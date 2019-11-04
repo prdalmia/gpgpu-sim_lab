@@ -746,7 +746,8 @@ enum cache_operator_type {
 
     // stores
     CACHE_WRITE_BACK,   // .wb
-    CACHE_WRITE_THROUGH // .wt
+    CACHE_WRITE_THROUGH, // .wt
+    CACHE_LAB           //Local Atomic Buffer
 };
 
 class mem_access_t {

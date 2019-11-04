@@ -1680,6 +1680,39 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_l1cache( l1_cache *c
     }
 }
 
+mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache, warp_inst_t &inst )
+{
+    mem_stage_stall_type result = NO_RC_FAIL;
+    if( inst.accessq_empty() )
+        return result;
+
+    mem_fetch *mf = m_mf_allocator->alloc(inst,inst.accessq_back());
+
+    if(m_config->m_L1D_config.l1_latency > 0)
+	{
+ 
+    	if( mf->get_inst().is_store() ) {
+				m_core->inc_store_req(inst.warp_id());
+			}
+
+    		inst.accessq_pop_back();
+    	}
+    	else
+        {
+        	result = BK_CONF;
+        	delete mf;
+        }
+        if( !inst.accessq_empty() &&  result !=BK_CONF)
+		   result = COAL_STALL;
+	   return result;
+    else
+    {
+		std::list<cache_event> events;
+		enum cache_request_status status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+		return process_cache_access( cache, mf->get_addr(), inst, events, mf, status );
+    }
+}
+
 void ldst_unit::L1_latency_queue_cycle()
 {
 	//std::deque< std::pair<mem_fetch*,bool> >::iterator it = m_latency_queue.begin();
@@ -1788,7 +1821,11 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    mem_stage_stall_type stall_cond = NO_RC_FAIL;
    const mem_access_t &access = inst.accessq_back();
 
-   bool bypassL1D = false; 
+   bool bypassL1D = false;
+   bool accessforLab = false;
+   if( CACHE_LAB == inst.cache_op){
+       accessforLab = true;     
+   } 
    if ( CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) ) {
        bypassL1D = true; 
    } else if (inst.space.is_global()) { // global memory access 
@@ -1817,7 +1854,12 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
        }
    } else {
        assert( CACHE_UNDEFINED != inst.cache_op );
+       if(accessforLab){
+        stall_cond = process_memory_access_queue_labcache(m_lab,inst);   
+       }
+       else{
        stall_cond = process_memory_access_queue_l1cache(m_L1D,inst);
+       }
    }
    if( !inst.accessq_empty() && stall_cond == NO_RC_FAIL)
        stall_cond = COAL_STALL;
@@ -1832,6 +1874,9 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    return inst.accessq_empty(); 
 }
 
+bool ldst_unit::lab_cycle(warp_inst_t &inst, mem_stage_stall_type &stall_reason, mem_stage_access_type &access_type){
+
+}
 
 bool ldst_unit::response_buffer_full() const
 {
@@ -2075,6 +2120,7 @@ void ldst_unit::init( mem_fetch_interface *icnt,
     m_L1T = new tex_cache(L1T_name,m_config->m_L1T_config,m_sid,get_shader_texture_cache_id(),icnt,IN_L1T_MISS_QUEUE,IN_SHADER_L1T_ROB);
     m_L1C = new read_only_cache(L1C_name,m_config->m_L1C_config,m_sid,get_shader_constant_cache_id(),icnt,IN_L1C_MISS_QUEUE);
     m_L1D = NULL;
+    m_lab = NULL;
     m_mem_rc = NO_RC_FAIL;
     m_num_writeback_clients=5; // = shared memory, global/local (uncached), L1D, L1T, L1C
     m_writeback_arb = 0;
@@ -2106,6 +2152,7 @@ ldst_unit::ldst_unit( mem_fetch_interface *icnt,
           stats, 
           sid,
           tpc );
+          char lab_name[STRSIZE];
     if( !m_config->m_L1D_config.disabled() ) {
         char L1D_name[STRSIZE];
         snprintf(L1D_name, STRSIZE, "L1D_%03d", m_sid);
@@ -2122,6 +2169,19 @@ ldst_unit::ldst_unit( mem_fetch_interface *icnt,
         	for(int i=0; i<m_config->m_L1D_config.l1_latency; i++ )
         		l1_latency_queue.push_back((mem_fetch*)NULL);
 	    }
+    }
+    m_name = "MEM ";
+     lab_block_t **new_lines;
+    new_lines = new lab_block_t *[m_config->m_lab_config.get_num_lines()];
+    for (unsigned i = 0; i < m_config->m_lab_config.get_num_lines(); i++)
+        new_lines[i] = new lab_block_t();
+
+    snprintf(lab_name, STRSIZE, "lab_%03d", m_sid);
+    m_lab = new lab(lab_name, m_config->m_lab_config, m_sid, new_lines);
+    if (m_config->m_lab_config.lab_latency > 0)
+    {
+        for (int i = 0; i < m_config->m_lab_config.lab_latency; i++)
+            lab_latency_queue.push_back((mem_fetch *)NULL);
     }
     m_name = "MEM ";
 }

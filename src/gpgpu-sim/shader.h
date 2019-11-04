@@ -1287,7 +1287,7 @@ protected:
    bool constant_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
    bool texture_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
    bool memory_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
-
+   bool lab_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
    virtual mem_stage_stall_type process_cache_access( cache_t* cache,
                                                       new_addr_type address,
                                                       warp_inst_t &inst,
@@ -1296,6 +1296,7 @@ protected:
                                                       enum cache_request_status status );
    mem_stage_stall_type process_memory_access_queue( cache_t *cache, warp_inst_t &inst );
    mem_stage_stall_type process_memory_access_queue_l1cache( l1_cache *cache, warp_inst_t &inst );
+   mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache, warp_inst_t &inst );
 
    const memory_config *m_memory_config;
    class mem_fetch_interface *m_icnt;
@@ -1307,6 +1308,7 @@ protected:
    tex_cache *m_L1T; // texture cache
    read_only_cache *m_L1C; // constant cache
    l1_cache *m_L1D; // data cache
+   lab *m_lab;
    std::map<unsigned/*warp_id*/, std::map<unsigned/*regnum*/,unsigned/*count*/> > m_pending_writes;
    std::list<mem_fetch*> m_response_fifo;
    opndcoll_rfu_t *m_operand_collector;
@@ -1326,6 +1328,7 @@ protected:
    unsigned long long m_last_inst_gpu_tot_sim_cycle;
 
    std::deque<mem_fetch* > l1_latency_queue;
+   std::deque<mem_fetch* > lab_latency_queue;
    void L1_latency_queue_cycle();
 };
 
@@ -1414,6 +1417,7 @@ struct shader_core_config : public core_config
         m_L1T_config.init(m_L1T_config.m_config_string,FuncCachePreferNone);
         m_L1C_config.init(m_L1C_config.m_config_string,FuncCachePreferNone);
         m_L1D_config.init(m_L1D_config.m_config_string,FuncCachePreferNone);
+        m_lab_config.init(m_lab_config.m_config_string,FuncCachePreferNone);
         gpgpu_cache_texl1_linesize = m_L1T_config.get_line_sz();
         gpgpu_cache_constl1_linesize = m_L1C_config.get_line_sz();
         m_valid = true;
@@ -1447,7 +1451,7 @@ struct shader_core_config : public core_config
     mutable cache_config m_L1T_config;
     mutable cache_config m_L1C_config;
     mutable l1d_cache_config m_L1D_config;
-
+    mutable lab_cache_config m_lab_config;
     bool gpgpu_dwf_reg_bankconflict;
 
     int gpgpu_num_sched_per_core;
@@ -1549,8 +1553,8 @@ struct shader_core_stats_pod {
     unsigned *m_num_trans_acesses;
     unsigned *m_num_mem_acesses;
     unsigned *m_num_sp_committed;
-    unsigned *m_num_tlb_hits;
-    unsigned *m_num_tlb_accesses;
+    unsigned *m_num_lab_hits;
+    unsigned *m_num_lab_accesses;
     unsigned *m_num_sfu_committed;
     unsigned *m_num_tensor_core_committed;
     unsigned *m_num_mem_committed;
@@ -1639,8 +1643,8 @@ public:
         m_num_trans_acesses= (unsigned*) calloc(config->num_shader(),sizeof(unsigned));
         m_num_mem_acesses= (unsigned*) calloc(config->num_shader(),sizeof(unsigned));
         m_num_sp_committed= (unsigned*) calloc(config->num_shader(),sizeof(unsigned));
-        m_num_tlb_hits=(unsigned*) calloc(config->num_shader(),sizeof(unsigned));
-        m_num_tlb_accesses=(unsigned*) calloc(config->num_shader(),sizeof(unsigned));
+        m_num_lab_hits=(unsigned*) calloc(config->num_shader(),sizeof(unsigned));
+        m_num_lab_accesses=(unsigned*) calloc(config->num_shader(),sizeof(unsigned));
         m_active_sp_lanes= (unsigned*) calloc(config->num_shader(),sizeof(unsigned));
         m_active_sfu_lanes= (unsigned*) calloc(config->num_shader(),sizeof(unsigned));
         m_active_tensor_core_lanes= (unsigned*) calloc(config->num_shader(),sizeof(unsigned));

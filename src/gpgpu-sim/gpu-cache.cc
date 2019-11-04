@@ -243,6 +243,164 @@ void tag_array::remove_pending_line(mem_fetch *mf){
 	}
 }
 
+//Local Atomic Buffer
+
+lab_array::lab_array(lab_cache_config &config, int core_id, lab_block_t** new_lines)
+    :m_config( config ), m_lines( new_lines )
+{
+    init(core_id);
+}
+
+lab_array::~lab_array() 
+{
+	unsigned cache_lines_num = m_config.get_max_num_lines();
+	for(unsigned i=0; i<cache_lines_num; ++i)
+		delete m_lines[i];
+    delete[] m_lines;
+}
+
+void lab_array::init( int core_id)
+{
+    m_access = 0;
+    m_miss = 0;
+    m_pending_hit = 0;
+    m_res_fail = 0;
+    m_core_id = core_id; 
+    is_used = false;
+}
+
+enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode) const {
+
+	probe(addr, idx);
+
+}
+
+enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx , bool probe_mode, mem_fetch* mf) const {
+    unsigned set_index = m_config.set_index(addr);
+    new_addr_type tag = m_config.tag(addr);
+
+    unsigned invalid_line = (unsigned)-1;
+    unsigned valid_line = (unsigned)-1;
+    unsigned long long valid_timestamp = (unsigned)-1;
+
+    bool all_reserved = true;
+    // check for hit or pending hit
+    for (unsigned way=0; way<m_config.m_assoc; way++) {
+        unsigned index = set_index*m_config.m_assoc+way;
+        lab_block_t *line = m_lines[index];
+        if (line->m_tag == tag) {
+            if ( line->get_status() == RESERVED ) {
+                idx = index;
+                return HIT_RESERVED;
+            } else if ( line->get_status() == VALID ) {
+                idx = index;
+                return HIT;
+            }else {
+                assert( line->get_status() == INVALID );
+            }
+        }
+        if (!line->is_reserved_line()) {
+            all_reserved = false;
+            if (line->is_invalid_line()) {
+                invalid_line = index;
+            } else {
+                // valid line : keep track of most appropriate replacement candidate
+                if ( m_config.m_replacement_policy == LRU ) {
+                    if ( line->get_last_access_time() < valid_timestamp ) {
+                        valid_timestamp = line->get_last_access_time();
+                        valid_line = index;
+                    }
+                } else if ( m_config.m_replacement_policy == FIFO ) {
+                    if ( line->get_alloc_time() < valid_timestamp ) {
+                        valid_timestamp = line->get_alloc_time();
+                        valid_line = index;
+                    }
+                }
+            }
+        }
+    
+    }
+    if ( all_reserved ) { 
+        return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
+    }
+
+    if ( invalid_line != (unsigned)-1 ) {
+        idx = invalid_line;
+    } else if ( valid_line != (unsigned)-1) {
+        idx = valid_line;
+    } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
+
+
+    return MISS;
+
+}
+
+enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf)
+{
+    //bool wb=false;
+    evicted_block_info evicted;
+    enum cache_request_status result = access(addr,time,evicted,mf);
+    //assert(!wb);
+    return result;
+}
+
+enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, evicted_block_info &evicted, mem_fetch* mf )
+{
+    m_access++;
+    is_used = true;
+    unsigned idx = unsigned(-1);
+    bool wb;
+    //shader_cache_access_log(m_core_id, m_type_id, 0); // log accesses to cache
+    enum cache_request_status status = probe(addr,idx,mf);
+    switch (status) {
+    case HIT_RESERVED: 
+        m_pending_hit++;
+    case HIT: 
+        m_lines[idx]->set_last_access_time(time);
+        break;
+    case MISS:
+        m_miss++;
+        //shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
+        if ( m_config.m_alloc_policy == ON_MISS ) {
+            if( m_lines[idx]->is_modified_line()) {
+                wb = true;
+                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
+            }
+            m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time);
+        }
+        break;
+    case RESERVATION_FAIL:
+        m_res_fail++;
+        break;
+    default:
+        fprintf( stderr, "lab_array::access - Error: Unknown"
+            "cache_request_status %d\n", status );
+        abort();
+    }
+    return status;
+}
+
+void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch* mf)
+{
+    fill(addr, time);
+}
+
+void lab_array::fill( new_addr_type addr, unsigned time)
+{
+    //assert( m_config.m_alloc_policy == ON_FILL );
+    unsigned idx = unsigned(-1);
+    enum cache_request_status status = probe(addr,idx);
+    //assert(status==MISS||status==SECTOR_MISS); // MSHR should have prevented redundant memory request
+    if(status==MISS)
+    	m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time);
+    if (status != RESERVATION_FAIL)
+    {
+        m_lines[idx]->fill(time);
+    }   
+}
+
+//TLB FUNCTIONS
+
 enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode) const {
     mem_access_sector_mask_t mask = mf->get_access_sector_mask();
     return probe(addr, idx, mask, probe_mode, mf);
