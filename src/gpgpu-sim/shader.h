@@ -1259,6 +1259,12 @@ public:
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
 
+
+ 	// rohan 
+    void print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses );
+    void get_lab_sub_stats(struct cache_sub_stats &css) const;
+
+
 protected:
     ldst_unit( mem_fetch_interface *icnt,
                shader_core_mem_fetch_allocator *mf_allocator,
@@ -1287,7 +1293,7 @@ protected:
    bool constant_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
    bool texture_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
    bool memory_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
-   bool lab_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
+   //bool lab_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type);
    virtual mem_stage_stall_type process_cache_access( cache_t* cache,
                                                       new_addr_type address,
                                                       warp_inst_t &inst,
@@ -1296,7 +1302,7 @@ protected:
                                                       enum cache_request_status status );
    mem_stage_stall_type process_memory_access_queue( cache_t *cache, warp_inst_t &inst );
    mem_stage_stall_type process_memory_access_queue_l1cache( l1_cache *cache, warp_inst_t &inst );
-   mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache, warp_inst_t &inst );
+   mem_stage_stall_type process_memory_access_queue_labcache( lab *cache, warp_inst_t &inst );
 
    const memory_config *m_memory_config;
    class mem_fetch_interface *m_icnt;
@@ -1830,12 +1836,18 @@ public:
     std::list<unsigned> get_regs_written( const inst_t &fvt ) const;
     const shader_core_config *get_config() const { return m_config; }
     void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses );
+    
+// rohan tlb cache stats 
+    void print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses );
 
     void get_cache_stats(cache_stats &cs);
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
+    
+// rohan
+void get_lab_sub_stats(struct cache_sub_stats &css) const;
 
     void get_icnt_power_stats(long &n_simt_to_mem, long &n_mem_to_simt) const;
 
@@ -2102,12 +2114,14 @@ public:
 
     void display_pipeline( unsigned sid, FILE *fout, int print_mem, int mask );
     void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) const;
-
+    void print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) const;
+// rohan up and down 
     void get_cache_stats(cache_stats &cs) const;
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
+    void get_lab_sub_stats(struct cache_sub_stats &css) const;
 
     void get_icnt_stats(long &n_simt_to_mem, long &n_mem_to_simt) const;
     float get_current_occupancy( unsigned long long& active, unsigned long long & total ) const;

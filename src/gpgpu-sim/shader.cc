@@ -1468,6 +1468,14 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
    }
 }
 
+
+
+// rohan
+void ldst_unit::print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) {
+   if( m_tlb ) {	// remove this? recheck
+       m_tlb->print( fp, tlb_accesses, tlb_misses );
+   }
+}
 void ldst_unit::get_cache_stats(cache_stats &cs) {
     // Adds stats to 'cs' from each cache
     if(m_L1D)
@@ -1476,7 +1484,9 @@ void ldst_unit::get_cache_stats(cache_stats &cs) {
         cs += m_L1C->get_stats();
     if(m_L1T)
         cs += m_L1T->get_stats();
-
+    if(m_lab) // thios also  
+        cs += m_tlb->get_stats(); 
+	
 }
 
 void ldst_unit::get_L1D_sub_stats(struct cache_sub_stats &css) const{
@@ -1491,6 +1501,15 @@ void ldst_unit::get_L1T_sub_stats(struct cache_sub_stats &css) const{
     if(m_L1T)
         m_L1T->get_sub_stats(css);
 }
+
+
+
+// rohan
+void ldst_unit::get_lab_sub_stats(struct cache_sub_stats &css) const{
+    if(m_tlb)
+        m_tlb->get_sub_stats(css);
+}
+
 
 void shader_core_ctx::warp_inst_complete(const warp_inst_t &inst)
 {
@@ -1688,21 +1707,22 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache
 
     mem_fetch *mf = m_mf_allocator->alloc(inst,inst.accessq_back());
 
-    if(m_config->m_L1D_config.l1_latency > 0)
+    if(m_config->m_lab_config.lab_latency > 0)
 	{
- 
+        // this is just incrementing a counter for stores, not chnaging would just change the final count
     	if( mf->get_inst().is_store() ) {
 				m_core->inc_store_req(inst.warp_id());
 			}
 
     		inst.accessq_pop_back();
-    	}
-    	else
+    }
+    else
         {
         	result = BK_CONF;
         	delete mf;
         }
-        if( !inst.accessq_empty() &&  result !=BK_CONF)
+    
+    if( !inst.accessq_empty() &&  result !=BK_CONF)
 		   result = COAL_STALL;
 	   return result;
     else
@@ -1775,6 +1795,72 @@ void ldst_unit::L1_latency_queue_cycle()
 
 }
 
+
+
+
+void ldst_unit::lab_latency_queue_cycle()
+{
+	//std::deque< std::pair<mem_fetch*,bool> >::iterator it = m_latency_queue.begin();
+	if((lab_latency_queue[0]) != NULL)
+    {
+		        mem_fetch* mf_next = lab_latency_queue[0];
+			std::list<cache_event> events;
+
+            // check the access function to look for hit/miss
+		   enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+
+		   bool write_sent = was_write_sent(events);
+		   bool read_sent = was_read_sent(events);
+
+		   if ( status == HIT ) {
+			   assert( !read_sent );
+			   lab_latency_queue[0] = NULL;
+			   if ( mf_next->get_inst().is_load() ) {
+				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
+					   if (mf_next->get_inst().out[r] > 0)
+					   {
+						   assert(m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]]>0);
+						   unsigned still_pending = --m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]];
+						   if(!still_pending)
+						   {
+							m_pending_writes[mf_next->get_inst().warp_id()].erase(mf_next->get_inst().out[r]);
+							m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),mf_next->get_inst().out[r]);
+							m_core->warp_inst_complete(mf_next->get_inst());
+						   }
+					   }
+			   }
+                            // ROhan do we need for LAB?
+			   //For write hit in WB policy
+			   if(mf_next->get_inst().is_store() && !write_sent)
+			   {
+				   unsigned dec_ack = (m_config->m_L1D_config.get_mshr_type() == SECTOR_ASSOC)?
+				   						(mf_next->get_data_size()/SECTOR_SIZE) : 1;
+
+				   mf_next->set_reply();
+                                    // stores the mf to the lab
+				   for(unsigned i=0; i< dec_ack; ++i)
+				      m_core->store_ack(mf_next);
+			   }
+
+			   if( !write_sent )
+				   delete mf_next;
+
+		   } else if ( status == RESERVATION_FAIL ) {
+			   assert( !read_sent );
+			   assert( !write_sent );
+		   } else {
+			   assert( status == MISS || status == HIT_RESERVED );
+			   l1_latency_queue[0] = NULL;
+	   }
+    }
+
+	 for( unsigned stage = 0; stage<m_config->m_lab_config.lab_latency-1; ++stage)
+	  if( lab_latency_queue[stage] == NULL) {
+		   lab_latency_queue[stage] = lab_latency_queue[stage+1] ;
+		   lab_latency_queue[stage+1] = NULL;
+	   }
+
+}
 
 
 bool ldst_unit::constant_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type)
@@ -1874,9 +1960,10 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    return inst.accessq_empty(); 
 }
 
-bool ldst_unit::lab_cycle(warp_inst_t &inst, mem_stage_stall_type &stall_reason, mem_stage_access_type &access_type){
 
-}
+// rohan 
+//bool ldst_unit::lab_cycle(warp_inst_t &inst, mem_stage_stall_type &stall_reason, mem_stage_access_type &access_type){
+//}
 
 bool ldst_unit::response_buffer_full() const
 {
@@ -2419,6 +2506,17 @@ void ldst_unit::cycle()
 	   		L1_latency_queue_cycle();
    }
 
+   // rohan
+   // Sends next request to lower level of memory
+   // pushes the mf to mem_port, if mem_port is not full
+   m_lab->cycle();      // calls the baseline cache cycle
+   
+
+   // assuming our LAB is of infinite size, we do not care about repacement but otherwise
+   lab_latency_queue_cycle();
+   // for replacement, read data from l2
+   // for now, assume infinite size, so just flush at the end of kernel
+
    warp_inst_t &pipe_reg = *m_dispatch_reg;
    enum mem_stage_stall_type rc_fail = NO_RC_FAIL;
    mem_stage_access_type type;
@@ -2669,6 +2767,23 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
         fprintf(fout, "\tL1T_total_cache_pending_hits = %llu\n", total_css.pending_hits);
         fprintf(fout, "\tL1T_total_cache_reservation_fails = %llu\n", total_css.res_fails);
     }
+    // Rohan  LAB Stats
+    if(1){	// m_tlb ?
+        total_css.clear();
+        css.clear();
+        fprintf(fout, "lab_cache:\n");
+        for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
+            m_cluster[i]->get_tlb_sub_stats(css);
+            total_css += css;
+        }
+        fprintf(fout, "\tlab_total_cache_accesses = %llu\n", total_css.accesses);
+        fprintf(fout, "\tlab_total_cache_misses = %llu\n", total_css.misses);
+        if(total_css.accesses > 0){
+            fprintf(fout, "\tlab_total_cache_miss_rate = %.4lf\n", (double)total_css.misses / (double)total_css.accesses);
+        }
+        fprintf(fout, "\tlab_total_cache_pending_hits = %llu\n", total_css.pending_hits);
+        fprintf(fout, "\tlab_total_cache_reservation_fails = %llu\n", total_css.res_fails);
+    }
 }
 
 void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const
@@ -2733,6 +2848,22 @@ void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const
    }
    fprintf(fout, "\n");
    */
+}
+
+
+// rohan printing
+void gpgpu_sim::shader_print_lab_miss_stat( FILE *fout ) const
+{
+   unsigned total_tlb_misses = 0, total_tlb_accesses = 0;
+   for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
+         unsigned cluster_tlb_misses = 0, cluster_tlb_accesses = 0;
+         m_cluster[ i ]->print_tlb_stats( fout, cluster_tlb_accesses, cluster_tlb_misses );
+         total_lab_misses += cluster_lab_misses;
+         total_lab_accesses += cluster_lab_accesses;
+   }
+   fprintf( fout, "total_tlb_misses=%d\n", total_tlb_misses );
+   fprintf( fout, "total_tlb_accesses=%d\n", total_tlb_accesses );
+   fprintf( fout, "total_tlb_miss_rate= %f\n", (float)total_tlb_misses / (float)total_tlb_accesses );
 }
 
 void warp_inst_t::print( FILE *fout ) const
@@ -3480,6 +3611,12 @@ void shader_core_ctx::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsig
    m_ldst_unit->print_cache_stats( fp, dl1_accesses, dl1_misses );
 }
 
+
+// rohan added
+void shader_core_ctx::print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) {
+   m_ldst_unit->print_tlb_stats( fp, tlb_accesses, tlb_misses );
+}
+
 void shader_core_ctx::get_cache_stats(cache_stats &cs){
     // Adds stats from each cache to 'cs'
     cs += m_L1I->get_stats(); // Get L1I stats
@@ -3500,6 +3637,10 @@ void shader_core_ctx::get_L1T_sub_stats(struct cache_sub_stats &css) const{
     m_ldst_unit->get_L1T_sub_stats(css);
 }
 
+//rohan added
+void shader_core_ctx::get_lab_sub_stats(struct cache_sub_stats &css) const{
+    m_ldst_unit->get_tlb_sub_stats(css);
+}
 void shader_core_ctx::get_icnt_power_stats(long &n_simt_to_mem, long &n_mem_to_simt) const{
 	n_simt_to_mem += m_stats->n_simt_to_mem[m_sid];
 	n_mem_to_simt += m_stats->n_mem_to_simt[m_sid];
@@ -4088,6 +4229,13 @@ void simt_core_cluster::print_cache_stats( FILE *fp, unsigned& dl1_accesses, uns
       m_core[ i ]->print_cache_stats( fp, dl1_accesses, dl1_misses );
    }
 }
+	
+// rohan
+	void simt_core_cluster::print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) const {
+   	for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
+      	m_core[ i ]->print_tlb_stats( fp, tlb_accesses, tlb_misses );
+   	}
+}
 
 void simt_core_cluster::get_icnt_stats(long &n_simt_to_mem, long &n_mem_to_simt) const {
 	long simt_to_mem=0;
@@ -4145,6 +4293,20 @@ void simt_core_cluster::get_L1T_sub_stats(struct cache_sub_stats &css) const{
     total_css.clear();
     for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
         m_core[i]->get_L1T_sub_stats(temp_css);
+        total_css += temp_css;
+    }
+    css = total_css;
+}
+
+
+// rohan added
+void simt_core_cluster::get_lab_sub_stats(struct cache_sub_stats &css) const{
+    struct cache_sub_stats temp_css;
+    struct cache_sub_stats total_css;
+    temp_css.clear();
+    total_css.clear();
+    for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
+        m_core[i]->get_tlb_sub_stats(temp_css);
         total_css += temp_css;
     }
     css = total_css;

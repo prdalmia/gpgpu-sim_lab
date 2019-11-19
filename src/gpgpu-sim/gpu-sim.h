@@ -507,7 +507,7 @@ private:
    void print_shader_cycle_distro( FILE *fout ) const;
 
    void gpgpu_debug();
-
+	   void shader_print_lab_miss_stat( FILE *fout ) const; // rohan 
 ///// data /////
 
    class simt_core_cluster **m_cluster;

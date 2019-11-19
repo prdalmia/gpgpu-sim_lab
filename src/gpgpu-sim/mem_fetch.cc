@@ -66,6 +66,8 @@ mem_fetch::mem_fetch( const mem_access_t &access,
    icnt_flit_size = config->icnt_flit_size;
    original_mf = m_original_mf;
    original_wr_mf = m_original_wr_mf;
+   // rohan 
+   m_lab_miss = 0;
 }
 
 mem_fetch::~mem_fetch()

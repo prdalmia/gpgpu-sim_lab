@@ -119,7 +119,13 @@ public:
    mem_fetch* get_original_mf() { return original_mf; }
    mem_fetch* get_original_wr_mf()  { return original_wr_mf; }
 
+// rohan - check
+    bool get_lab_miss() { return m_tlb_miss; } 
+   void set_lab_miss(unsigned t) { m_tlb_miss = t; } 
+
 private:
+	// rohan
+    bool m_lab_miss;
    // request source information
    unsigned m_request_uid;
    unsigned m_sid;
