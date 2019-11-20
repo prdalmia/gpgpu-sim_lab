@@ -1518,7 +1518,7 @@ public:
     virtual bool data_port_free() const {}; 
     virtual bool fill_port_free() const {};
     
-    void cycle();
+    //virtual void cycle();
     /// Interface for response from lower memory level (model bandwidth restictions in caller)
     void fill( mem_fetch *mf, unsigned time )
     {

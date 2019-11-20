@@ -1939,10 +1939,6 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    return inst.accessq_empty(); 
 }
 
-bool ldst_unit::lab_cycle(warp_inst_t &inst, mem_stage_stall_type &stall_reason, mem_stage_access_type &access_type){
-
-}
-
 bool ldst_unit::response_buffer_full() const
 {
     return m_response_fifo.size() >= m_config->ldst_unit_response_queue_size;
@@ -2484,7 +2480,7 @@ void ldst_unit::cycle()
 	   		L1_latency_queue_cycle();
    }
    if( m_lab ) {
-	   m_lab->cycle();
+	   //m_lab->cycle();
 	   if(m_config->m_lab_config.lab_latency > 0)
 	   		Lab_latency_queue_cycle();
    }
