@@ -120,8 +120,8 @@ public:
    mem_fetch* get_original_wr_mf()  { return original_wr_mf; }
 
 // rohan - check
-    bool get_lab_miss() { return m_tlb_miss; } 
-   void set_lab_miss(unsigned t) { m_tlb_miss = t; } 
+    bool get_lab_miss() { return m_lab_miss; } 
+   void set_lab_miss(unsigned t) { m_lab_miss = t; } 
 
 private:
 	// rohan

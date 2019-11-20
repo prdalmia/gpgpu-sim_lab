@@ -1539,6 +1539,13 @@ public:
         printf("stats");
     }
 
+    const cache_stats &get_stats() const {
+        return m_stats;
+    }
+    void get_sub_stats(struct cache_sub_stats &css) const {
+        m_stats.get_sub_stats(css);
+    }
+
 protected:
     const char* m_name;
     lab_cache_config &m_config;

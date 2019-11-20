@@ -1261,7 +1261,7 @@ public:
 
 
  	// rohan 
-    void print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses );
+    void print_lab_stats( FILE *fp, unsigned& lab_accesses, unsigned& lab_misses );
     void get_lab_sub_stats(struct cache_sub_stats &css) const;
 
 
@@ -1336,6 +1336,7 @@ protected:
    std::deque<mem_fetch* > l1_latency_queue;
    std::deque<mem_fetch* > lab_latency_queue;
    void L1_latency_queue_cycle();
+   void lab_latency_queue_cycle();
 };
 
 enum pipeline_stage_name_t {
@@ -1837,8 +1838,8 @@ public:
     const shader_core_config *get_config() const { return m_config; }
     void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses );
     
-// rohan tlb cache stats 
-    void print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses );
+// rohan lab cache stats 
+    void print_lab_stats( FILE *fp, unsigned& lab_accesses, unsigned& lab_misses );
 
     void get_cache_stats(cache_stats &cs);
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
@@ -2114,7 +2115,7 @@ public:
 
     void display_pipeline( unsigned sid, FILE *fout, int print_mem, int mask );
     void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) const;
-    void print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) const;
+    void print_lab_stats( FILE *fp, unsigned& lab_accesses, unsigned& lab_misses ) const;
 // rohan up and down 
     void get_cache_stats(cache_stats &cs) const;
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;

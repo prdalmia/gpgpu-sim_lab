@@ -162,208 +162,6 @@ unsigned l2_cache_config::set_index(new_addr_type addr) const{
 	}
 }
 
-
-/*
-
-// rohan - lab
-// see how LRU is updated
-
-//fill
-
-
-void lab::fill(mem_fetch *mf, unsigned time){
-
-	if(m_config.m_mshr_type == SECTOR_ASSOC) {
-	assert(mf->get_original_mf());
-	extra_mf_fields_lookup::iterator e = m_extra_mf_fields.find(mf->get_original_mf());
-    assert( e != m_extra_mf_fields.end() );
-    e->second.pending_read--;
-
-    if(e->second.pending_read > 0) {
-    	//wait for the other requests to come back
-    	delete mf;
-    	return;
-      } else {
-    	mem_fetch *temp = mf;
-    	mf = mf->get_original_mf();
-    	delete temp;
-      }
-	}
-
-    extra_mf_fields_lookup::iterator e = m_extra_mf_fields.find(mf);
-    assert( e != m_extra_mf_fields.end() );
-    assert( e->second.m_valid );
-    mf->set_data_size( e->second.m_data_size );
-    mf->set_addr( e->second.m_addr );
-    if ( m_config.m_alloc_policy == ON_MISS )
-        m_tag_array->fill(e->second.m_cache_index,time,mf);
-    else if ( m_config.m_alloc_policy == ON_FILL ) {
-        m_tag_array->fill(e->second.m_block_addr,time,mf);
-        if(m_config.is_streaming())
-        	m_tag_array->remove_pending_line(mf);
-    }
-    else abort();
-    bool has_atomic = false;
-    m_mshrs.mark_ready(e->second.m_block_addr, has_atomic);
-    if (has_atomic) {
-        assert(m_config.m_alloc_policy == ON_MISS);
-        cache_block_t* block = m_tag_array->get_block(e->second.m_cache_index);
-        block->set_status(MODIFIED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
-    }
-    m_extra_mf_fields.erase(mf);
-    m_bandwidth_management.use_fill_port(mf); 
-}
-
-
-
-
-
-
-// probe
-
-enum cache_request_status lab::probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode) const {
-    mem_access_sector_mask_t mask = mf->get_access_sector_mask();
-    return probe(addr, idx, mask, probe_mode, mf);
-}
-
-
-enum cache_request_status lab::probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode, mem_fetch* mf) const {
-    //assert( m_config.m_write_policy == READ_ONLY );
-    unsigned set_index = m_config.set_index(addr);
-    new_addr_type tag = m_config.tag(addr);
-
-    unsigned invalid_line = (unsigned)-1;
-    unsigned valid_line = (unsigned)-1;
-    unsigned long long valid_timestamp = (unsigned)-1;
-
-    bool all_reserved = true;
-
-    // check for hit or pending hit
-    for (unsigned way=0; way<m_config.m_assoc; way++) {
-        unsigned index = set_index*m_config.m_assoc+way;
-        cache_block_t *line = m_lines[index];
-        if (line->m_tag == tag) {
-            if ( line->get_status(mask) == RESERVED ) {
-                idx = index;
-                //return HIT_RESERVED;
-                return HIT;
-            } else if ( line->get_status(mask) == VALID ) {
-                idx = index;
-                return HIT;
-            } else if ( line->get_status(mask) == MODIFIED) {
-            	if(line->is_readable(mask)) {
-					idx = index;
-					return HIT;
-            	}
-            	else {
-            		idx = index;
-            		//return SECTOR_MISS;
-                    return MISS;        // good arch interview question
-            	}
-
-            } else if ( line->is_valid_line() && line->get_status(mask) == INVALID ) {
-                idx = index;
-                //return SECTOR_MISS;
-                return MISS;
-            }else {
-                assert( line->get_status(mask) == INVALID );
-            }
-        }
-        if (!line->is_reserved_line()) {
-            all_reserved = false;
-            if (line->is_invalid_line()) {
-                invalid_line = index;
-            } else {
-                // valid line : keep track of most appropriate replacement candidate
-                if ( m_config.m_replacement_policy == LRU ) {
-                    if ( line->get_last_access_time() < valid_timestamp ) {
-                        valid_timestamp = line->get_last_access_time();
-                        valid_line = index;
-                    }
-                } else if ( m_config.m_replacement_policy == FIFO ) {
-                    if ( line->get_alloc_time() < valid_timestamp ) {
-                        valid_timestamp = line->get_alloc_time();
-                        valid_line = index;
-                    }
-                }
-            }
-        }
-    }
-    if ( all_reserved ) {
-        assert( m_config.m_alloc_policy == ON_MISS ); 
-        return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
-    }
-
-    if ( invalid_line != (unsigned)-1 ) {
-        idx = invalid_line;
-    } else if ( valid_line != (unsigned)-1) {
-        idx = valid_line;
-    } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
-
-
-    //if(probe_mode && m_config.is_streaming()){
-	//	line_table::const_iterator i = pending_lines.find(m_config.block_addr(addr));
-	//	assert(mf);
-	//	if ( !mf->is_write() && i != pending_lines.end() ) {
-	//		 if(i->second != mf->get_inst().get_uid())
-	//			 return SECTOR_MISS;
-	//	}
-    //}
-
-    return MISS;
-}
-
-// access
-enum cache_request_status tlb::access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf )
-{
-    m_access++;
-    //is_used = true;
-    //shader_cache_access_log(m_core_id, m_type_id, 0); // log accesses to cache
-    enum cache_request_status status = probe(addr,idx,mf);
-    switch (status) {
-    //case HIT_RESERVED: 
-    //    m_pending_hit++;
-    case HIT: 
-        m_lines[idx]->set_last_access_time(time, mf->get_access_sector_mask());
-        break;
-    case MISS:
-        m_miss++;
-        //shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
-        //if ( m_config.m_alloc_policy == ON_MISS ) {
-            if( m_lines[idx]->is_modified_line()) {
-                wb = true;
-                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
-            }
-            m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
-        //}
-        break;
-    //case SECTOR_MISS:
-    //	assert(m_config.m_cache_type == SECTOR);
-    //	m_sector_miss++;
-	//	shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
-	//	if ( m_config.m_alloc_policy == ON_MISS ) {
-	//		((sector_cache_block*)m_lines[idx])->allocate_sector( time, mf->get_access_sector_mask() );
-	//	}
-	//	break;
-    //case RESERVATION_FAIL:
-    //    m_res_fail++;
-    //    shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
-    //    break;
-    default:
-        fprintf( stderr, "tag_array::access - Error: Unknown - Rohan error in cache_request_stats tag_array_access"
-            "cache_request_status %d\n", status );
-        abort();
-    }
-    return status;
-}
-
-
-
-*/
-
-
-
-
 // rohan added similar to cache_line_array
 
 tag_array::~tag_array() 
@@ -552,7 +350,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
 {
     m_access++;
 // rohan
-    mf->set_tlb_miss(0);
+    mf->set_lab_miss(0);
     is_used = true;
     unsigned idx = unsigned(-1);
     bool wb;
@@ -574,7 +372,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
             }
             m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time);
 		// rohan	    
-		mf->set_tlb_miss(1);
+		mf->set_lab_miss(1);
         }
         break;
     case RESERVATION_FAIL:
@@ -608,9 +406,8 @@ void lab_array::fill( new_addr_type addr, unsigned time)
 }
 
 
-
-enum cache_request_status
-lab::access( new_addr_type addr,
+/*
+enum cache_request_status lab::access( new_addr_type addr,
                          mem_fetch *mf,
                          unsigned time,
                          std::list<cache_event> &events )
@@ -645,10 +442,10 @@ lab::access( new_addr_type addr,
     m_stats.inc_stats_pw(mf->get_access_type(), m_stats.select_stats_status(status, cache_status));
     return cache_status;
 }
+*/
 
 
-
-//TLB FUNCTIONS
+//LAB FUNCTIONS
 
 enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode) const {
     mem_access_sector_mask_t mask = mf->get_access_sector_mask();

@@ -1,0 +1,22 @@
+       git branch -a
+  673  git pull
+  674  git checkout -b path2
+  675  git status
+  676  git push origin path2
+  677  git branch -a
+  678  git status
+  679  git remote add lab_update path2
+  680  git push lab_update
+  681  pwd
+  682  l
+  683  ls
+  684  git branch -a
+  685  git add *
+  686  git commit -m "config changes"
+  687  git push lab_update path2
+  688  git push lab_update https://github.com/prdalmia/gpgpu-sim_lab/commits/path2
+  689  git push https://github.com/prdalmia/gpgpu-sim_lab/commits/path2
+  690  git push 
+  691  git push --set-upstream origin path2
+  692  pwd
+

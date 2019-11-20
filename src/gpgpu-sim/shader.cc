@@ -1471,9 +1471,9 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
 
 
 // rohan
-void ldst_unit::print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) {
-   if( m_tlb ) {	// remove this? recheck
-       m_tlb->print( fp, tlb_accesses, tlb_misses );
+void ldst_unit::print_lab_stats( FILE *fp, unsigned& lab_accesses, unsigned& lab_misses ) {
+   if( m_lab ) {	// remove this? recheck
+       m_lab->print( fp, lab_accesses, lab_misses );
    }
 }
 void ldst_unit::get_cache_stats(cache_stats &cs) {
@@ -1485,7 +1485,7 @@ void ldst_unit::get_cache_stats(cache_stats &cs) {
     if(m_L1T)
         cs += m_L1T->get_stats();
     if(m_lab) // thios also  
-        cs += m_tlb->get_stats(); 
+        cs += m_lab->get_stats(); 
 	
 }
 
@@ -1506,8 +1506,8 @@ void ldst_unit::get_L1T_sub_stats(struct cache_sub_stats &css) const{
 
 // rohan
 void ldst_unit::get_lab_sub_stats(struct cache_sub_stats &css) const{
-    if(m_tlb)
-        m_tlb->get_sub_stats(css);
+    if(m_lab)
+        m_lab->get_sub_stats(css);
 }
 
 
@@ -1723,8 +1723,9 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache
         }
     
     if( !inst.accessq_empty() &&  result !=BK_CONF)
-		   result = COAL_STALL;
-	   return result;
+		{result = COAL_STALL;
+	    return result;
+        }
     else
     {
 		std::list<cache_event> events;
@@ -2768,12 +2769,12 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
         fprintf(fout, "\tL1T_total_cache_reservation_fails = %llu\n", total_css.res_fails);
     }
     // Rohan  LAB Stats
-    if(1){	// m_tlb ?
+    if(1){	// m_lab ?
         total_css.clear();
         css.clear();
         fprintf(fout, "lab_cache:\n");
         for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
-            m_cluster[i]->get_tlb_sub_stats(css);
+            m_cluster[i]->get_lab_sub_stats(css);
             total_css += css;
         }
         fprintf(fout, "\tlab_total_cache_accesses = %llu\n", total_css.accesses);
@@ -2854,16 +2855,16 @@ void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const
 // rohan printing
 void gpgpu_sim::shader_print_lab_miss_stat( FILE *fout ) const
 {
-   unsigned total_tlb_misses = 0, total_tlb_accesses = 0;
+   unsigned total_lab_misses = 0, total_lab_accesses = 0;
    for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
-         unsigned cluster_tlb_misses = 0, cluster_tlb_accesses = 0;
-         m_cluster[ i ]->print_tlb_stats( fout, cluster_tlb_accesses, cluster_tlb_misses );
+         unsigned cluster_lab_misses = 0, cluster_lab_accesses = 0;
+         m_cluster[ i ]->print_lab_stats( fout, cluster_lab_accesses, cluster_lab_misses );
          total_lab_misses += cluster_lab_misses;
          total_lab_accesses += cluster_lab_accesses;
    }
-   fprintf( fout, "total_tlb_misses=%d\n", total_tlb_misses );
-   fprintf( fout, "total_tlb_accesses=%d\n", total_tlb_accesses );
-   fprintf( fout, "total_tlb_miss_rate= %f\n", (float)total_tlb_misses / (float)total_tlb_accesses );
+   fprintf( fout, "total_lab_misses=%d\n", total_lab_misses );
+   fprintf( fout, "total_lab_accesses=%d\n", total_lab_accesses );
+   fprintf( fout, "total_lab_miss_rate= %f\n", (float)total_lab_misses / (float)total_lab_accesses );
 }
 
 void warp_inst_t::print( FILE *fout ) const
@@ -3613,8 +3614,8 @@ void shader_core_ctx::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsig
 
 
 // rohan added
-void shader_core_ctx::print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) {
-   m_ldst_unit->print_tlb_stats( fp, tlb_accesses, tlb_misses );
+void shader_core_ctx::print_lab_stats( FILE *fp, unsigned& lab_accesses, unsigned& lab_misses ) {
+   m_ldst_unit->print_lab_stats( fp, lab_accesses, lab_misses );
 }
 
 void shader_core_ctx::get_cache_stats(cache_stats &cs){
@@ -3639,7 +3640,7 @@ void shader_core_ctx::get_L1T_sub_stats(struct cache_sub_stats &css) const{
 
 //rohan added
 void shader_core_ctx::get_lab_sub_stats(struct cache_sub_stats &css) const{
-    m_ldst_unit->get_tlb_sub_stats(css);
+    m_ldst_unit->get_lab_sub_stats(css);
 }
 void shader_core_ctx::get_icnt_power_stats(long &n_simt_to_mem, long &n_mem_to_simt) const{
 	n_simt_to_mem += m_stats->n_simt_to_mem[m_sid];
@@ -4231,9 +4232,9 @@ void simt_core_cluster::print_cache_stats( FILE *fp, unsigned& dl1_accesses, uns
 }
 	
 // rohan
-	void simt_core_cluster::print_lab_stats( FILE *fp, unsigned& tlb_accesses, unsigned& tlb_misses ) const {
+	void simt_core_cluster::print_lab_stats( FILE *fp, unsigned& lab_accesses, unsigned& lab_misses ) const {
    	for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
-      	m_core[ i ]->print_tlb_stats( fp, tlb_accesses, tlb_misses );
+      	m_core[ i ]->print_lab_stats( fp, lab_accesses, lab_misses );
    	}
 }
 
@@ -4306,7 +4307,7 @@ void simt_core_cluster::get_lab_sub_stats(struct cache_sub_stats &css) const{
     temp_css.clear();
     total_css.clear();
     for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
-        m_core[i]->get_tlb_sub_stats(temp_css);
+        m_core[i]->get_lab_sub_stats(temp_css);
         total_css += temp_css;
     }
     css = total_css;
