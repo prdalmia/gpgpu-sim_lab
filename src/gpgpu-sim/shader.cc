@@ -1687,12 +1687,18 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache
         return result;
 
     mem_fetch *mf = m_mf_allocator->alloc(inst,inst.accessq_back());
-
-    if(m_config->m_L1D_config.l1_latency > 0)
+    if(m_config->m_lab_config.lab_latency > 0)
 	{
- 
-    	if( mf->get_inst().is_store() ) {
-				m_core->inc_store_req(inst.warp_id());
+    	if((lab_latency_queue[m_config->m_lab_config.lab_latency-1]) == NULL)
+    	{
+    		lab_latency_queue[m_config->m_lab_config.lab_latency-1] = mf;
+
+    		if( mf->get_inst().is_store() ) {
+				unsigned inc_ack = (m_config->m_lab_config.get_mshr_type() == SECTOR_ASSOC)?
+						(mf->get_data_size()/SECTOR_SIZE) : 1;
+
+				for(unsigned i=0; i< inc_ack; ++i)
+					m_core->inc_store_req( inst.warp_id() );
 			}
 
     		inst.accessq_pop_back();
@@ -1705,12 +1711,10 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache
         if( !inst.accessq_empty() &&  result !=BK_CONF)
 		   result = COAL_STALL;
 	   return result;
-    else
-    {
-		std::list<cache_event> events;
-		enum cache_request_status status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
-		return process_cache_access( cache, mf->get_addr(), inst, events, mf, status );
-    }
+	}
+
+//Are we ever going to read from this ?
+     
 }
 
 void ldst_unit::L1_latency_queue_cycle()
@@ -1775,6 +1779,67 @@ void ldst_unit::L1_latency_queue_cycle()
 
 }
 
+void ldst_unit::Lab_latency_queue_cycle()
+{
+	//std::deque< std::pair<mem_fetch*,bool> >::iterator it = m_latency_queue.begin();
+	if((lab_latency_queue[0]) != NULL)
+    {
+		    mem_fetch* mf_next = lab_latency_queue[0];
+			std::list<cache_event> events;
+			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+
+		   bool write_sent = was_write_sent(events);
+		   bool read_sent = was_read_sent(events);
+
+		   if ( status == HIT) {
+			   assert( !read_sent );
+			   lab_latency_queue[0] = NULL;
+			   if ( mf_next->get_inst().is_load() ) {
+				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
+					   if (mf_next->get_inst().out[r] > 0)
+					   {
+						   assert(m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]]>0);
+						   unsigned still_pending = --m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]];
+						   if(!still_pending)
+						   {
+							m_pending_writes[mf_next->get_inst().warp_id()].erase(mf_next->get_inst().out[r]);
+							m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),mf_next->get_inst().out[r]);
+							m_core->warp_inst_complete(mf_next->get_inst());
+						   }
+					   }
+			   }
+
+			   //For write hit in WB policy
+			   if(mf_next->get_inst().is_store() && !write_sent)
+			   {
+				   unsigned dec_ack = (m_config->m_lab_config.get_mshr_type() == SECTOR_ASSOC)?
+				   						(mf_next->get_data_size()/SECTOR_SIZE) : 1;
+
+				   mf_next->set_reply();
+
+				   for(unsigned i=0; i< dec_ack; ++i)
+				      m_core->store_ack(mf_next);
+			   }
+
+			   if( !write_sent )
+				   delete mf_next;
+
+		   } else if ( status == RESERVATION_FAIL ) {
+			   assert( !read_sent );
+			   assert( !write_sent );
+		   } else {
+			   assert( status == MISS || status == HIT_RESERVED );
+			   lab_latency_queue[0] = NULL;
+	   }
+    }
+
+	 for( unsigned stage = 0; stage< m_config->m_lab_config.lab_latency-1; ++stage)
+	  if( lab_latency_queue[stage] == NULL) {
+		   lab_latency_queue[stage] = lab_latency_queue[stage+1] ;
+		   lab_latency_queue[stage+1] = NULL;
+	   }
+
+}
 
 
 bool ldst_unit::constant_cycle( warp_inst_t &inst, mem_stage_stall_type &rc_fail, mem_stage_access_type &fail_type)
@@ -2417,6 +2482,11 @@ void ldst_unit::cycle()
 	   m_L1D->cycle();
 	   if(m_config->m_L1D_config.l1_latency > 0)
 	   		L1_latency_queue_cycle();
+   }
+   if( m_lab ) {
+	   m_lab->cycle();
+	   if(m_config->m_lab_config.lab_latency > 0)
+	   		Lab_latency_queue_cycle();
    }
 
    warp_inst_t &pipe_reg = *m_dispatch_reg;

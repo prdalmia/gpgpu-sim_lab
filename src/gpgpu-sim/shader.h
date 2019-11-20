@@ -1296,7 +1296,7 @@ protected:
                                                       enum cache_request_status status );
    mem_stage_stall_type process_memory_access_queue( cache_t *cache, warp_inst_t &inst );
    mem_stage_stall_type process_memory_access_queue_l1cache( l1_cache *cache, warp_inst_t &inst );
-   mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache, warp_inst_t &inst );
+   mem_stage_stall_type process_memory_access_queue_labcache( lab *cache, warp_inst_t &inst );
 
    const memory_config *m_memory_config;
    class mem_fetch_interface *m_icnt;
@@ -1330,6 +1330,7 @@ protected:
    std::deque<mem_fetch* > l1_latency_queue;
    std::deque<mem_fetch* > lab_latency_queue;
    void L1_latency_queue_cycle();
+   void Lab_latency_queue_cycle();
 };
 
 enum pipeline_stage_name_t {
