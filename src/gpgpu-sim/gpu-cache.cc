@@ -335,7 +335,7 @@ enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx , 
 
 }
 
-enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf)
+enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf )
 {
     //bool wb=false;
     evicted_block_info evicted;
@@ -352,6 +352,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
     bool wb;
     //shader_cache_access_log(m_core_id, m_type_id, 0); // log accesses to cache
     enum cache_request_status status = probe(addr,idx,mf);
+
     switch (status) {
     case HIT_RESERVED: 
         m_pending_hit++;

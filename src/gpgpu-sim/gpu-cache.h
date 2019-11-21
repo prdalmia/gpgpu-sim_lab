@@ -1004,7 +1004,7 @@ public:
 
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, bool probe_mode=false, mem_fetch* mf=NULL) const;
-    enum cache_request_status access( new_addr_type addr, unsigned time, mem_fetch* mf );
+    enum cache_request_status access( new_addr_type addr, unsigned time, mem_fetch* mf);
     enum cache_request_status access( new_addr_type addr, unsigned time,  evicted_block_info &evicted, mem_fetch* mf );
 
     void fill( new_addr_type addr, unsigned time, mem_fetch* mf );
@@ -1511,7 +1511,7 @@ public:
     }
     enum cache_request_status access( new_addr_type addr, mem_fetch *mf, unsigned time, std::list<cache_event> &events ) 
     {
-        m_lab_array->access(addr, time, mf);
+        return m_lab_array->access(addr, time, mf);
     }
     /// Sends next request to lower level of memory
     // accessors for cache bandwidth availability 

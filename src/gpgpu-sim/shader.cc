@@ -1743,6 +1743,7 @@ void ldst_unit::L1_latency_queue_cycle()
 							m_pending_writes[mf_next->get_inst().warp_id()].erase(mf_next->get_inst().out[r]);
 							m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),mf_next->get_inst().out[r]);
 							m_core->warp_inst_complete(mf_next->get_inst());
+                            
 						   }
 					   }
 			   }
@@ -1794,35 +1795,6 @@ void ldst_unit::Lab_latency_queue_cycle()
 		   if ( status == HIT) {
 			   assert( !read_sent );
 			   lab_latency_queue[0] = NULL;
-			   if ( mf_next->get_inst().is_load() ) {
-				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
-					   if (mf_next->get_inst().out[r] > 0)
-					   {
-						   assert(m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]]>0);
-						   unsigned still_pending = --m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]];
-						   if(!still_pending)
-						   {
-							m_pending_writes[mf_next->get_inst().warp_id()].erase(mf_next->get_inst().out[r]);
-							m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),mf_next->get_inst().out[r]);
-							m_core->warp_inst_complete(mf_next->get_inst());
-						   }
-					   }
-			   }
-
-			   //For write hit in WB policy
-			   if(mf_next->get_inst().is_store() && !write_sent)
-			   {
-				   unsigned dec_ack = (m_config->m_lab_config.get_mshr_type() == SECTOR_ASSOC)?
-				   						(mf_next->get_data_size()/SECTOR_SIZE) : 1;
-
-				   mf_next->set_reply();
-
-				   for(unsigned i=0; i< dec_ack; ++i)
-				      m_core->store_ack(mf_next);
-			   }
-
-			   if( !write_sent )
-				   delete mf_next;
 
 		   } else if ( status == RESERVATION_FAIL ) {
 			   assert( !read_sent );
@@ -1831,6 +1803,14 @@ void ldst_unit::Lab_latency_queue_cycle()
 			   assert( status == MISS || status == HIT_RESERVED );
 			   lab_latency_queue[0] = NULL;
 	   }
+
+        m_lab->fill(mf_next,gpu_sim_cycle+gpu_tot_sim_cycle);
+    
+     if ( mf_next && mf_next->isatomic() ){
+                    mf_next->do_atomic();
+               }
+    
+    
     }
 
 	 for( unsigned stage = 0; stage< m_config->m_lab_config.lab_latency-1; ++stage)
