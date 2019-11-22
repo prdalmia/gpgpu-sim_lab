@@ -1968,6 +1968,16 @@ void ldst_unit::fill( mem_fetch *mf )
 void ldst_unit::flush(){
 	// Flush L1D cache
 	m_L1D->flush();
+
+    
+    std::deque<mem_fetch*> flush_queue = m_lab->flush();
+
+    for (unsigned i=0; i < m_config.get_num_lines(); i++)
+    	if(m_lines[i]->is_modified_line()) {            
+           mem_fetch *mf =  m_lines[i]->get_mf();
+           m_icnt->push(mf);
+    	}
+    is_used = false;
 }
 
 void ldst_unit::invalidate(){

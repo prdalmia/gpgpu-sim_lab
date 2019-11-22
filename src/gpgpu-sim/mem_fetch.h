@@ -92,11 +92,13 @@ public:
    unsigned get_sid() const { return m_sid; }
    unsigned get_tpc() const { return m_tpc; }
    unsigned get_wid() const { return m_wid; }
+   unsigned get_wid() const { return m_wid; }
    bool istexture() const;
    bool isconst() const;
    enum mf_type get_type() const { return m_type; }
    bool isatomic() const;
-
+   bool isatomicdone() const {return m_atomic_completed;} 
+   void set_atomicdone()  {m_atomic_completed = true;} 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
    void set_icnt_receive_time( unsigned t ) { m_icnt_receive_time=t; }
    unsigned get_timestamp() const { return m_timestamp; }
@@ -137,6 +139,7 @@ private:
    new_addr_type m_partition_addr; // linear physical address *within* dram partition (partition bank select bits squeezed out)
    addrdec_t m_raw_addr; // raw physical address (i.e., decoded DRAM chip-row-bank-column address)
    enum mf_type m_type;
+   bool m_atomic_completed;
 
    // statistics
    unsigned m_timestamp;  // set to gpu_sim_cycle+gpu_tot_sim_cycle at struct creation

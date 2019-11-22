@@ -36,6 +36,7 @@
 #include "../tr1_hash_map.h"
 
 #include "addrdec.h"
+#include <deque>
 #include <iostream>
 
 #define MAX_DEFAULT_CACHE_SIZE_MULTIBLIER 4
@@ -111,13 +112,14 @@ struct lab_block_t {
     }
 
 
-	void allocate(new_addr_type tag, new_addr_type block_addr, unsigned time)
+	void allocate(new_addr_type tag, new_addr_type block_addr, unsigned time, mem_fetch* mf)
 	{
 		m_tag = tag;
 		m_block_addr = block_addr;
 		m_alloc_time = time;
 		m_last_access_time = time;
 		m_fill_time = 0;
+        mf_for_block = mf;
 		m_status = RESERVED;
 	}
 
@@ -162,6 +164,10 @@ struct lab_block_t {
 	{
 	  	return m_alloc_time;
 	}
+     mem_fetch * get_mf()
+	{
+	  	return mf_for_block;
+	}
 
 	 void print_status() {
 		 printf("m_block_addr is %llu, status = %u\n", m_block_addr, m_status);
@@ -177,13 +183,14 @@ struct lab_block_t {
 
         new_addr_type    m_tag;
         new_addr_type    m_block_addr;
-
+        
 private:
         
 	    unsigned long long     m_alloc_time;
+        mem_fetch* mf_for_block;
 	    unsigned long long     m_last_access_time;
 	    unsigned long long     m_fill_time;
-	    enum cache_block_state    	   m_status;
+	    enum cache_block_state m_status;
 };
 
 struct cache_block_t {
@@ -1009,12 +1016,12 @@ public:
 
     void fill( new_addr_type addr, unsigned time, mem_fetch* mf );
     void fill( unsigned idx, unsigned time, mem_fetch* mf );
-    void fill( new_addr_type addr, unsigned time);
+    //void fill( new_addr_type addr, unsigned time);
 
     unsigned size() const { return m_config.get_num_lines();}
     lab_block_t* get_block(unsigned idx) { return m_lines[idx];}
 
-    void flush(); // flush all written entries
+    std::deque<mem_fetch*> flush() ; // flush all written entries
     void invalidate(); // invalidate all entries
     void new_window();
     void init(int core_id);
@@ -1033,6 +1040,7 @@ protected:
     lab_cache_config &m_config;
 
     lab_block_t **m_lines; /* nbanks  x nset x assoc lines in total */
+    std::deque<mem_fetch*> flush_queue;
 
     unsigned m_access;
     unsigned m_miss;
@@ -1532,7 +1540,7 @@ public:
     /// Pop next ready access (does not include accesses that "HIT")
    // mem_fetch *next_access(){return my_queue.next_access();}
     // flash invalidate all entries in cache
-    void flush(){m_lab_array->flush();}
+    std::deque<mem_fetch*> flush(){ return m_lab_array->flush();}
     void invalidate(){m_lab_array->invalidate();}
     void print(FILE *fp, unsigned &accesses, unsigned &misses) const
     {

@@ -60,6 +60,7 @@ mem_fetch::mem_fetch( const mem_access_t &access,
    m_type = m_access.is_write()?WRITE_REQUEST:READ_REQUEST;
    m_timestamp = gpu_sim_cycle + gpu_tot_sim_cycle;
    m_timestamp2 = 0;
+   m_atomic_completed = 0;
    m_status = MEM_FETCH_INITIALIZED;
    m_status_change = gpu_sim_cycle + gpu_tot_sim_cycle;
    m_mem_config = config;
@@ -111,6 +112,7 @@ bool mem_fetch::isatomic() const
 
 void mem_fetch::do_atomic()
 {
+   
     m_inst.do_atomic( m_access.get_warp_mask() );
 }
 

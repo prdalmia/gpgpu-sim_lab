@@ -381,23 +381,38 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
     return status;
 }
 
-void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch* mf)
-{
-    fill(addr, time);
-}
+//void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch* mf)
+//{
+//    fill(addr, time);
+//}
 
-void lab_array::fill( new_addr_type addr, unsigned time)
+void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch *mf)
 {
     //assert( m_config.m_alloc_policy == ON_FILL );
     unsigned idx = unsigned(-1);
     enum cache_request_status status = probe(addr,idx);
     //assert(status==MISS||status==SECTOR_MISS); // MSHR should have prevented redundant memory request
     if(status==MISS)
-    	m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time);
+    	m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf);
     if (status != RESERVATION_FAIL)
     {
         m_lines[idx]->fill(time);
     }   
+}
+
+
+//TODO: we need write back the flushed data to the upper level
+std::deque<mem_fetch*> lab_array::flush() 
+{
+	if(!is_used)
+		return;
+    
+    for (unsigned i=0; i < m_config.get_num_lines(); i++)
+    	if(m_lines[i]->is_modified_line()) {            
+           mem_fetch *mf =  m_lines[i]->get_mf();
+           flush_queue.push_back(mf);
+    	}
+    is_used = false;
 }
 
 //TLB FUNCTIONS
