@@ -1842,6 +1842,7 @@ void ldst_unit::Lab_latency_queue_cycle()
     
      if ( mf_next && mf_next->isatomic() ){
                     mf_next->do_atomic();
+                    mf_next->set_atomicdone();
                }
         m_next_global = mf_next;
     
@@ -1972,12 +1973,9 @@ void ldst_unit::flush(){
     
     std::deque<mem_fetch*> flush_queue = m_lab->flush();
 
-    for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(m_lines[i]->is_modified_line()) {            
-           mem_fetch *mf =  m_lines[i]->get_mf();
-           m_icnt->push(mf);
+    for (unsigned i=0; i < flush_queue.size(); i++){
+           m_icnt->push(flush_queue[i]);
     	}
-    is_used = false;
 }
 
 void ldst_unit::invalidate(){
