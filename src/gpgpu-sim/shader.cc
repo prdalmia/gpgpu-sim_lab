@@ -1554,7 +1554,11 @@ void shader_core_ctx::writeback()
         m_gpu->gpu_sim_insn_last_update_sid = m_sid;
         m_gpu->gpu_sim_insn_last_update = gpu_sim_cycle;
         m_last_inst_gpu_sim_cycle = gpu_sim_cycle;
+
+       
+
         m_last_inst_gpu_tot_sim_cycle = gpu_tot_sim_cycle;
+        
         pipe_reg->clear();
         preg = m_pipeline_reg[EX_WB].get_ready();
         pipe_reg = (preg==NULL)? NULL:*preg;
@@ -1693,13 +1697,13 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache
     	{
     		lab_latency_queue[m_config->m_lab_config.lab_latency-1] = mf;
 
-    		if( mf->get_inst().is_store() ) {
-				unsigned inc_ack = (m_config->m_lab_config.get_mshr_type() == SECTOR_ASSOC)?
-						(mf->get_data_size()/SECTOR_SIZE) : 1;
-
-				for(unsigned i=0; i< inc_ack; ++i)
-					m_core->inc_store_req( inst.warp_id() );
-			}
+    	//	if( mf->get_inst().is_store() ) {
+		//		unsigned inc_ack = (m_config->m_lab_config.get_mshr_type() == SECTOR_ASSOC)?
+		//				(mf->get_data_size()/SECTOR_SIZE) : 1;
+        //
+		//		for(unsigned i=0; i< inc_ack; ++i)
+		//			m_core->inc_store_req( inst.warp_id() );
+		//	}
 
     		inst.accessq_pop_back();
     	}
@@ -1795,6 +1799,36 @@ void ldst_unit::Lab_latency_queue_cycle()
 		   if ( status == HIT) {
 			   assert( !read_sent );
 			   lab_latency_queue[0] = NULL;
+                if ( mf_next->get_inst().is_load() ) {
+				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
+					   if (mf_next->get_inst().out[r] > 0)
+					   {
+						   assert(m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]]>0);
+						   unsigned still_pending = --m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]];
+						   if(!still_pending)
+						   {
+							m_pending_writes[mf_next->get_inst().warp_id()].erase(mf_next->get_inst().out[r]);
+							m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),mf_next->get_inst().out[r]);
+							m_core->warp_inst_complete(mf_next->get_inst());
+                            
+						   }
+					   }
+			   }
+
+			   //For write hit in WB policy
+			   if(mf_next->get_inst().is_store() && !write_sent)
+			   {
+				   unsigned dec_ack = (m_config->m_L1D_config.get_mshr_type() == SECTOR_ASSOC)?
+				   						(mf_next->get_data_size()/SECTOR_SIZE) : 1;
+
+				   mf_next->set_reply();
+
+				   for(unsigned i=0; i< dec_ack; ++i)
+				      m_core->store_ack(mf_next);
+			   }
+
+			   if( !write_sent )
+				   delete mf_next;
 
 		   } else if ( status == RESERVATION_FAIL ) {
 			   assert( !read_sent );
@@ -1802,9 +1836,9 @@ void ldst_unit::Lab_latency_queue_cycle()
 		   } else {
 			   assert( status == MISS || status == HIT_RESERVED );
 			   lab_latency_queue[0] = NULL;
+                m_lab->fill(mf_next,gpu_sim_cycle+gpu_tot_sim_cycle);
 	   }
 
-        m_lab->fill(mf_next,gpu_sim_cycle+gpu_tot_sim_cycle);
     
      if ( mf_next && mf_next->isatomic() ){
                     mf_next->do_atomic();
@@ -2356,7 +2390,7 @@ void ldst_unit::writeback()
                 m_next_wb = mf->get_inst();
                 delete mf;
                 serviced_client = next_client; 
-            }
+            }  
             break;
         default: abort();
         }
