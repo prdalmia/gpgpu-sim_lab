@@ -1679,8 +1679,7 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_l1cache( l1_cache *c
     else
     {
 		std::list<cache_event> events;
-		enum cache_request_stat   
-        us status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+		enum cache_request_status status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
 		return process_cache_access( cache, mf->get_addr(), inst, events, mf, status );
     }
 }
@@ -1844,7 +1843,7 @@ void ldst_unit::Lab_latency_queue_cycle()
      if ( mf_next && mf_next->isatomic() ){
                     mf_next->do_atomic();
                }
-        m_next_global = mf;
+        m_next_global = mf_next;
     
     
     }
