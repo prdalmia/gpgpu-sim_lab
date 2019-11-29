@@ -92,7 +92,6 @@ public:
    unsigned get_sid() const { return m_sid; }
    unsigned get_tpc() const { return m_tpc; }
    unsigned get_wid() const { return m_wid; }
-   unsigned get_wid() const { return m_wid; }
    bool istexture() const;
    bool isconst() const;
    enum mf_type get_type() const { return m_type; }
