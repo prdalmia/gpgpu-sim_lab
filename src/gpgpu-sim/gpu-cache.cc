@@ -367,7 +367,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
             }
-            m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time);
+            m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf);
         }
         break;
     case RESERVATION_FAIL:
@@ -413,6 +413,8 @@ std::deque<mem_fetch*> lab_array::flush()
            flush_queue.push_back(mf);
     	}
     is_used = false;
+
+    return flush_queue;
 }
 
 //TLB FUNCTIONS
