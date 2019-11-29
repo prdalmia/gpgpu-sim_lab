@@ -404,15 +404,12 @@ void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch *mf)
 //TODO: we need write back the flushed data to the upper level
 std::deque<mem_fetch*> lab_array::flush() 
 {
-	if(!is_used)
-		return;
     
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
     	if(m_lines[i]->is_modified_line()) {            
            mem_fetch *mf =  m_lines[i]->get_mf();
            flush_queue.push_back(mf);
     	}
-    is_used = false;
 
     return flush_queue;
 }
