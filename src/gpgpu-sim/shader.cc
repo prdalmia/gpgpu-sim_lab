@@ -1839,8 +1839,11 @@ void ldst_unit::Lab_latency_queue_cycle()
                 m_lab->fill(mf_next,gpu_sim_cycle+gpu_tot_sim_cycle);
 	   }
 
+
     
      if ( mf_next && mf_next->isatomic() ){
+
+         const warp_inst_t inst_temp = mf_next->get_inst();
                     mf_next->do_atomic();
                     mf_next->set_atomicdone();
                }
