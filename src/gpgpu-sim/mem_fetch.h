@@ -73,6 +73,7 @@ public:
        }
    }
    void do_atomic();
+   long long * do_atomic_lab();
 
    void print( FILE *fp, bool print_inst = true ) const;
 

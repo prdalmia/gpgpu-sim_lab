@@ -264,6 +264,24 @@ void warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceDo ) {
     }
 }
 
+long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceDo, new_addr_type addr ) {
+    assert( m_isatomic && (!m_empty||forceDo) );
+    for( unsigned i=0; i < m_config->warp_size; i++ )
+    {
+        if( access_mask.test(i) )
+        {
+            dram_callback_t &cb = m_per_scalar_thread[i].callback;
+            if( cb.thread )
+                cb.function(cb.instruction, cb.thread);
+                long long* data = new(long long);
+                cb.thread->get_global_memory()->read(addr,4,data);
+                return data;
+        }
+    }
+}
+
+
+
 void warp_inst_t::broadcast_barrier_reduction(const active_mask_t& access_mask)
 {
 	for( unsigned i=0; i < m_config->warp_size; i++ )

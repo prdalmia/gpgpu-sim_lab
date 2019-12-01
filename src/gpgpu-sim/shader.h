@@ -1329,7 +1329,7 @@ protected:
 
    std::deque<mem_fetch* > l1_latency_queue;
    std::deque<mem_fetch* > lab_latency_queue;
-   std::unordered_map< new_addr_type , unsigned long> lab_data_map;
+   std::map < new_addr_type , unsigned long> lab_data_map;
    void L1_latency_queue_cycle();
    void Lab_latency_queue_cycle();
 };
