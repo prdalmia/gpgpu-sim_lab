@@ -1566,6 +1566,8 @@ void gpgpu_sim::issue_block2core()
 
 unsigned long long g_single_step=0; // set this in gdb to single step the pipeline
 
+
+//int cnt1 = 0;
 void gpgpu_sim::cycle()
 {
    int clock_mask = next_clock_domain();
@@ -1682,11 +1684,19 @@ void gpgpu_sim::cycle()
       // Depending on configuration, invalidate the caches once all of threads are completed.
       int all_threads_complete = 1;
       if (m_config.gpgpu_flush_l1_cache) {
+         //printf("rohan number of simt_clusters = %d \n\n", m_shader_config->n_simt_clusters);
          for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
+            //printf("rohan m_cluster[i]->get_not_completed() = %d \n", m_cluster[i]->get_not_completed());
             if (m_cluster[i]->get_not_completed() == 0)
+            {
+               
                 m_cluster[i]->cache_invalidate();
+                m_cluster[i]->cache_flush();
+                //printf("rohan count1 = %d", cnt1);
+            }
             else
                all_threads_complete = 0 ;
+         //printf("rohan total times printed = %d", i);
          }
       }
 

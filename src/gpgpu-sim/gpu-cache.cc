@@ -368,6 +368,8 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
             }
             m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf);
+            //If it misses in the cache, this means we want to do an atomic and this address will be reserved
+            m_lines[idx]->set_status(RESERVED) ;
         }
         break;
     case RESERVATION_FAIL:
@@ -406,7 +408,8 @@ std::deque<mem_fetch*> lab_array::flush()
 {
     
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(m_lines[i]->is_modified_line()) {            
+    	//if(m_lines[i]->is_modified_line() ) {            
+        if(m_lines[i]->is_valid_line() ) {            
            mem_fetch *mf =  m_lines[i]->get_mf();
            flush_queue.push_back(mf);
     	}
