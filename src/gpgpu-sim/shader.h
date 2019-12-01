@@ -2062,8 +2062,7 @@ private:
     unsigned int m_occupied_ctas;
     std::bitset<MAX_THREAD_PER_SM> m_occupied_hwtid;
     std::map<unsigned int, unsigned int> m_occupied_cta_to_hwtid; 
-    // rohan
-    int cnt1 = 0;
+
 
 };
 

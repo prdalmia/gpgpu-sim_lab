@@ -3193,15 +3193,11 @@ void shader_core_config::set_pipeline_latency() {
 
 }
 
-
 void shader_core_ctx::cycle()
 {
 	if(!isactive() && get_not_completed() == 0)
-        
-        {
-        //printf ("rohan inside shader_core_cycle \n");
 		return;
-        }
+
 	m_stats->shader_cycles[m_sid]++;
     writeback();
     execute();
@@ -3215,8 +3211,7 @@ void shader_core_ctx::cycle()
 
 void shader_core_ctx::cache_flush()
 {
-   if (m_not_completed == 0)
-        m_ldst_unit->flush();
+   m_ldst_unit->flush();
 }
 
 void shader_core_ctx::cache_invalidate()
@@ -3985,7 +3980,6 @@ unsigned simt_core_cluster::max_cta( const kernel_info_t &kernel )
 unsigned simt_core_cluster::get_not_completed() const
 {
     unsigned not_completed=0;
-    //printf("rohan per cluster print %d", m_config->n_simt_cores_per_cluster);
     for( unsigned i=0; i < m_config->n_simt_cores_per_cluster; i++ ) 
         not_completed += m_core[i]->get_not_completed();
     return not_completed;
