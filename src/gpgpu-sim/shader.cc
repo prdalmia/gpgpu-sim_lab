@@ -1845,7 +1845,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 
          const warp_inst_t inst_temp = mf_next->get_inst();
                     long long* data = mf_next->do_atomic_lab();
-                    printf("The data after atomic is %d\n", *data);
+                    lab_data_map[mf_next->get_addr] = *data;
                     mf_next->set_atomicdone();
                }
         m_next_global = mf_next;
