@@ -275,6 +275,13 @@ enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx, m
 
 }
 
+/// Sends write request to lower level memory (write or writeback)
+void lab::send_write_request(mem_fetch *mf, cache_event request, unsigned time, std::list<cache_event> &events){
+
+	events.push_back(request);
+    mf->set_status( IN_PARTITION_ICNT_TO_L2_QUEUE ,time);
+}
+
 enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx , bool probe_mode, mem_fetch* mf) const {
     unsigned set_index = m_config.set_index(addr);
     new_addr_type tag = m_config.tag(addr);

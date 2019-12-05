@@ -1799,21 +1799,6 @@ void ldst_unit::Lab_latency_queue_cycle()
 		   if ( status == HIT) {
 			   assert( !read_sent );
 			   lab_latency_queue[0] = NULL;
-                if ( mf_next->get_inst().is_load() ) {
-				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
-					   if (mf_next->get_inst().out[r] > 0)
-					   {
-						   assert(m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]]>0);
-						   unsigned still_pending = --m_pending_writes[mf_next->get_inst().warp_id()][mf_next->get_inst().out[r]];
-						   if(!still_pending)
-						   {
-							m_pending_writes[mf_next->get_inst().warp_id()].erase(mf_next->get_inst().out[r]);
-							m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),mf_next->get_inst().out[r]);
-							m_core->warp_inst_complete(mf_next->get_inst());
-                            
-						   }
-					   }
-			   }
 
 			   //For write hit in WB policy
 			   if(mf_next->get_inst().is_store() && !write_sent)
@@ -1826,10 +1811,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 				   for(unsigned i=0; i< dec_ack; ++i)
 				      m_core->store_ack(mf_next);
 			   }
-
-			   if( !write_sent )
-				   delete mf_next;
-
+        
 		   } else if ( status == RESERVATION_FAIL ) {
 			   assert( !read_sent );
 			   assert( !write_sent );
@@ -1843,9 +1825,11 @@ void ldst_unit::Lab_latency_queue_cycle()
     
      if ( mf_next && mf_next->isatomic() ){
 
-         const warp_inst_t inst_temp = mf_next->get_inst();
-                    long long* data = mf_next->do_atomic_lab();
-                    lab_data_map[mf_next->get_addr] = *data;
+         //const warp_inst_t inst_temp = mf_next->get_inst();
+                    //long long* data = mf_next->do_atomic_lab();
+                    //lab_data_map[mf_next->get_addr()] = *data;
+                    m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
+                    mf_next->do_atomic();
                     mf_next->set_atomicdone();
                }
         m_next_global = mf_next;

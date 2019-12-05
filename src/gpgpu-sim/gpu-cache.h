@@ -1537,6 +1537,14 @@ public:
     {
         
     }
+
+     // Functions for data cache access
+    /// Sends write request to lower level memory (write or writeback)
+    void send_write_request( mem_fetch *mf,
+                             cache_event request,
+                             unsigned time,
+                             std::list<cache_event> &events);
+                             
     /// Pop next ready access (does not include accesses that "HIT")
    // mem_fetch *next_access(){return my_queue.next_access();}
     // flash invalidate all entries in cache
