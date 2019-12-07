@@ -1304,6 +1304,7 @@ protected:
    class shader_core_ctx *m_core;
    unsigned m_sid;
    unsigned m_tpc;
+   bool m_flush_lab;
 
    tex_cache *m_L1T; // texture cache
    read_only_cache *m_L1C; // constant cache

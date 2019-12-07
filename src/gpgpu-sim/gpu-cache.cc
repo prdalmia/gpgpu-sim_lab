@@ -413,7 +413,7 @@ std::deque<mem_fetch*> lab_array::flush()
 {
     
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(m_lines[i]->is_modified_line()) {            
+    	if(m_lines[i]->is_valid_line()) {            
            mem_fetch *mf =  m_lines[i]->get_mf();
            flush_queue.push_back(mf);
     	}

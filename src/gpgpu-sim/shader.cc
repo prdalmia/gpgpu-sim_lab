@@ -1791,7 +1791,19 @@ void ldst_unit::Lab_latency_queue_cycle()
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
-			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+            
+             warp_inst_t inst = mf_next->get_inst();
+            
+            const mem_access_t &access = inst.accessq_back();
+            mem_fetch *mf_copy = new mem_fetch(access,
+                                      &mf_next->get_inst(),
+                                      mf_next->get_ctrl_size(),
+                                      mf_next->get_wid(),
+                                      mf_next->get_sid(), 
+                                      mf_next->get_tpc(), 
+                                      mf_next->get_mem_config());
+
+			enum cache_request_status status = m_lab->access(mf_copy->get_addr(),mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle,events);
 
 		   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
@@ -1831,6 +1843,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                     m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
                     mf_next->do_atomic();
                     mf_next->set_atomicdone();
+                    mf_copy->set_atomicdone();
                }
         m_next_global = mf_next;
     
@@ -1956,14 +1969,16 @@ void ldst_unit::fill( mem_fetch *mf )
 
 void ldst_unit::flush(){
 	// Flush L1D cache
-	m_L1D->flush();
 
-    
+    if(m_flush_lab == false){
+
     std::deque<mem_fetch*> flush_queue = m_lab->flush();
 
     for (unsigned i=0; i < flush_queue.size(); i++){
            m_icnt->push(flush_queue[i]);
     	}
+    m_flush_lab = true;
+    }
 }
 
 void ldst_unit::invalidate(){
@@ -2193,6 +2208,7 @@ void ldst_unit::init( mem_fetch_interface *icnt,
     m_L1C = new read_only_cache(L1C_name,m_config->m_L1C_config,m_sid,get_shader_constant_cache_id(),icnt,IN_L1C_MISS_QUEUE);
     m_L1D = NULL;
     m_lab = NULL;
+    m_flush_lab = false;
     m_mem_rc = NO_RC_FAIL;
     m_num_writeback_clients=5; // = shared memory, global/local (uncached), L1D, L1T, L1C
     m_writeback_arb = 0;
@@ -3196,7 +3212,10 @@ void shader_core_ctx::cycle()
 
 void shader_core_ctx::cache_flush()
 {
-   m_ldst_unit->flush();
+    if(m_not_completed == 0 )
+    {
+        m_ldst_unit->flush();
+    }
 }
 
 void shader_core_ctx::cache_invalidate()

@@ -1683,8 +1683,11 @@ void gpgpu_sim::cycle()
       int all_threads_complete = 1;
       if (m_config.gpgpu_flush_l1_cache) {
          for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-            if (m_cluster[i]->get_not_completed() == 0)
+            if (m_cluster[i]->get_not_completed() == 0){
                 m_cluster[i]->cache_invalidate();
+                m_cluster[i]->cache_flush();
+            }
+
             else
                all_threads_complete = 0 ;
          }
