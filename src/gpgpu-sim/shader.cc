@@ -2502,7 +2502,7 @@ void ldst_unit::cycle()
                } else {
                    if (m_L1D->fill_port_free()) {
                        if(mf->isatomic()){
-                           m_next_global = mf;
+                        m_response_fifo.pop_front();
                        }
                        else{
                         m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -3582,7 +3582,7 @@ void shader_core_ctx::accept_ldst_unit_response(mem_fetch * mf)
 
 void shader_core_ctx::store_ack( class mem_fetch *mf )
 {
-	assert( mf->get_type() == WRITE_ACK  || ( m_config->gpgpu_perfect_mem && mf->get_is_write() ) );
+	//assert( mf->get_type() == WRITE_ACK  || ( m_config->gpgpu_perfect_mem && mf->get_is_write() ) );
     unsigned warp_id = mf->get_wid();
     m_warp[warp_id].dec_store_req();
 }
