@@ -274,7 +274,16 @@ long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceD
             if( cb.thread )
                 cb.function(cb.instruction, cb.thread);
                 long long* data = new(long long);
-                cb.thread->get_global_memory()->read(addr,4,data);
+                const ptx_instruction *pI = dynamic_cast<const ptx_instruction*>(cb.instruction);
+                const operand_info &src1 = pI->src1();
+                unsigned to_type = pI->get_type();
+                size_t size;
+                int t;
+                type_info_key::type_decode(to_type, size, t);
+                ptx_reg_t src1_data; 
+                src1_data = cb.thread->get_operand_value(src1, src1, to_type, cb.thread, 1);
+                addr_t effective_address = src1_data.u64;
+                cb.thread->get_global_memory()->read( effective_address,size/8,data);
                 return data;
         }
     }

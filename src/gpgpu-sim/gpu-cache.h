@@ -1532,6 +1532,7 @@ public:
     {
         m_lab_array->fill(mf->get_addr(), time, mf);
     }
+
     /// Checks if mf is waiting to be filled by lower memory level
     bool waiting_for_fill( mem_fetch *mf )
     {

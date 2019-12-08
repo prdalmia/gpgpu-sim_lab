@@ -1830,7 +1830,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 		   } else {
 			   assert( status == MISS || status == HIT_RESERVED );
 			   lab_latency_queue[0] = NULL;
-                m_lab->fill(mf_next,gpu_sim_cycle+gpu_tot_sim_cycle);
+                m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
 	   }
 
 
@@ -1838,11 +1838,11 @@ void ldst_unit::Lab_latency_queue_cycle()
      if ( mf_next && mf_next->isatomic() ){
 
          //const warp_inst_t inst_temp = mf_next->get_inst();
-                    //long long* data = mf_next->do_atomic_lab();
-                    //lab_data_map[mf_next->get_addr()] = *data;
+                    long long* data = mf_next->do_atomic_lab();
+                    lab_data_map[mf_next->get_addr()] = *data;
+                    printf("The data is %d\n", *data);
                     m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
                     mf_next->do_atomic();
-                    mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
                }
         m_next_global = mf_next;
@@ -1937,7 +1937,7 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    } else {
        assert( CACHE_UNDEFINED != inst.cache_op );
        if(accessforLab){
-        stall_cond = process_memory_access_queue_labcache(m_lab,inst);   
+        stall_cond = process_memory_access_queue_labcache(m_lab,inst);  
        }
        else{
        stall_cond = process_memory_access_queue_l1cache(m_L1D,inst);
@@ -1969,6 +1969,7 @@ void ldst_unit::fill( mem_fetch *mf )
 
 void ldst_unit::flush(){
 	// Flush L1D cache
+    m_L1D->flush();
 
     if(m_flush_lab == false){
 
@@ -2389,12 +2390,21 @@ void ldst_unit::writeback()
             break;
         case 3: // global/local
             if( m_next_global ) {
+                if(m_next_global->isatomic() && m_next_global->isatomicdone() == true){
+                    m_core->warp_inst_complete(m_next_global->get_inst());
+                   // m_scoreboard->releaseRegister( m_next_global->get_inst().warp_id(), m_next_global->get_inst().out[r] );
+                    //delete m_next_global;
+                    m_next_global = NULL;
+                    serviced_client = next_client; 
+                }
+                else{
                 m_next_wb = m_next_global->get_inst();
-                if( m_next_global->isatomic() ) 
+                if( m_next_global->isatomic()) 
                     m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
                 delete m_next_global;
                 m_next_global = NULL;
                 serviced_client = next_client; 
+            }
             }
             break;
         case 4: 
@@ -2491,8 +2501,13 @@ void ldst_unit::cycle()
                    }
                } else {
                    if (m_L1D->fill_port_free()) {
-                       m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
-                       m_response_fifo.pop_front();
+                       if(mf->isatomic()){
+                           m_next_global = mf;
+                       }
+                       else{
+                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
+                        m_response_fifo.pop_front();
+                       }
                    }
                }
            }
