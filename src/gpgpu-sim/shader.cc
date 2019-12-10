@@ -1787,7 +1787,12 @@ void ldst_unit::L1_latency_queue_cycle()
 void ldst_unit::Lab_latency_queue_cycle()
 {
 	//std::deque< std::pair<mem_fetch*,bool> >::iterator it = m_latency_queue.begin();
-	if((lab_latency_queue[0]) != NULL)
+	
+    if(!m_next_global_queue.empty()){
+        m_next_global = m_next_global_queue.front();
+    }
+    
+    if((lab_latency_queue[0]) != NULL)
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
@@ -1840,12 +1845,13 @@ void ldst_unit::Lab_latency_queue_cycle()
          //const warp_inst_t inst_temp = mf_next->get_inst();
                     long long* data = mf_next->do_atomic_lab();
                     lab_data_map[mf_next->get_addr()] = *data;
-                    //printf("The data is %d\n", *data);
-                    m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
-                    mf_next->do_atomic();
+                  //  printf("The data is %d\n", lab_data_map[mf_next->get_addr()]);
+                    //m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
+                    mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
                }
-        m_next_global = mf_next;
+          m_next_global_queue.push_back(mf_next);  
+          
     
     
     }
@@ -1969,7 +1975,7 @@ void ldst_unit::fill( mem_fetch *mf )
 
 void ldst_unit::flush(){
 	// Flush L1D cache
-    m_L1D->flush();
+    //m_L1D->flush();
 
     if(m_flush_lab == false){
 
@@ -2391,8 +2397,10 @@ void ldst_unit::writeback()
         case 3: // global/local
             if( m_next_global ) {
                 m_next_wb = m_next_global->get_inst();
-                if( m_next_global->isatomic()) 
-                    m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
+                if( m_next_global->isatomic()){
+                     m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
+                    m_next_global_queue.pop_front();
+                    }
                 delete m_next_global;
                 m_next_global = NULL;
                 serviced_client = next_client; 

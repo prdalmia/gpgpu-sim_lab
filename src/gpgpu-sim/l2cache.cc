@@ -351,30 +351,30 @@ memory_sub_partition::~memory_sub_partition()
 
 void memory_sub_partition::cache_cycle( unsigned cycle )
 {
-    // L2 fill responses
+       // L2 fill responses
     if( !m_config->m_L2_config.disabled()) {
        if ( m_L2cache->access_ready() && !m_L2_icnt_queue->full() ) {
            mem_fetch *mf = m_L2cache->next_access();
-           else{
            if(mf->get_access_type() != L2_WR_ALLOC_R){ // Don't pass write allocate read request back to upper level cache
-				mf->set_reply();
-				mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-				m_L2_icnt_queue->push(mf);
+                                mf->set_reply();
+                                mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
+                                m_L2_icnt_queue->push(mf);
            }else{
-        	    if(m_config->m_L2_config.m_write_alloc_policy == FETCH_ON_WRITE)
-        	    {
-        	    	mem_fetch* original_wr_mf = mf->get_original_wr_mf();
-					assert(original_wr_mf);
-					original_wr_mf->set_reply();
-					original_wr_mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-					m_L2_icnt_queue->push(original_wr_mf);
-        	    }
-				m_request_tracker.erase(mf);
-				delete mf;
-           }
+                    if(m_config->m_L2_config.m_write_alloc_policy == FETCH_ON_WRITE)
+                    {
+                        mem_fetch* original_wr_mf = mf->get_original_wr_mf();
+                                        assert(original_wr_mf);
+                                        original_wr_mf->set_reply();
+                                        original_wr_mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
+                                        m_L2_icnt_queue->push(original_wr_mf);
+                    }
+                                m_request_tracker.erase(mf);
+                                delete mf;
            }
        }
     }
+
+
 
     // DRAM to L2 (texture) and icnt (not texture)
     if ( !m_dram_L2_queue->empty() ) {

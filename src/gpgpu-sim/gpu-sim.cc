@@ -261,11 +261,11 @@ void shader_core_config::reg_options(class OptionParser * opp)
                  "smem Latency",
                  "3");
    option_parser_register(opp, "-gpgpu_cache:lab", OPT_CSTR, &m_lab_config.m_config_string,
-                  "per-shader tlb config "
+                  "per-shader lab config "
                   " {<nsets>:<bsize>:<assoc>:<wr>:<alloc> | none}",
-                  "1:8:4096:L:m" );
+                  "1:8:8192:L:m" );
     option_parser_register(opp, "-lab_latency", OPT_UINT32, &m_lab_config.lab_latency,
-                 "TLB Latency",
+                 "LAB Latency",
                  "20");
     option_parser_register(opp, "-gpgpu_cache:dl1PrefL1", OPT_CSTR, &m_L1D_config.m_config_stringPrefL1,
                    "per-shader L1 data cache config "
