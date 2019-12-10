@@ -355,11 +355,6 @@ void memory_sub_partition::cache_cycle( unsigned cycle )
     if( !m_config->m_L2_config.disabled()) {
        if ( m_L2cache->access_ready() && !m_L2_icnt_queue->full() ) {
            mem_fetch *mf = m_L2cache->next_access();
-           if(mf->isatomic()){
-               m_request_tracker.erase(mf);
-               printf("Apun aagaya yahan %x", mf);
-				delete mf;
-           }
            else{
            if(mf->get_access_type() != L2_WR_ALLOC_R){ // Don't pass write allocate read request back to upper level cache
 				mf->set_reply();

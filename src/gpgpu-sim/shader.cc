@@ -1840,7 +1840,7 @@ void ldst_unit::Lab_latency_queue_cycle()
          //const warp_inst_t inst_temp = mf_next->get_inst();
                     long long* data = mf_next->do_atomic_lab();
                     lab_data_map[mf_next->get_addr()] = *data;
-                    printf("The data is %d\n", *data);
+                    //printf("The data is %d\n", *data);
                     m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
                     mf_next->do_atomic();
                     mf_copy->set_atomicdone();
@@ -2390,21 +2390,12 @@ void ldst_unit::writeback()
             break;
         case 3: // global/local
             if( m_next_global ) {
-                if(m_next_global->isatomic() && m_next_global->isatomicdone() == true){
-                    m_core->warp_inst_complete(m_next_global->get_inst());
-                   // m_scoreboard->releaseRegister( m_next_global->get_inst().warp_id(), m_next_global->get_inst().out[r] );
-                    //delete m_next_global;
-                    m_next_global = NULL;
-                    serviced_client = next_client; 
-                }
-                else{
                 m_next_wb = m_next_global->get_inst();
                 if( m_next_global->isatomic()) 
                     m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
                 delete m_next_global;
                 m_next_global = NULL;
                 serviced_client = next_client; 
-            }
             }
             break;
         case 4: 
@@ -3582,7 +3573,7 @@ void shader_core_ctx::accept_ldst_unit_response(mem_fetch * mf)
 
 void shader_core_ctx::store_ack( class mem_fetch *mf )
 {
-	//assert( mf->get_type() == WRITE_ACK  || ( m_config->gpgpu_perfect_mem && mf->get_is_write() ) );
+	assert( mf->get_type() == WRITE_ACK  || ( m_config->gpgpu_perfect_mem && mf->get_is_write() ) );
     unsigned warp_id = mf->get_wid();
     m_warp[warp_id].dec_store_req();
 }
