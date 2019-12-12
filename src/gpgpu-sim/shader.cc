@@ -1787,11 +1787,7 @@ void ldst_unit::L1_latency_queue_cycle()
 void ldst_unit::Lab_latency_queue_cycle()
 {
 	//std::deque< std::pair<mem_fetch*,bool> >::iterator it = m_latency_queue.begin();
-	
-    if(!m_next_global_queue.empty()){
-        m_next_global = m_next_global_queue.front();
-    }
-    
+	   
     if((lab_latency_queue[0]) != NULL)
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
@@ -1847,10 +1843,11 @@ void ldst_unit::Lab_latency_queue_cycle()
                     lab_data_map[mf_next->get_addr()] = *data;
                   //  printf("The data is %d\n", lab_data_map[mf_next->get_addr()]);
                     //m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
-                    mf_next->set_atomicdone();
+                    //mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
                }
-          m_next_global_queue.push_back(mf_next);  
+          
+          m_response_fifo.push_back(mf_next);  
           
     
     
@@ -2399,7 +2396,7 @@ void ldst_unit::writeback()
                 m_next_wb = m_next_global->get_inst();
                 if( m_next_global->isatomic()){
                      m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
-                    m_next_global_queue.pop_front();
+                    //m_next_global_queue.pop_front();
                     }
                 delete m_next_global;
                 m_next_global = NULL;
@@ -2486,7 +2483,7 @@ void ldst_unit::cycle()
                assert( !mf->get_is_write() ); // L1 cache is write evict, allocate line on load miss only
 
                bool bypassL1D = false; 
-               if ( CACHE_GLOBAL == mf->get_inst().cache_op || (m_L1D == NULL) ) {
+               if ( CACHE_GLOBAL == mf->get_inst().cache_op || (m_L1D == NULL) || CACHE_LAB == mf->get_inst().cache_op  ) {
                    bypassL1D = true; 
                } else if (mf->get_access_type() == GLOBAL_ACC_R || mf->get_access_type() == GLOBAL_ACC_W) { // global memory access 
                    if (m_core->get_config()->gmem_skip_L1D)
@@ -2496,6 +2493,7 @@ void ldst_unit::cycle()
                    if ( m_next_global == NULL ) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
+                       if(!(mf->isatomic() == true && mf->isatomicdone() == true))
                        m_next_global = mf;
                    }
                } else {
