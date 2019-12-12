@@ -1841,7 +1841,7 @@ void ldst_unit::Lab_latency_queue_cycle()
          //const warp_inst_t inst_temp = mf_next->get_inst();
                     long long* data = mf_next->do_atomic_lab();
                     lab_data_map[mf_next->get_addr()] = *data;
-                  //  printf("The data is %d\n", lab_data_map[mf_next->get_addr()]);
+                  printf("The data is %d\n", lab_data_map[mf_next->get_addr()]);
                     //m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
                     //mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
@@ -2784,7 +2784,7 @@ void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const
          m_cluster[ i ]->print_cache_stats( fout, cluster_d1_accesses, custer_d1_misses );
          total_d1_misses += custer_d1_misses;
          total_d1_accesses += cluster_d1_accesses;
-   }
+   }T
    fprintf( fout, "total_dl1_misses=%d\n", total_d1_misses );
    fprintf( fout, "total_dl1_accesses=%d\n", total_d1_accesses );
    fprintf( fout, "total_dl1_miss_rate= %f\n", (float)total_d1_misses / (float)total_d1_accesses );
