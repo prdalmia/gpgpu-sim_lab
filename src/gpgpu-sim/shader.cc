@@ -1842,7 +1842,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                     long long* data = mf_next->do_atomic_lab();
                     lab_data_map[mf_next->get_addr()] = *data;
                   printf("The data is %d\n", lab_data_map[mf_next->get_addr()]);
-                    //m_lab->send_write_request(mf_next, cache_event(WRITE_REQUEST_SENT), gpu_sim_cycle+gpu_tot_sim_cycle, events);
+
                     //mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
                }
@@ -2493,16 +2493,13 @@ void ldst_unit::cycle()
                    if ( m_next_global == NULL ) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
-                       if(!(mf->isatomic() == true && mf->isatomicdone() == true))
+                       if(!(mf->isatomic() == true && mf->isatomicdone() == true)){
                        m_next_global = mf;
+                       }
                    }
                } else {
                    if (m_L1D->fill_port_free()) {
-                       if(mf->isatomic()){
-                        m_response_fifo.pop_front();
-                       }
-                       else{
-                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
+                       m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                         m_response_fifo.pop_front();
                        }
                    }
