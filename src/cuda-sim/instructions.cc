@@ -1398,6 +1398,10 @@ void atom_callback( const inst_t* inst, ptx_thread_info* thread)
    // (i.e. copy src1_data to dst)
    if ( data_ready ) {
       mem->write(effective_address,size/8,&op_result.s64,thread,pI);
+      long long * data = new long long;
+      mem->read( effective_address,size/8,data);
+      //printf("The address is %x and data is %d\n", effective_address, *data);
+      delete data;
    } else {
       printf("Execution error: data_ready not set\n");
       assert(0);

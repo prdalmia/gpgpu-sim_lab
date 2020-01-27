@@ -1691,6 +1691,7 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue_labcache( lab *cache
         return result;
 
     mem_fetch *mf = m_mf_allocator->alloc(inst,inst.accessq_back());
+    
     if(m_config->m_lab_config.lab_latency > 0)
 	{
     	if((lab_latency_queue[m_config->m_lab_config.lab_latency-1]) == NULL)
@@ -1788,13 +1789,13 @@ void ldst_unit::Lab_latency_queue_cycle()
 {
 	//std::deque< std::pair<mem_fetch*,bool> >::iterator it = m_latency_queue.begin();
 	   
-    if((lab_latency_queue[0]) != NULL)
+    if((lab_latency_queue[0]) != NULL) 
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
             
              warp_inst_t inst = mf_next->get_inst();
-            
+
             const mem_access_t &access = inst.accessq_back();
             mem_fetch *mf_copy = new mem_fetch(access,
                                       &mf_next->get_inst(),
@@ -1841,8 +1842,6 @@ void ldst_unit::Lab_latency_queue_cycle()
          //const warp_inst_t inst_temp = mf_next->get_inst();
                     long long* data = mf_next->do_atomic_lab();
                     lab_data_map[mf_next->get_addr()] = *data;
-                  printf("The data is %d\n", lab_data_map[mf_next->get_addr()]);
-
                     //mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
                }
@@ -1913,6 +1912,7 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    } 
    if ( CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) ) {
        bypassL1D = true; 
+       
    } else if (inst.space.is_global()) { // global memory access 
        // skip L1 cache if the option is enabled
        if (m_core->get_config()->gmem_skip_L1D && (CACHE_L1 != inst.cache_op))
@@ -1975,14 +1975,16 @@ void ldst_unit::flush(){
     //m_L1D->flush();
 
     if(m_flush_lab == false){
-
     std::deque<mem_fetch*> flush_queue = m_lab->flush();
 
     for (unsigned i=0; i < flush_queue.size(); i++){
            m_icnt->push(flush_queue[i]);
+           
+           printf("The flush queue has MF for addresses %x\n ", flush_queue[i]->get_addr());
     	}
     m_flush_lab = true;
     }
+    
 }
 
 void ldst_unit::invalidate(){
@@ -2463,6 +2465,9 @@ void ldst_unit::cycle()
 
    if( !m_response_fifo.empty() ) {
        mem_fetch *mf = m_response_fifo.front();
+       if((mf->isatomic() == true && mf->isatomicdone() == true)){
+                           printf("MF for address %x returned and will now be popped\n", mf->get_addr());
+                       }
        if (mf->get_access_type() == TEXTURE_ACC_R) {
            if (m_L1T->fill_port_free()) {
                m_L1T->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -2491,7 +2496,7 @@ void ldst_unit::cycle()
                }
                if( bypassL1D ) {
                    if ( m_next_global == NULL ) {
-                       mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
+                       // mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
                        if(!(mf->isatomic() == true && mf->isatomicdone() == true)){
                        m_next_global = mf;
@@ -2506,7 +2511,7 @@ void ldst_unit::cycle()
                }
            }
        }
-   }
+   
 
    m_L1T->cycle();
    m_L1C->cycle();
@@ -2781,7 +2786,7 @@ void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const
          m_cluster[ i ]->print_cache_stats( fout, cluster_d1_accesses, custer_d1_misses );
          total_d1_misses += custer_d1_misses;
          total_d1_accesses += cluster_d1_accesses;
-   }T
+   }
    fprintf( fout, "total_dl1_misses=%d\n", total_d1_misses );
    fprintf( fout, "total_dl1_accesses=%d\n", total_d1_accesses );
    fprintf( fout, "total_dl1_miss_rate= %f\n", (float)total_d1_misses / (float)total_d1_accesses );

@@ -266,6 +266,7 @@ void warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceDo ) {
 
 long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceDo, new_addr_type addr ) {
     assert( m_isatomic && (!m_empty||forceDo) );
+    long long* data = new(long long);
     for( unsigned i=0; i < m_config->warp_size; i++ )
     {
         if( access_mask.test(i) )
@@ -273,7 +274,7 @@ long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceD
             dram_callback_t &cb = m_per_scalar_thread[i].callback;
             if( cb.thread )
                 cb.function(cb.instruction, cb.thread);
-                long long* data = new(long long);
+                
                 const ptx_instruction *pI = dynamic_cast<const ptx_instruction*>(cb.instruction);
                 const operand_info &src1 = pI->src1();
                 unsigned to_type = pI->get_type();
@@ -284,9 +285,9 @@ long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceD
                 src1_data = cb.thread->get_operand_value(src1, src1, to_type, cb.thread, 1);
                 addr_t effective_address = src1_data.u64;
                 cb.thread->get_global_memory()->read( effective_address,size/8,data);
-                return data;
         }
     }
+    return data;
 }
 
 
