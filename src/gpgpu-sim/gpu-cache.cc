@@ -342,11 +342,14 @@ enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx , 
 
 }
 
-enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf )
+enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf, std::list<cache_event> &events )
 {
     //bool wb=false;
     evicted_block_info evicted;
     enum cache_request_status result = access(addr,time,evicted,mf);
+    if(evicted.mf){
+    events.push_back(cache_event(WRITE_BACK_REQUEST_SENT, evicted));
+    }
     //assert(!wb);
     return result;
 }
@@ -370,9 +373,11 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
         m_miss++;
         //shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
         if ( m_config.m_alloc_policy == ON_MISS ) {
-            if( m_lines[idx]->is_modified_line()) {
+            //if( m_lines[idx]->is_modified_line()) {
+                if( m_lines[idx]->is_valid_line()) {
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
+                evicted.mf = m_lines[idx]->get_mf();
             }
             m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf);
         }
@@ -1842,7 +1847,7 @@ data_cache::access( new_addr_type addr,
 /// granularity of individual blocks (Set by GPGPU-Sim configuration file)
 /// (the policy used in fermi according to the CUDA manual)
 enum cache_request_status
-l1_cache::access( new_addr_type addr,
+l1_cache:: access( new_addr_type addr,
                   mem_fetch *mf,
                   unsigned time,
                   std::list<cache_event> &events )

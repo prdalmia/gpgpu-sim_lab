@@ -1795,7 +1795,6 @@ void ldst_unit::Lab_latency_queue_cycle()
 			std::list<cache_event> events;
             
              warp_inst_t inst = mf_next->get_inst();
-
             const mem_access_t &access = inst.accessq_back();
             mem_fetch *mf_copy = new mem_fetch(access,
                                       &mf_next->get_inst(),
@@ -1804,7 +1803,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                                       mf_next->get_sid(), 
                                       mf_next->get_tpc(), 
                                       mf_next->get_mem_config());
-
+            
 			enum cache_request_status status = m_lab->access(mf_copy->get_addr(),mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle,events);
 
 		   bool write_sent = was_write_sent(events);
@@ -1832,6 +1831,14 @@ void ldst_unit::Lab_latency_queue_cycle()
 		   } else {
 			   assert( status == MISS || status == HIT_RESERVED );
 			   lab_latency_queue[0] = NULL;
+               if(!events.empty()){
+                   cache_event lab_event = events.front();
+                   if(lab_event.m_cache_event_type == WRITE_BACK_REQUEST_SENT)
+                   {
+                   events.pop_back();
+                    m_icnt->push(lab_event.m_evicted_block.mf);
+                   } 
+               }
                 m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
 	   }
 
@@ -1967,6 +1974,10 @@ bool ldst_unit::response_buffer_full() const
 void ldst_unit::fill( mem_fetch *mf )
 {
     mf->set_status(IN_SHADER_LDST_RESPONSE_FIFO,gpu_sim_cycle+gpu_tot_sim_cycle);
+  /*  if((mf->isatomic() == true && mf->isatomicdone() == true)){
+                           printf("Adst ka atomic return for address %x\n", mf->get_addr());
+                       }
+   */
     m_response_fifo.push_back(mf);
 }
 
@@ -1980,7 +1991,7 @@ void ldst_unit::flush(){
     for (unsigned i=0; i < flush_queue.size(); i++){
            m_icnt->push(flush_queue[i]);
            
-           printf("The flush queue has MF for addresses %x\n ", flush_queue[i]->get_addr());
+          // printf("The flush queue has MF for addresses %x\n ", flush_queue[i]->get_addr());
     	}
     m_flush_lab = true;
     }
@@ -2465,9 +2476,7 @@ void ldst_unit::cycle()
 
    if( !m_response_fifo.empty() ) {
        mem_fetch *mf = m_response_fifo.front();
-       if((mf->isatomic() == true && mf->isatomicdone() == true)){
-                           printf("MF for address %x returned and will now be popped\n", mf->get_addr());
-                       }
+       
        if (mf->get_access_type() == TEXTURE_ACC_R) {
            if (m_L1T->fill_port_free()) {
                m_L1T->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -2496,7 +2505,10 @@ void ldst_unit::cycle()
                }
                if( bypassL1D ) {
                    if ( m_next_global == NULL ) {
-                       // mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
+                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
+                       // if((mf->isatomic() == true && mf->isatomicdone() == true)){
+                         //  printf("MF for address %x returned and will now be popped\n", mf->get_addr());
+                       //}
                        m_response_fifo.pop_front();
                        if(!(mf->isatomic() == true && mf->isatomicdone() == true)){
                        m_next_global = mf;
@@ -4139,6 +4151,7 @@ void simt_core_cluster::icnt_cycle()
 {
     if( !m_response_fifo.empty() ) {
         mem_fetch *mf = m_response_fifo.front();
+        
         unsigned cid = m_config->sid_to_cid(mf->get_sid());
         if( mf->get_access_type() == INST_ACC_R ) {
             // instruction fetch response
@@ -4149,13 +4162,17 @@ void simt_core_cluster::icnt_cycle()
         } else {
             // data response
             if( !m_core[cid]->ldst_unit_response_buffer_full() ) {
+               /* if((mf->isatomic() == true && mf->isatomicdone() == true)){
+                           printf("Bdst ka atomic return for address %x\n", mf->get_addr());
+                       }
+                */
                 m_response_fifo.pop_front();
                 m_memory_stats->memlatstat_read_done(mf);
                 m_core[cid]->accept_ldst_unit_response(mf);
             }
         }
     }
-    if( m_response_fifo.size() < m_config->n_simt_ejection_buffer_size ) {
+    //if( m_response_fifo.size() < m_config->n_simt_ejection_buffer_size ) {
         mem_fetch *mf = (mem_fetch*) ::icnt_pop(m_cluster_id);
         if (!mf) 
             return;
@@ -4170,8 +4187,13 @@ void simt_core_cluster::icnt_cycle()
         mf->set_status(IN_CLUSTER_TO_SHADER_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
         //m_memory_stats->memlatstat_read_done(mf,m_shader_config->max_warps_per_shader);
         m_response_fifo.push_back(mf);
+        /*
+        if((mf->isatomic() == true && mf->isatomicdone() == true)){
+                           printf("Ldst ka atomic return for address %x tpc is %d\n", mf->get_addr(), mf->get_tpc());
+                       }
+        */               
         m_stats->n_mem_to_simt[m_cluster_id] += mf->get_num_flits(false);
-    }
+    //}
 }
 
 void simt_core_cluster::get_pdom_stack_top_info( unsigned sid, unsigned tid, unsigned *pc, unsigned *rpc ) const

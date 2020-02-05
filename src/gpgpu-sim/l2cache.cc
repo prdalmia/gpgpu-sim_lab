@@ -456,7 +456,9 @@ void memory_sub_partition::cache_cycle( unsigned cycle )
     if( !m_rop.empty() && (cycle >= m_rop.front().ready_cycle) && !m_icnt_L2_queue->full() ) {
         mem_fetch* mf = m_rop.front().req;
         m_rop.pop();
+        
         m_icnt_L2_queue->push(mf);
+        
         mf->set_status(IN_PARTITION_ICNT_TO_L2_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
     }
 }
@@ -695,7 +697,6 @@ mem_fetch* memory_sub_partition::pop()
     if( !mf->isatomicdone()){
         mf->do_atomic();
     }
-    
     if( mf && (mf->get_access_type() == L2_WRBK_ACC || mf->get_access_type() == L1_WRBK_ACC) ) {
         delete mf;
         mf = NULL;
