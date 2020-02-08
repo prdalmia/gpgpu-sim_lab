@@ -1847,6 +1847,7 @@ void ldst_unit::Lab_latency_queue_cycle()
      if ( mf_next && mf_next->isatomic() ){
 
          //const warp_inst_t inst_temp = mf_next->get_inst();
+         //this will be a new branch
                     long long* data = mf_next->do_atomic_lab();
                     lab_data_map[mf_next->get_addr()] = *data;
                     //mf_next->set_atomicdone();
