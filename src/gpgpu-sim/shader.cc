@@ -1463,9 +1463,20 @@ void shader_core_ctx::execute()
 }
 
 void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) {
+  /*
    if( m_L1D ) {
        m_L1D->print( fp, dl1_accesses, dl1_misses );
    }
+         
+      for( const std::pair<new_addr_type, unsigned long> p : lab_data_map){
+          printf("\tThe address %x was accessed %d times\n", p.first, p.second);
+    }
+*/
+
+   if( m_lab ) {
+       m_lab->print( fp, dl1_accesses, dl1_misses );
+   }
+
 }
 
 void ldst_unit::get_cache_stats(cache_stats &cs) {
@@ -1476,6 +1487,8 @@ void ldst_unit::get_cache_stats(cache_stats &cs) {
         cs += m_L1C->get_stats();
     if(m_L1T)
         cs += m_L1T->get_stats();
+    if(m_lab)
+        cs += m_lab->get_stats();    
 
 }
 
@@ -1490,6 +1503,10 @@ void ldst_unit::get_L1C_sub_stats(struct cache_sub_stats &css) const{
 void ldst_unit::get_L1T_sub_stats(struct cache_sub_stats &css) const{
     if(m_L1T)
         m_L1T->get_sub_stats(css);
+}
+void ldst_unit::get_LAB_sub_stats(struct cache_sub_stats &css) const{
+    if(m_lab)
+        m_lab->get_sub_stats(css);
 }
 
 void shader_core_ctx::warp_inst_complete(const warp_inst_t &inst)
@@ -1805,6 +1822,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                                       mf_next->get_mem_config());
             
 			enum cache_request_status status = m_lab->access(mf_copy->get_addr(),mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+             //    printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 		   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
@@ -1837,6 +1855,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    {
                    events.pop_back();
                     m_icnt->push(lab_event.m_evicted_block.mf);
+                     // printf(" Block with address %x is evicted and is sent down\n", lab_event.m_evicted_block.mf->get_addr() );
                    } 
                }
                 m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -1848,8 +1867,10 @@ void ldst_unit::Lab_latency_queue_cycle()
 
          //const warp_inst_t inst_temp = mf_next->get_inst();
          //this will be a new branch
+                    //long long* data = mf_next->do_atomic_lab();
                     long long* data = mf_next->do_atomic_lab();
-                    lab_data_map[mf_next->get_addr()] = *data;
+                    //lab_data_map[mf_next->get_addr()]++;
+                    delete data;
                     //mf_next->set_atomicdone();
                     mf_copy->set_atomicdone();
                }
@@ -1975,7 +1996,9 @@ bool ldst_unit::response_buffer_full() const
 void ldst_unit::fill( mem_fetch *mf )
 {
     mf->set_status(IN_SHADER_LDST_RESPONSE_FIFO,gpu_sim_cycle+gpu_tot_sim_cycle);
-  /*  if((mf->isatomic() == true && mf->isatomicdone() == true)){
+    
+    /*
+    if((mf->isatomic() == true && mf->isatomicdone() == true)){
                            printf("Adst ka atomic return for address %x\n", mf->get_addr());
                        }
    */
@@ -2477,7 +2500,11 @@ void ldst_unit::cycle()
 
    if( !m_response_fifo.empty() ) {
        mem_fetch *mf = m_response_fifo.front();
-       
+/*
+       if((mf->isatomic() == true && mf->isatomicdone() == true)){
+                           printf("MF for address %x and tpc %d will be popped\n", mf->get_addr(), mf->get_tpc());
+                       }
+  */     
        if (mf->get_access_type() == TEXTURE_ACC_R) {
            if (m_L1T->fill_port_free()) {
                m_L1T->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -2513,6 +2540,9 @@ void ldst_unit::cycle()
                        m_response_fifo.pop_front();
                        if(!(mf->isatomic() == true && mf->isatomicdone() == true)){
                        m_next_global = mf;
+                       }
+                       else{
+                           delete mf;
                        }
                    }
                } else {
@@ -2753,6 +2783,42 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
         fprintf(fout, "\tL1D_total_cache_reservation_fails = %llu\n", total_css.res_fails);
         total_css.print_port_stats(fout, "\tL1D_cache"); 
     }
+
+   /*
+        total_css.clear();
+        css.clear();
+        fprintf(fout, "LAB_cache:\n");
+        for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++){
+            m_cluster[i]->get_LAB_sub_stats(css);
+
+            fprintf( stdout, "\tLAB_cache_core[%d]: Access = %llu, Miss = %llu, Miss_rate = %.3lf, Pending_hits = %llu, Reservation_fails = %llu\n",
+                     i, css.accesses, css.misses, (double)css.misses / (double)css.accesses, css.pending_hits, css.res_fails);
+
+            total_css += css;
+        }
+        fprintf(fout, "\tLAB_total_cache_accesses = %llu\n", total_css.accesses);
+        fprintf(fout, "\tLAB_total_cache_misses = %llu\n", total_css.misses);
+        if(total_css.accesses > 0){
+            fprintf(fout, "\tLAB_total_cache_miss_rate = %.4lf\n", (double)total_css.misses / (double)total_css.accesses);
+        }
+        fprintf(fout, "\tLAB_total_cache_pending_hits = %llu\n", total_css.pending_hits);
+        fprintf(fout, "\tLAB_total_cache_reservation_fails = %llu\n", total_css.res_fails);
+        total_css.print_port_stats(fout, "\tLAB_cache"); 
+*/
+// LAB
+
+    fprintf(fout, "LAB_cache:\n");
+    unsigned total_lab_misses = 0, total_lab_accesses = 0;
+    for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
+         unsigned cluster_lab_misses = 0, cluster_lab_accesses = 0;
+         m_cluster[ i ]->print_cache_stats( fout, cluster_lab_accesses, cluster_lab_misses );
+         total_lab_misses += cluster_lab_misses;
+         total_lab_accesses += cluster_lab_accesses;
+   }
+   fprintf( fout, "\tLAB_total_cache_accesses = %llu\n", total_lab_accesses );
+   fprintf( fout, "\tLAB_total_cache_misses = %llu\n", total_lab_misses );
+   fprintf( fout, "\tLAB_total_cache_miss_rate = %.4lf\n", (float)total_lab_misses / (float)total_lab_accesses );
+
 
     // L1C
     if(!m_shader_config->m_L1C_config.disabled()){
@@ -3616,6 +3682,9 @@ void shader_core_ctx::get_L1I_sub_stats(struct cache_sub_stats &css) const{
 void shader_core_ctx::get_L1D_sub_stats(struct cache_sub_stats &css) const{
     m_ldst_unit->get_L1D_sub_stats(css);
 }
+void shader_core_ctx::get_LAB_sub_stats(struct cache_sub_stats &css) const{
+    m_ldst_unit->get_LAB_sub_stats(css);
+}
 void shader_core_ctx::get_L1C_sub_stats(struct cache_sub_stats &css) const{
     m_ldst_unit->get_L1C_sub_stats(css);
 }
@@ -4162,18 +4231,20 @@ void simt_core_cluster::icnt_cycle()
             }
         } else {
             // data response
+          
             if( !m_core[cid]->ldst_unit_response_buffer_full() ) {
-               /* if((mf->isatomic() == true && mf->isatomicdone() == true)){
+          /*
+                if((mf->isatomic() == true && mf->isatomicdone() == true)){
                            printf("Bdst ka atomic return for address %x\n", mf->get_addr());
                        }
-                */
+            */    
                 m_response_fifo.pop_front();
                 m_memory_stats->memlatstat_read_done(mf);
                 m_core[cid]->accept_ldst_unit_response(mf);
             }
         }
     }
-    //if( m_response_fifo.size() < m_config->n_simt_ejection_buffer_size ) {
+    if( m_response_fifo.size() < m_config->n_simt_ejection_buffer_size ) {
         mem_fetch *mf = (mem_fetch*) ::icnt_pop(m_cluster_id);
         if (!mf) 
             return;
@@ -4192,9 +4263,9 @@ void simt_core_cluster::icnt_cycle()
         if((mf->isatomic() == true && mf->isatomicdone() == true)){
                            printf("Ldst ka atomic return for address %x tpc is %d\n", mf->get_addr(), mf->get_tpc());
                        }
-        */               
+         */                            
         m_stats->n_mem_to_simt[m_cluster_id] += mf->get_num_flits(false);
-    //}
+    }
 }
 
 void simt_core_cluster::get_pdom_stack_top_info( unsigned sid, unsigned tid, unsigned *pc, unsigned *rpc ) const
@@ -4256,6 +4327,17 @@ void simt_core_cluster::get_L1D_sub_stats(struct cache_sub_stats &css) const{
     total_css.clear();
     for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
         m_core[i]->get_L1D_sub_stats(temp_css);
+        total_css += temp_css;
+    }
+    css = total_css;
+}
+void simt_core_cluster::get_LAB_sub_stats(struct cache_sub_stats &css) const{
+    struct cache_sub_stats temp_css;
+    struct cache_sub_stats total_css;
+    temp_css.clear();
+    total_css.clear();
+    for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
+        m_core[i]->get_LAB_sub_stats(temp_css);
         total_css += temp_css;
     }
     css = total_css;

@@ -1581,12 +1581,13 @@ void gpgpu_sim::cycle()
         for (unsigned i=0;i<m_memory_config->m_n_mem_sub_partition;i++) {
             mem_fetch* mf = m_memory_sub_partition[i]->top();
             if (mf) {
-            /*   if((mf->isatomic() == true && mf->isatomicdone() == true)){
+             /*  
+              if((mf->isatomic() == true && mf->isatomicdone() == true)){
                      volatile new_addr_type addr = mf->get_addr();
                      volatile new_addr_type addr1 = addr;
                            printf("Sgst ka atomic return for address %x and tpc is %d\n", mf->get_addr(), mf->get_tpc());
                        }
-                      */ 
+    */
                 unsigned response_size = mf->get_is_write()?mf->get_ctrl_size():mf->size();
                 if ( ::icnt_has_buffer( m_shader_config->mem2device(i), response_size ) ) {
                     //if (!mf->get_is_write())

@@ -1055,6 +1055,7 @@ protected:
     unsigned m_prev_snapshot_pending_hit;
 
     int m_core_id; // which shader core is using this
+    int m_type_id; // what kind of cache is this (normal, texture, constant)
 
     bool is_used;  //a flag if the whole cache has ever been accessed before
 
@@ -1553,9 +1554,21 @@ public:
     // flash invalidate all entries in cache
     std::deque<mem_fetch*> flush(){ return m_lab_array->flush();}
     void invalidate(){m_lab_array->invalidate();}
-    void print(FILE *fp, unsigned &accesses, unsigned &misses) const
-    {
-        printf("stats");
+
+    // Stat collection
+    const cache_stats &get_stats() const {
+        return m_stats;
+    }
+    unsigned get_stats(enum mem_access_type *access_type, unsigned num_access_type, enum cache_request_status *access_status, unsigned num_access_status) const{
+        return m_stats.get_stats(access_type, num_access_type, access_status, num_access_status);
+    }
+
+    void get_sub_stats(struct cache_sub_stats &css) const{
+        m_stats.get_sub_stats(css);
+    }
+   void print(FILE *fp, unsigned &accesses, unsigned &misses) const{
+    //fprintf( fp, "Cache %s:\t", m_name.c_str() );
+    m_lab_array->print(fp,accesses,misses);
     }
 
 protected:

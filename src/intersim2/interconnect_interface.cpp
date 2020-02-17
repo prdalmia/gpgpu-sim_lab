@@ -127,9 +127,9 @@ void InterconnectInterface::CreateInterconnect(unsigned n_shader, unsigned n_mem
   _boundary_buffer_capacity = _icnt_config->GetInt( "boundary_buffer_size" ) ;
   assert(_boundary_buffer_capacity);
   if (_icnt_config->GetInt("input_buffer_size")) {
-    _input_buffer_capacity = _icnt_config->GetInt("input_buffer_size");
+    _input_buffer_capacity =  16384;   //_icnt_config->GetInt("input_buffer_size");
   } else {
-    _input_buffer_capacity = 9;
+    _input_buffer_capacity = 18;
   }
   _vcs = _icnt_config->GetInt("num_vcs");
 
@@ -267,6 +267,11 @@ bool InterconnectInterface::HasBuffer(unsigned deviceID, unsigned int size) cons
 
   if ((_subnets>1) && deviceID >= _n_shader) // deviceID is memory node
     has_buffer = _traffic_manager->_input_queue[1][icntID][0].size() +n_flits <= _input_buffer_capacity;
+
+if(has_buffer == false){
+
+  printf("The input buffer capacity we need is either %d or %d but is %d\n", _traffic_manager->_input_queue[0][icntID][0].size() +n_flits, _traffic_manager->_input_queue[1][icntID][0].size() +n_flits, _input_buffer_capacity );
+}
 
   return has_buffer;
 }

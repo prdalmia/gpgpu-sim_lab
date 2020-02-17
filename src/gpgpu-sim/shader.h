@@ -1256,6 +1256,7 @@ public:
     void get_cache_stats(cache_stats &cs);
 
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
+    void get_LAB_sub_stats(struct cache_sub_stats &css) const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
 
@@ -1331,7 +1332,7 @@ protected:
    std::deque<mem_fetch* > l1_latency_queue; 
    std::deque<mem_fetch* > m_next_global_queue;
    std::deque<mem_fetch* > lab_latency_queue;
-   std::map < new_addr_type , unsigned long> lab_data_map;
+   //std::map < new_addr_type , unsigned long> lab_data_map;
    void L1_latency_queue_cycle();
    void Lab_latency_queue_cycle();
 };
@@ -1838,6 +1839,7 @@ public:
     void get_cache_stats(cache_stats &cs);
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
+    void get_LAB_sub_stats(struct cache_sub_stats &css) const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
 
@@ -2110,6 +2112,7 @@ public:
     void get_cache_stats(cache_stats &cs) const;
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
+    void get_LAB_sub_stats(struct cache_sub_stats &css) const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
 

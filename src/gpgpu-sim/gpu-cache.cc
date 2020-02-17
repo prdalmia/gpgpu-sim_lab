@@ -360,7 +360,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
     is_used = true;
     unsigned idx = unsigned(-1);
     bool wb;
-    //shader_cache_access_log(m_core_id, m_type_id, 0); // log accesses to cache
+    shader_cache_access_log(m_core_id, m_type_id, 0); // log accesses to cache
     enum cache_request_status status = probe(addr,idx,mf);
 
     switch (status) {
@@ -371,7 +371,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
         break;
     case MISS:
         m_miss++;
-        //shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
+    shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
         if ( m_config.m_alloc_policy == ON_MISS ) {
             //if( m_lines[idx]->is_modified_line()) {
                 if( m_lines[idx]->is_valid_line()) {
@@ -427,6 +427,42 @@ std::deque<mem_fetch*> lab_array::flush()
     return flush_queue;
 }
 
+float lab_array::windowed_miss_rate( ) const
+{
+    unsigned n_access    = m_access - m_prev_snapshot_access;
+    unsigned n_miss      = m_miss - m_prev_snapshot_miss;
+    // unsigned n_pending_hit = m_pending_hit - m_prev_snapshot_pending_hit;
+
+    float missrate = 0.0f;
+    if (n_access != 0)
+        missrate = (float) n_miss / n_access;
+    return missrate;
+}
+
+void lab_array::new_window()
+{
+    m_prev_snapshot_access = m_access;
+    m_prev_snapshot_miss = m_miss;
+    m_prev_snapshot_miss = m_miss;
+    m_prev_snapshot_pending_hit = m_pending_hit;
+}
+
+void lab_array::print( FILE *stream, unsigned &total_access, unsigned &total_misses ) const
+{
+    //m_config.print(stream);
+    fprintf( stream, "\tLAB_cache_core[%d]: Access = %llu, Miss = %llu, Miss_rate = %.3lf, Pending_hits = %llu, Reservation_fails = %llu\n", m_core_id,  m_access,  m_miss, (float) (m_miss) / m_access,
+             m_pending_hit, m_res_fail);
+    total_misses+=(m_miss);
+    total_access+=m_access;
+}
+
+void lab_array::get_stats(unsigned &total_access, unsigned &total_misses, unsigned &total_hit_res, unsigned &total_res_fail) const{
+    // Update statistics from the tag array
+    total_access    = m_access;
+    total_misses    = m_miss;
+    total_hit_res   = m_pending_hit;
+    total_res_fail  = m_res_fail;
+}
 //TLB FUNCTIONS
 
 enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode) const {
