@@ -75,6 +75,10 @@ enum perf_count_t {
    DC_RM,
    DC_WH,
    DC_WM,
+   LAB_RH,
+   LAB_RM,
+   LAB_WH,
+   LAB_WM,
    TC_H,
    TC_M,
    CC_H,
@@ -185,6 +189,33 @@ typedef struct{
 	double wbb_reads;
 	double conflicts;
 } dcache_systemcore;
+typedef struct{
+	//params
+	double dcache_config[20];
+	int buffer_sizes[20];
+	int cache_policy;//0 no write or write-though with non-write allocate;1 write-back with write-allocate
+	//stats
+	double total_accesses;
+	double read_accesses;
+	double write_accesses;
+	double total_hits;
+	double total_misses;
+	double read_hits;
+	double write_hits;
+	double read_misses;
+	double write_misses;
+	double replacements;
+	double write_backs;
+	double miss_buffer_access;
+	double fill_buffer_accesses;
+	double prefetch_buffer_accesses;
+	double prefetch_buffer_writes;
+	double prefetch_buffer_reads;
+	double prefetch_buffer_hits;
+	double wbb_writes;
+	double wbb_reads;
+	double conflicts;
+} lab_systemcore;
 typedef struct{
 	//params
 	int BTB_config[20];
@@ -347,6 +378,7 @@ typedef struct{
 	icache_systemcore icache;
 	dtlb_systemcore dtlb;
 	dcache_systemcore dcache;
+	dcache_systemcore plab;
 	dcache_systemcore ccache;
 	dcache_systemcore tcache;
 	dcache_systemcore sharedmemory; // added by Jingwen

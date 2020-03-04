@@ -161,6 +161,8 @@ class LoadStoreU :public Component {
 	double scktRatio, chip_PR_overhead, macro_PR_overhead;
 	double lsq_height;
 	DataCache dcache;
+	// base class should be similar so not making a new base class for lab
+	DataCache plab;
 	DataCache ccache;
 	DataCache tcache;
 	DataCache sharedmemory;
@@ -367,7 +369,58 @@ class Core :public Component {
 		return value;
 	}
 
+        //lab
 
+        
+	float get_coefficient_plab_readhits()
+	{
+		float value=0;
+		value+=lsu->plab.caches->local_result.power.readOp.dynamic;
+		value+=lsu->xbar_shared->power.readOp.dynamic;
+		//return 0.5*value;
+		return value;
+	}
+	float get_coefficient_plab_readmisses()
+	{
+		float value=0;
+		value+=lsu->plab.caches->local_result.power.readOp.dynamic;
+		value+=(lsu->cache_p==Write_back)?  0:lsu->plab.missb->local_result.power.searchOp.dynamic;
+		value+=(lsu->cache_p==Write_back)?  0:lsu->plab.ifb->local_result.power.searchOp.dynamic;
+		value+=(lsu->cache_p==Write_back)?  0:lsu->plab.prefetchb->local_result.power.searchOp.dynamic;
+		value+=(lsu->cache_p==Write_back)?  0:lsu->plab.missb->local_result.power.writeOp.dynamic;
+		value+=(lsu->cache_p==Write_back)?  0:lsu->plab.ifb->local_result.power.writeOp.dynamic;
+		value+=(lsu->cache_p==Write_back)?  0:lsu->plab.prefetchb->local_result.power.writeOp.dynamic;
+
+		//return 0.5*value;
+		return value;
+	}
+	float get_coefficient_plab_writehits()
+	{
+		float value=0;
+		value+=lsu->plab.caches->local_result.power.writeOp.dynamic;
+		value+=lsu->xbar_shared->power.readOp.dynamic;
+		return value;
+	}
+	float get_coefficient_plab_writemisses(){
+		float value=0;
+		value+=lsu->plab.caches->local_result.power.writeOp.dynamic;
+		value+=lsu->plab.caches->local_result.tag_array2->power.readOp.dynamic;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.caches->local_result.power.writeOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.missb->local_result.power.searchOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.ifb->local_result.power.searchOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.prefetchb->local_result.power.searchOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.wbb->local_result.power.searchOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.missb->local_result.power.writeOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.ifb->local_result.power.writeOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.prefetchb->local_result.power.writeOp.dynamic:0;
+		value+= (lsu->cache_p==Write_back)? lsu->plab.wbb->local_result.power.writeOp.dynamic:0;
+		//return 1.6*value;
+		return value;
+	}
+
+
+
+        // lab**
 
 	float get_coefficient_tcache_readhits()
 	{

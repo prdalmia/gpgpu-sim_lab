@@ -59,6 +59,7 @@ void power_mem_stat_t::init(){
 
     for(unsigned i=0; i<NUM_STAT_IDX; ++i){
         core_cache_stats[i].clear();
+        lab_stats[i].clear();
         l2_cache_stats[i].clear();
 
         n_cmd[i] = (unsigned *)calloc(m_config->m_n_mem,sizeof(unsigned));
@@ -79,6 +80,7 @@ void power_mem_stat_t::init(){
 void power_mem_stat_t::save_stats(){
 
     core_cache_stats[PREV_STAT_IDX] = core_cache_stats[CURRENT_STAT_IDX];
+    lab_stats[PREV_STAT_IDX] = lab_stats[CURRENT_STAT_IDX];
     l2_cache_stats[PREV_STAT_IDX] = l2_cache_stats[CURRENT_STAT_IDX];
 
     for(unsigned i=0; i<m_core_config->num_shader(); ++i){
@@ -120,6 +122,7 @@ void power_mem_stat_t::print (FILE *fout) const {
 
     fprintf(fout, "Core cache stats:\n");
     core_cache_stats->print_stats(fout);
+    lab_stats->print_stats(fout);
     fprintf(fout, "L2 cache stats:\n");
     l2_cache_stats->print_stats(fout);
 }

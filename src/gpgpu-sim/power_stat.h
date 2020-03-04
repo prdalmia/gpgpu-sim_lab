@@ -90,6 +90,7 @@ private:
 struct mem_power_stats_pod{
     // [CURRENT_STAT_IDX] = CURRENT_STAT_IDX stat, [PREV_STAT_IDX] = last reading
     class cache_stats core_cache_stats[NUM_STAT_IDX]; // Total core stats
+    class cache_stats lab_stats[NUM_STAT_IDX];        // Total LAB stats
     class cache_stats l2_cache_stats[NUM_STAT_IDX]; // Total L2 partition stats
 
     unsigned *shmem_read_access[NUM_STAT_IDX];   // Shared memory access
@@ -496,6 +497,53 @@ public:
        }
        return total_inst;
     }
+
+
+// LAB
+ unsigned get_lab_read_accesses(){
+        enum mem_access_type access_type[] = {GLOBAL_ACC_R, LOCAL_ACC_R};
+        enum cache_request_status request_status[] = {HIT, MISS, HIT_RESERVED};
+        unsigned num_access_type = sizeof(access_type)/sizeof(enum mem_access_type);
+        unsigned num_request_status = sizeof(request_status)/sizeof(enum cache_request_status);
+        // rohan: we have not defined LAB for memory_access_type and hence we can use what L1D uses But then inside the get_function, we need to check for lab and then output the stats? But should we change the get function or add a new type? mem_access_type defined in abstract_hardware_model
+
+        return (pwr_mem_stat->lab_stats[CURRENT_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status)) -
+                (pwr_mem_stat->lab_stats[PREV_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status));
+    }
+    unsigned get_lab_read_misses(){
+        enum mem_access_type access_type[] = {GLOBAL_ACC_R, LOCAL_ACC_R};
+        enum cache_request_status request_status[] = {MISS};
+        unsigned num_access_type = sizeof(access_type)/sizeof(enum mem_access_type);
+        unsigned num_request_status = sizeof(request_status)/sizeof(enum cache_request_status);
+
+        return (pwr_mem_stat->lab_stats[CURRENT_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status)) -
+                (pwr_mem_stat->lab_stats[PREV_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status));
+    }
+    unsigned get_lab_read_hits(){
+        return (get_lab_read_accesses()-get_lab_read_misses());
+    }
+    unsigned get_lab_write_accesses(){
+        enum mem_access_type access_type[] = {GLOBAL_ACC_W, LOCAL_ACC_W};
+        enum cache_request_status request_status[] = {HIT, MISS, HIT_RESERVED};
+        unsigned num_access_type = sizeof(access_type)/sizeof(enum mem_access_type);
+        unsigned num_request_status = sizeof(request_status)/sizeof(enum cache_request_status);
+
+        return (pwr_mem_stat->lab_stats[CURRENT_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status)) -
+                (pwr_mem_stat->lab_stats[PREV_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status));
+    }
+    unsigned get_lab_write_misses(){
+        enum mem_access_type access_type[] = {GLOBAL_ACC_W, LOCAL_ACC_W};
+        enum cache_request_status request_status[] = {MISS};
+        unsigned num_access_type = sizeof(access_type)/sizeof(enum mem_access_type);
+        unsigned num_request_status = sizeof(request_status)/sizeof(enum cache_request_status);
+
+        return (pwr_mem_stat->lab_stats[CURRENT_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status)) -
+                (pwr_mem_stat->lab_stats[PREV_STAT_IDX].get_stats(access_type, num_access_type, request_status, num_request_status));
+    }
+    unsigned get_lab_write_hits(){
+        return (get_lab_write_accesses()-get_lab_write_misses());
+    }
+// LAB**
 
     unsigned get_l2_read_accesses(){
         enum mem_access_type access_type[] = {GLOBAL_ACC_R, LOCAL_ACC_R, CONST_ACC_R, TEXTURE_ACC_R, INST_ACC_R};

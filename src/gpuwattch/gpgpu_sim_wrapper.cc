@@ -317,6 +317,23 @@ void gpgpu_sim_wrapper::set_l1cache_power(double read_hits, double read_misses, 
 
 }
 
+void gpgpu_sim_wrapper::set_lab_power(double read_hits, double read_misses, double write_hits, double write_misses)
+{
+	p->sys.core[0].plab.read_accesses = read_hits * p->sys.scaling_coefficients[DC_RH] +read_misses * p->sys.scaling_coefficients[LAB_RM];
+	p->sys.core[0].plab.read_misses =  read_misses * p->sys.scaling_coefficients[LAB_RM];
+	p->sys.core[0].plab.write_accesses = write_hits * p->sys.scaling_coefficients[DC_WH]+write_misses * p->sys.scaling_coefficients[DC_WM];
+	p->sys.core[0].plab.write_misses = write_misses * p->sys.scaling_coefficients[DC_WM];
+	sample_perf_counters[LAB_RH]=read_hits;
+	sample_perf_counters[LAB_RM]=read_misses;
+	sample_perf_counters[LAB_WH]=write_hits;
+	sample_perf_counters[LAB_WM]=write_misses;
+	// TODO: coalescing logic is counted as part of the caches power (this is not valid for no-caches architectures)
+
+
+
+}
+
+
 void gpgpu_sim_wrapper::set_l2cache_power(double read_hits, double read_misses, double write_hits, double write_misses)
 {
 	p->sys.l2.total_accesses = read_hits* p->sys.scaling_coefficients[L2_RH]+read_misses * p->sys.scaling_coefficients[L2_RM]+ write_hits * p->sys.scaling_coefficients[L2_WH]+write_misses  * p->sys.scaling_coefficients[L2_WM];
@@ -492,6 +509,12 @@ void gpgpu_sim_wrapper::update_coefficients()
 	initpower_coeff[DC_RM]=(proc->cores[0]->get_coefficient_dcache_readmisses() + proc->get_coefficient_readcoalescing());
 	initpower_coeff[DC_WH]=(proc->cores[0]->get_coefficient_dcache_writehits() + proc->get_coefficient_writecoalescing());
 	initpower_coeff[DC_WM]=(proc->cores[0]->get_coefficient_dcache_writemisses() + proc->get_coefficient_writecoalescing());
+
+	initpower_coeff[DC_RH]=(proc->cores[0]->get_coefficient_plab_readhits() + proc->get_coefficient_readcoalescing());
+	initpower_coeff[DC_RM]=(proc->cores[0]->get_coefficient_plab_readmisses() + proc->get_coefficient_readcoalescing());
+	initpower_coeff[DC_WH]=(proc->cores[0]->get_coefficient_plab_writehits() + proc->get_coefficient_writecoalescing());
+	initpower_coeff[DC_WM]=(proc->cores[0]->get_coefficient_plab_writemisses() + proc->get_coefficient_writecoalescing());
+
 	effpower_coeff[DC_RH]=initpower_coeff[DC_RH]*p->sys.scaling_coefficients[DC_RH];
 	effpower_coeff[DC_RM]=initpower_coeff[DC_RM]*p->sys.scaling_coefficients[DC_RM];
 	effpower_coeff[DC_WH]=initpower_coeff[DC_WH]*p->sys.scaling_coefficients[DC_WH];
@@ -554,6 +577,8 @@ void gpgpu_sim_wrapper::update_components_power()
 	sample_cmp_pwr[ICP]=proc->cores[0]->ifu->icache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[DCP]=proc->cores[0]->lsu->dcache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
+	
+        sample_cmp_pwr[DCP]=proc->cores[0]->lsu->plab.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[TCP]=proc->cores[0]->lsu->tcache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 

@@ -1258,6 +1258,96 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 	  area.set_area(area.get_area()+ dcache.ifb->local_result.area);
 	  //output_data_csv(dcache.ifb.local_result);
 
+
+/*
+    * plab starts here
+    */   
+    //Plab
+	  size                             = (int)XML->sys.core[ithCore].plab.dcache_config[0];
+	  line                             = (int)XML->sys.core[ithCore].plab.dcache_config[1];
+	  assoc                            = (int)XML->sys.core[ithCore].plab.dcache_config[2];
+	  idx    					 	   = debug?9:int(ceil(log2(size/line/assoc)));
+	  tag							   = debug?51:XML->sys.physical_address_width-idx-int(ceil(log2(line))) + EXTRA_TAG_BITS;
+	  interface_ip.specific_tag        = 1;
+	  interface_ip.tag_w               = tag;
+	  interface_ip.cache_sz            = debug?32768:(int)XML->sys.core[ithCore].plab.dcache_config[0];
+	  interface_ip.line_sz             = debug?64:(int)XML->sys.core[ithCore].plab.dcache_config[1];
+	  interface_ip.assoc               = debug?8:(int)XML->sys.core[ithCore].plab.dcache_config[2];
+	  interface_ip.nbanks              = debug?1:(int)XML->sys.core[ithCore].plab.dcache_config[3];
+	  interface_ip.out_w               = interface_ip.line_sz*8;
+	  interface_ip.access_mode         = 0;//debug?0:XML->sys.core[ithCore].plab.dcache_config[5];
+	  interface_ip.throughput          = debug?1.0/clockRate:XML->sys.core[ithCore].plab.dcache_config[4]/clockRate;
+	  interface_ip.latency             = debug?3.0/clockRate:XML->sys.core[ithCore].plab.dcache_config[5]/clockRate;
+	  interface_ip.is_cache			 = true;
+	  interface_ip.obj_func_dyn_energy = 0;
+	  interface_ip.obj_func_dyn_power  = 0;
+	  interface_ip.obj_func_leak_power = 0;
+	  interface_ip.obj_func_cycle_t    = 1;
+	  interface_ip.num_rw_ports    = debug?1:XML->sys.core[ithCore].memory_ports;//usually In-order has 1 and OOO has 2 at least.
+	  interface_ip.num_rd_ports    = 0;
+	  interface_ip.num_wr_ports    = 0;
+	  interface_ip.num_se_rd_ports = 0;
+	  plab.caches = new ArrayST(&interface_ip, "plab", Core_device, coredynp.opt_local, coredynp.core_ty);
+	  plab.area.set_area(plab.area.get_area()+ plab.caches->local_result.area);
+	  area.set_area(area.get_area()+ plab.caches->local_result.area);
+	  //output_data_csv(plab.caches.local_result);
+
+
+	  //plab controllers
+	  //miss buffer
+	  tag							   = XML->sys.physical_address_width + EXTRA_TAG_BITS;
+	  data							   = (XML->sys.physical_address_width) + int(ceil(log2(size/line))) + plab.caches->l_ip.line_sz*8;
+	  interface_ip.specific_tag        = 1;
+	  interface_ip.tag_w               = tag;
+	  interface_ip.line_sz             = int(ceil(data/8.0));//int(ceil(pow(2.0,ceil(log2(data)))/8.0));
+	  interface_ip.cache_sz            = XML->sys.core[ithCore].plab.buffer_sizes[0]*interface_ip.line_sz;
+	  interface_ip.assoc               = 0;
+	  interface_ip.nbanks              = 1;
+	  interface_ip.out_w               = interface_ip.line_sz*8;
+	  interface_ip.access_mode         = 2;
+	  interface_ip.throughput          = debug?1.0/clockRate:XML->sys.core[ithCore].plab.dcache_config[4]/clockRate;
+	  interface_ip.latency             = debug?1.0/clockRate:XML->sys.core[ithCore].plab.dcache_config[5]/clockRate;
+	  interface_ip.obj_func_dyn_energy = 0;
+	  interface_ip.obj_func_dyn_power  = 0;
+	  interface_ip.obj_func_leak_power = 0;
+	  interface_ip.obj_func_cycle_t    = 1;
+	  interface_ip.num_rw_ports    = debug?1:XML->sys.core[ithCore].memory_ports;;
+	  interface_ip.num_rd_ports    = 0;
+	  interface_ip.num_wr_ports    = 0;
+	  interface_ip.num_se_rd_ports = 0;
+	  plab.missb = new ArrayST(&interface_ip, "plabMissBuffer", Core_device, coredynp.opt_local, coredynp.core_ty);
+	  plab.area.set_area(plab.area.get_area()+ plab.missb->local_result.area);
+	  area.set_area(area.get_area()+ plab.missb->local_result.area);
+	  //output_data_csv(plab.missb.local_result);
+
+	  //fill buffer
+	  tag							   = XML->sys.physical_address_width + EXTRA_TAG_BITS;
+	  data							   = plab.caches->l_ip.line_sz;
+	  interface_ip.specific_tag        = 1;
+	  interface_ip.tag_w               = tag;
+	  interface_ip.line_sz             = data;//int(pow(2.0,ceil(log2(data))));
+	  interface_ip.cache_sz            = data*XML->sys.core[ithCore].plab.buffer_sizes[1];
+	  interface_ip.assoc               = 0;
+	  interface_ip.nbanks              = 1;
+	  interface_ip.out_w               = interface_ip.line_sz*8;
+	  interface_ip.access_mode         = 2;
+	  interface_ip.throughput          = debug?1.0/clockRate:XML->sys.core[ithCore].plab.dcache_config[4]/clockRate;
+	  interface_ip.latency             = debug?1.0/clockRate:XML->sys.core[ithCore].plab.dcache_config[5]/clockRate;
+	  interface_ip.obj_func_dyn_energy = 0;
+	  interface_ip.obj_func_dyn_power  = 0;
+	  interface_ip.obj_func_leak_power = 0;
+	  interface_ip.obj_func_cycle_t    = 1;
+	  interface_ip.num_rw_ports    = debug?1:XML->sys.core[ithCore].memory_ports;;
+	  interface_ip.num_rd_ports    = 0;
+	  interface_ip.num_wr_ports    = 0;
+	  interface_ip.num_se_rd_ports = 0;
+	  plab.ifb = new ArrayST(&interface_ip, "plabFillBuffer", Core_device, coredynp.opt_local, coredynp.core_ty);
+	  plab.area.set_area(plab.area.get_area()+ plab.ifb->local_result.area);
+	  area.set_area(area.get_area()+ plab.ifb->local_result.area);
+	  //output_data_csv(plab.ifb.local_result);
+        
+          // plab**
+
 	  //prefetch buffer
 	  tag							   = XML->sys.physical_address_width + EXTRA_TAG_BITS;//check with previous entries to decide wthether to merge.
 	  data							   = dcache.caches->l_ip.line_sz;//separate queue to prevent from cache polution.
@@ -3670,6 +3760,33 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 	    		dcache.wbb->stats_t.readAc.access  = dcache.wbb->l_ip.num_search_ports;
 	    		dcache.wbb->stats_t.writeAc.access = dcache.wbb->l_ip.num_search_ports;
 	    		dcache.wbb->tdp_stats = dcache.wbb->stats_t;
+	    	}
+
+	        // lab  init stats for Peak
+	    	plab.caches->stats_t.readAc.access  = 0.67*plab.caches->l_ip.num_rw_ports*coredynp.LSU_duty_cycle;
+	    	plab.caches->stats_t.readAc.miss    = 0;
+	    	plab.caches->stats_t.readAc.hit     = plab.caches->stats_t.readAc.access - plab.caches->stats_t.readAc.miss;
+	    	plab.caches->stats_t.writeAc.access = 0.33*plab.caches->l_ip.num_rw_ports*coredynp.LSU_duty_cycle;
+	    	plab.caches->stats_t.writeAc.miss   = 0;
+    		plab.caches->stats_t.writeAc.hit    = plab.caches->stats_t.writeAc.access -	plab.caches->stats_t.writeAc.miss;
+	    	plab.caches->tdp_stats = plab.caches->stats_t;
+
+	    	plab.missb->stats_t.readAc.access  = plab.missb->l_ip.num_search_ports;
+	    	plab.missb->stats_t.writeAc.access = plab.missb->l_ip.num_search_ports;
+	    	plab.missb->tdp_stats = plab.missb->stats_t;
+
+	    	plab.ifb->stats_t.readAc.access  = plab.ifb->l_ip.num_search_ports;
+	    	plab.ifb->stats_t.writeAc.access = plab.ifb->l_ip.num_search_ports;
+	    	plab.ifb->tdp_stats = plab.ifb->stats_t;
+
+	    	plab.prefetchb->stats_t.readAc.access  = plab.prefetchb->l_ip.num_search_ports;
+	    	plab.prefetchb->stats_t.writeAc.access = plab.ifb->l_ip.num_search_ports;
+	    	plab.prefetchb->tdp_stats = plab.prefetchb->stats_t;
+	    	if (cache_p==Write_back)
+	    	{
+	    		plab.wbb->stats_t.readAc.access  = plab.wbb->l_ip.num_search_ports;
+	    		plab.wbb->stats_t.writeAc.access = plab.wbb->l_ip.num_search_ports;
+	    		plab.wbb->tdp_stats = plab.wbb->stats_t;
 	    	}
 
 

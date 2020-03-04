@@ -99,6 +99,11 @@ const int dcachesize=32768;
 const int dcacheassoc=4;
 const int dcacheblocksize=32;
 const int dcache_write_buffers=8;
+//plab
+const int plabsize=32768;
+const int plabassoc=4;
+const int plabblocksize=32;
+const int plab_write_buffers=8;
 
 //cache controllers
 //IB,

@@ -68,6 +68,8 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 
 		wrapper->set_l1cache_power(power_stats->get_l1d_read_hits(), power_stats->get_l1d_read_misses(),
 				power_stats->get_l1d_write_hits(), power_stats->get_l1d_write_misses());
+	wrapper->set_lab_power(power_stats->get_lab_read_hits(), power_stats->get_lab_read_misses(),
+				power_stats->get_lab_write_hits(), power_stats->get_lab_write_misses());
 
 
 		wrapper->set_l2cache_power(power_stats->get_l2_read_hits(), power_stats->get_l2_read_misses(),

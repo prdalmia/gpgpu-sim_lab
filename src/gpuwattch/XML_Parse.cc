@@ -850,6 +850,85 @@ void ParseXML::parse(char* filepath)
 							}
 						}
 
+                                                // lab
+
+						if (strcmp(xNode4.getAttribute("name"),"plab")==0)
+						{//find system.core0.plab
+							itmp=xNode4.nChildNode("param");
+							for(k=0; k<itmp; k++)
+							{ //get all items of param in system.core0.plab--plab
+								if (strcmp(xNode4.getChildNode("param",k).getAttribute("name"),"plab_config")==0)
+								{
+									strtmp.assign(xNode4.getChildNode("param",k).getAttribute("value"));
+									m=0;
+									for(n=0; n<strtmp.length(); n++)
+									{
+										if (strtmp[n]!=',')
+										{
+											sprintf(chtmp,"%c",strtmp[n]);
+											strcat(chtmp1,chtmp);
+										}
+										else{
+											sys.core[i].plab.dcache_config[m]=atof(chtmp1);
+											m++;
+											chtmp1[0]='\0';
+										}
+									}
+									sys.core[i].plab.dcache_config[m]=atof(chtmp1);
+									m++;
+									chtmp1[0]='\0';
+									continue;
+								}
+								if (strcmp(xNode4.getChildNode("param",k).getAttribute("name"),"buffer_sizes")==0)
+								{
+									strtmp.assign(xNode4.getChildNode("param",k).getAttribute("value"));
+									m=0;
+									for(n=0; n<strtmp.length(); n++)
+									{
+										if (strtmp[n]!=',')
+										{
+											sprintf(chtmp,"%c",strtmp[n]);
+											strcat(chtmp1,chtmp);
+										}
+										else{
+											sys.core[i].plab.buffer_sizes[m]=atoi(chtmp1);
+											m++;
+											chtmp1[0]='\0';
+										}
+									}
+									sys.core[i].plab.buffer_sizes[m]=atoi(chtmp1);
+									m++;
+									chtmp1[0]='\0';
+								}
+							}
+							itmp=xNode4.nChildNode("stat");
+							for(k=0; k<itmp; k++)
+							{ //get all items of stat in plab
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"total_accesses")==0) {sys.core[i].plab.total_accesses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"read_accesses")==0) {sys.core[i].plab.read_accesses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"write_accesses")==0) {sys.core[i].plab.write_accesses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"total_hits")==0) {sys.core[i].plab.total_hits=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"total_misses")==0) {sys.core[i].plab.total_misses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"read_hits")==0) {sys.core[i].plab.read_hits=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"write_hits")==0) {sys.core[i].plab.write_hits=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"read_misses")==0) {sys.core[i].plab.read_misses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"write_misses")==0) {sys.core[i].plab.write_misses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"replacements")==0) {sys.core[i].plab.replacements=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"write_backs")==0) {sys.core[i].plab.write_backs=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"miss_buffer_access")==0) {sys.core[i].plab.miss_buffer_access=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"fill_buffer_accesses")==0) {sys.core[i].plab.fill_buffer_accesses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"prefetch_buffer_accesses")==0) {sys.core[i].plab.prefetch_buffer_accesses=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"prefetch_buffer_writes")==0) {sys.core[i].plab.prefetch_buffer_writes=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"prefetch_buffer_reads")==0) {sys.core[i].plab.prefetch_buffer_reads=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"prefetch_buffer_hits")==0) {sys.core[i].plab.prefetch_buffer_hits=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"wbb_writes")==0) {sys.core[i].plab.wbb_writes=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"wbb_reads")==0) {sys.core[i].plab.wbb_reads=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+								if (strcmp(xNode4.getChildNode("stat",k).getAttribute("name"),"conflicts")==0) {sys.core[i].plab.conflicts=atof(xNode4.getChildNode("stat",k).getAttribute("value"));continue;}
+
+							}
+						}
+                                                // lab**
+
 
 						if (strcmp(xNode4.getAttribute("name"),"BTB")==0)
 						{//find system.core0.BTB
@@ -1915,6 +1994,28 @@ void ParseXML::initialize() //Initialize all
 		sys.core[i].dcache.prefetch_buffer_hits=1;
 		sys.core[i].dcache.wbb_writes=1;
 		sys.core[i].dcache.wbb_reads=1;
+                //system.core?.plab
+		for (j=0; j<20; j++) sys.core[i].plab.dcache_config[j]=1;
+		//strcpy(sys.core[i].plab.buffer_sizes,"default");
+		sys.core[i].plab.total_accesses=1;
+		sys.core[i].plab.read_accesses=1;
+		sys.core[i].plab.write_accesses=1;
+		sys.core[i].plab.total_hits=1;
+		sys.core[i].plab.total_misses=1;
+		sys.core[i].plab.read_hits=1;
+		sys.core[i].plab.write_hits=1;
+		sys.core[i].plab.read_misses=1;
+		sys.core[i].plab.write_misses=1;
+		sys.core[i].plab.replacements=1;
+		sys.core[i].plab.write_backs=1;
+		sys.core[i].plab.miss_buffer_access=1;
+		sys.core[i].plab.fill_buffer_accesses=1;
+		sys.core[i].plab.prefetch_buffer_accesses=1;
+		sys.core[i].plab.prefetch_buffer_writes=1;
+		sys.core[i].plab.prefetch_buffer_reads=1;
+		sys.core[i].plab.prefetch_buffer_hits=1;
+		sys.core[i].plab.wbb_writes=1;
+		sys.core[i].plab.wbb_reads=1;
 		//system.core?.BTB
 		for (j=0; j<20; j++) sys.core[i].BTB.BTB_config[j]=1;
 		sys.core[i].BTB.total_accesses=1;
