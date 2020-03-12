@@ -116,12 +116,13 @@ void mem_fetch::do_atomic()
      m_inst.do_atomic( m_access.get_warp_mask());
 }
 
+/*
 long long * mem_fetch::do_atomic_lab()
 {
    
      return m_inst.do_atomic( m_access.get_warp_mask(), false,  m_access.get_addr());
 }
-
+*/
 
 
 bool mem_fetch::istexture() const

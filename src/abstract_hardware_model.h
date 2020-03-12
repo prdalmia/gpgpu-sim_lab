@@ -978,7 +978,7 @@ public:
     void broadcast_barrier_reduction( const active_mask_t& access_mask);
     void do_atomic(bool forceDo=false);
     void do_atomic( const active_mask_t& access_mask, bool forceDo=false );
-    long long * do_atomic( const active_mask_t& access_mask,bool forceDo, new_addr_type addr );
+//    long long * do_atomic( const active_mask_t& access_mask,bool forceDo, new_addr_type addr );
     void clear() 
     { 
         m_empty=true; 

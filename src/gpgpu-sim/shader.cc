@@ -1810,18 +1810,9 @@ void ldst_unit::Lab_latency_queue_cycle()
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
-            
-             warp_inst_t inst = mf_next->get_inst();
-            const mem_access_t &access = inst.accessq_back();
-            mem_fetch *mf_copy = new mem_fetch(access,
-                                      &mf_next->get_inst(),
-                                      mf_next->get_ctrl_size(),
-                                      mf_next->get_wid(),
-                                      mf_next->get_sid(), 
-                                      mf_next->get_tpc(), 
-                                      mf_next->get_mem_config());
-            
-			enum cache_request_status status = m_lab->access(mf_copy->get_addr(),mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+                                  
+
+			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
              //    printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 		   bool write_sent = was_write_sent(events);
@@ -1858,7 +1849,26 @@ void ldst_unit::Lab_latency_queue_cycle()
                      // printf(" Block with address %x is evicted and is sent down\n", lab_event.m_evicted_block.mf->get_addr() );
                    } 
                }
+
+               const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
+									mf_next->get_addr(),
+									mf_next->get_data_size(),
+									mf_next->is_write(),
+									mf_next->get_access_warp_mask(),
+									mf_next->get_access_byte_mask(),
+									mf_next->get_access_sector_mask());
+
+               mem_fetch *mf_copy = new mem_fetch(*ma,
+                                      &mf_next->get_inst(),
+                                      mf_next->get_ctrl_size(),
+                                      mf_next->get_wid(),
+                                      mf_next->get_sid(), 
+                                      mf_next->get_tpc(), 
+                                     mf_next->get_mem_config());
+               
                 m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
+
+                mf_copy->set_atomicdone();
 	   }
 
 
@@ -1868,11 +1878,10 @@ void ldst_unit::Lab_latency_queue_cycle()
          //const warp_inst_t inst_temp = mf_next->get_inst();
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
-                    long long* data = mf_next->do_atomic_lab();
-                    //lab_data_map[mf_next->get_addr()]++;
-                    delete data;
+                     mf_next->do_atomic();
+                   //lab_data_map[mf_next->get_addr()]++;
+                    //delete data;
                     //mf_next->set_atomicdone();
-                    mf_copy->set_atomicdone();
                }
           
           m_response_fifo.push_back(mf_next);  
@@ -2538,17 +2547,17 @@ void ldst_unit::cycle()
                          //  printf("MF for address %x returned and will now be popped\n", mf->get_addr());
                        //}
                        m_response_fifo.pop_front();
-                       if(!(mf->isatomic() == true && mf->isatomicdone() == true)){
-                       m_next_global = mf;
-                       }
-                       else{
+                     if ((mf->isatomic() == true) && (mf->isatomicdone() == true)){
                            delete mf;
-                       }
+                     } 
+                     else{
+                          m_next_global = mf;
+                    } 
                    }
                } else {
                    if (m_L1D->fill_port_free()) {
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
-                        m_response_fifo.pop_front();
+                       m_response_fifo.pop_front();
                        }
                    }
                }

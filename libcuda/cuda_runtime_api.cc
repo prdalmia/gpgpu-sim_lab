@@ -3103,6 +3103,29 @@ size_t getMaxThreadsPerBlock(struct cudaFuncAttributes *attr) {
   return max;
 }
 
+cudaError_t CUDARTAPI cudaFuncSetAttribute(const char *hostFun, struct cudaFuncAttributes *attr, int value )
+{
+    if(g_debug_execution >= 3){
+	    announce_call(__my_func__);
+    }
+
+/*
+    CUctx_st *context = GPGPUSim_Context();
+	function_info *entry = context->get_kernel(hostFun);
+	if( entry ) {
+		const struct gpgpu_ptx_sim_info *kinfo = entry->get_kernel_info();
+		switch (attr->) {
+          case cudaFuncAttributeMaxDynamicSharedMemorySize:
+		    attr->sharedSizeBytes = value;
+		    break;
+		  default:
+	        printf("WARNING: cudaFuncSetAttribute has not been implemented yet for case %d.\n", );
+		}
+*/
+    	        printf("WARNING: cudaFuncSetAttribute has not been implemented yet.\n");
+    return g_last_cudaError = cudaSuccess;
+}
+
 cudaError_t CUDARTAPI cudaFuncGetAttributes(struct cudaFuncAttributes *attr, const char *hostFun )
 {
 	if(g_debug_execution >= 3){

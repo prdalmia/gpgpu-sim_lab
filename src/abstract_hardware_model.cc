@@ -264,6 +264,7 @@ void warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceDo ) {
     }
 }
 
+/*
 long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceDo, new_addr_type addr ) {
     assert( m_isatomic && (!m_empty||forceDo) );
     long long* data = new(long long);
@@ -290,7 +291,7 @@ long long * warp_inst_t::do_atomic( const active_mask_t& access_mask,bool forceD
     return data;
 }
 
-
+*/
 
 void warp_inst_t::broadcast_barrier_reduction(const active_mask_t& access_mask)
 {
