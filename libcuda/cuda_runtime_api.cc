@@ -3126,6 +3126,20 @@ cudaError_t CUDARTAPI cudaFuncSetAttribute(const char *hostFun, struct cudaFuncA
     return g_last_cudaError = cudaSuccess;
 }
 
+cudaError_t CUDARTAPI cudaProfilerStart ( void ){
+
+ printf("WARNING: cudaProfilerStart has not been implemented yet.\n");
+    return g_last_cudaError = cudaSuccess;
+
+}
+
+cudaError_t CUDARTAPI cudaProfilerStop ( void ){
+
+ printf("WARNING: cudaProfilerStop has not been implemented yet.\n");
+    return g_last_cudaError = cudaSuccess;
+
+}
+
 cudaError_t CUDARTAPI cudaFuncGetAttributes(struct cudaFuncAttributes *attr, const char *hostFun )
 {
 	if(g_debug_execution >= 3){
