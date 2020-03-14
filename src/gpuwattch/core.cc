@@ -725,6 +725,8 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 	  clockRate = coredynp.clockRate;
 	  executionTime = coredynp.executionTime;
 	  cache_p = (Cache_policy)XML->sys.core[ithCore].dcache.dcache_config[7];
+	  // rohan: check
+          //cache_p = (Cache_policy)XML->sys.core[ithCore].plab.dcache_config[7];
 
 	  interface_ip.num_search_ports    = XML->sys.core[ithCore].memory_ports;
 	  interface_ip.is_cache			   = true;
@@ -3877,6 +3879,21 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     		dcache.caches->stats_t.writeAc.hit    = dcache.caches->stats_t.writeAc.access -	dcache.caches->stats_t.writeAc.miss;
 	    	dcache.caches->rtp_stats = dcache.caches->stats_t;
 
+                // plab
+
+                
+	    	plab.caches->stats_t.readAc.access  = XML->sys.core[ithCore].plab.read_accesses;
+	    	plab.caches->stats_t.readAc.miss    = XML->sys.core[ithCore].plab.read_misses;
+	    	plab.caches->stats_t.readAc.hit     = plab.caches->stats_t.readAc.access - plab.caches->stats_t.readAc.miss;
+	    	plab.caches->stats_t.writeAc.access = XML->sys.core[ithCore].plab.write_accesses;
+	    	plab.caches->stats_t.writeAc.miss   = XML->sys.core[ithCore].plab.write_misses;
+    		plab.caches->stats_t.writeAc.hit    = plab.caches->stats_t.writeAc.access -	plab.caches->stats_t.writeAc.miss;
+	    	plab.caches->rtp_stats = plab.caches->stats_t;
+
+
+
+                // plab **
+
 	    	ccache.caches->stats_t.readAc.access  = XML->sys.core[ithCore].ccache.read_accesses;
 	    	ccache.caches->stats_t.readAc.miss    = XML->sys.core[ithCore].ccache.read_misses;
 	    	ccache.caches->stats_t.readAc.hit     = ccache.caches->stats_t.readAc.access - ccache.caches->stats_t.readAc.miss;
@@ -3922,6 +3939,25 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 	    		dcache.wbb->stats_t.readAc.access  = dcache.caches->stats_t.writeAc.miss;
 	    		dcache.wbb->stats_t.writeAc.access = dcache.caches->stats_t.writeAc.miss;
 	    		dcache.wbb->rtp_stats = dcache.wbb->stats_t;
+
+                        // plab
+
+                        
+	    		plab.missb->stats_t.readAc.access  = plab.caches->stats_t.writeAc.miss;
+	    		plab.missb->stats_t.writeAc.access = plab.caches->stats_t.writeAc.miss;
+	    		plab.missb->rtp_stats = plab.missb->stats_t;
+	    		plab.ifb->stats_t.readAc.access  = plab.caches->stats_t.writeAc.miss;
+	    		plab.ifb->stats_t.writeAc.access = plab.caches->stats_t.writeAc.miss;
+	    		plab.ifb->rtp_stats = plab.ifb->stats_t;
+	    		plab.prefetchb->stats_t.readAc.access  = plab.caches->stats_t.writeAc.miss;
+	    		plab.prefetchb->stats_t.writeAc.access = plab.caches->stats_t.writeAc.miss;
+	    		plab.prefetchb->rtp_stats = plab.prefetchb->stats_t;
+	    		plab.wbb->stats_t.readAc.access  = plab.caches->stats_t.writeAc.miss;
+	    		plab.wbb->stats_t.writeAc.access = plab.caches->stats_t.writeAc.miss;
+	    		plab.wbb->rtp_stats = plab.wbb->stats_t;
+
+                
+                        // plab **
 
 	    		ccache.missb->stats_t.readAc.access  = ccache.caches->stats_t.writeAc.miss;
 	    		ccache.missb->stats_t.writeAc.access = ccache.caches->stats_t.writeAc.miss;
@@ -3972,6 +4008,21 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 	    		dcache.prefetchb->stats_t.writeAc.access = dcache.caches->stats_t.readAc.miss;
 	    		dcache.prefetchb->rtp_stats = dcache.prefetchb->stats_t;
 
+                        // plab
+
+                        
+	    		plab.missb->stats_t.readAc.access  = plab.caches->stats_t.readAc.miss;
+	    		plab.missb->stats_t.writeAc.access = plab.caches->stats_t.readAc.miss;
+	    		plab.missb->rtp_stats = plab.missb->stats_t;
+	    		plab.ifb->stats_t.readAc.access  = plab.caches->stats_t.readAc.miss;
+	    		plab.ifb->stats_t.writeAc.access = plab.caches->stats_t.readAc.miss;
+	    		plab.ifb->rtp_stats = plab.ifb->stats_t;
+	    		plab.prefetchb->stats_t.readAc.access  = plab.caches->stats_t.readAc.miss;
+	    		plab.prefetchb->stats_t.writeAc.access = plab.caches->stats_t.readAc.miss;
+	    		plab.prefetchb->rtp_stats = plab.prefetchb->stats_t;
+
+                        // plab **
+
 
 	    		ccache.missb->stats_t.readAc.access  = ccache.caches->stats_t.readAc.miss;
 	    		ccache.missb->stats_t.writeAc.access = ccache.caches->stats_t.readAc.miss;
@@ -4010,6 +4061,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 
 	sharedmemory.power_t.reset();
 	dcache.power_t.reset();
+	plab.power_t.reset();
 	ccache.power_t.reset();
 	tcache.power_t.reset();
 	LSQ->power_t.reset();
@@ -4026,6 +4078,20 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     		dcache.caches->stats_t.writeAc.miss*dcache.caches->local_result.tag_array2->power.readOp.dynamic+
     		dcache.caches->stats_t.writeAc.access*dcache.caches->local_result.power.writeOp.dynamic +
 			xbar_shared->power.readOp.dynamic*(dcache.caches->stats_t.readAc.hit+ dcache.caches->stats_t.writeAc.hit));
+
+    // plab
+
+    
+    plab.power_t.readOp.dynamic	+= (plab.caches->stats_t.readAc.hit*plab.caches->local_result.power.readOp.dynamic+
+    		plab.caches->stats_t.readAc.miss*plab.caches->local_result.power.readOp.dynamic+
+    		plab.caches->stats_t.writeAc.miss*plab.caches->local_result.tag_array2->power.readOp.dynamic+
+    		plab.caches->stats_t.writeAc.access*plab.caches->local_result.power.writeOp.dynamic +
+			xbar_shared->power.readOp.dynamic*(plab.caches->stats_t.readAc.hit+ plab.caches->stats_t.writeAc.hit));
+
+
+    // plab **
+
+
     ccache.power_t.readOp.dynamic	+= (ccache.caches->stats_t.readAc.hit*ccache.caches->local_result.power.readOp.dynamic+
     		ccache.caches->stats_t.readAc.miss*ccache.caches->local_result.power.readOp.dynamic+
     		ccache.caches->stats_t.writeAc.miss*ccache.caches->local_result.tag_array2->power.readOp.dynamic+
@@ -4041,6 +4107,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     if (cache_p==Write_back)
     {//write miss will generate a write later
     	dcache.power_t.readOp.dynamic	+= dcache.caches->stats_t.writeAc.miss*dcache.caches->local_result.power.writeOp.dynamic;
+    	plab.power_t.readOp.dynamic	+= plab.caches->stats_t.writeAc.miss*plab.caches->local_result.power.writeOp.dynamic;
     	ccache.power_t.readOp.dynamic	+= ccache.caches->stats_t.writeAc.miss*ccache.caches->local_result.power.writeOp.dynamic;
     	tcache.power_t.readOp.dynamic	+= tcache.caches->stats_t.writeAc.miss*tcache.caches->local_result.power.writeOp.dynamic;
     	sharedmemory.power_t.readOp.dynamic	+= sharedmemory.caches->stats_t.writeAc.miss*sharedmemory.caches->local_result.power.writeOp.dynamic;
@@ -4066,10 +4133,26 @@ void LoadStoreU::computeEnergy(bool is_tdp)
             dcache.ifb->stats_t.writeAc.access*dcache.ifb->local_result.power.writeOp.dynamic;
     dcache.power_t.readOp.dynamic	+=  dcache.prefetchb->stats_t.readAc.access*dcache.prefetchb->local_result.power.searchOp.dynamic +
             dcache.prefetchb->stats_t.writeAc.access*dcache.prefetchb->local_result.power.writeOp.dynamic;
+
+
+    plab.power_t.readOp.dynamic	+= (plab.caches->stats_t.readAc.hit*plab.caches->local_result.power.readOp.dynamic+
+    		plab.caches->stats_t.readAc.miss*plab.caches->local_result.power.readOp.dynamic+
+    		plab.caches->stats_t.writeAc.miss*plab.caches->local_result.tag_array2->power.readOp.dynamic+
+    		plab.caches->stats_t.writeAc.access*plab.caches->local_result.power.writeOp.dynamic +
+			xbar_shared->power.readOp.dynamic*(plab.caches->stats_t.readAc.hit+ plab.caches->stats_t.writeAc.hit));
+
+
     if (cache_p==Write_back)
     {
     	dcache.power_t.readOp.dynamic	+=  dcache.wbb->stats_t.readAc.access*dcache.wbb->local_result.power.searchOp.dynamic
 			+ dcache.wbb->stats_t.writeAc.access*dcache.wbb->local_result.power.writeOp.dynamic;
+
+	plab.power_t.readOp.dynamic	+=  plab.wbb->stats_t.readAc.access*plab.wbb->local_result.power.searchOp.dynamic
+			+ plab.wbb->stats_t.writeAc.access*plab.wbb->local_result.power.writeOp.dynamic;
+
+
+
+
     }
 
     ccache.power_t.readOp.dynamic	+=  ccache.missb->stats_t.readAc.access*ccache.missb->local_result.power.searchOp.dynamic +
@@ -4143,6 +4226,16 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     		dcache.power = dcache.power + dcache.wbb->local_result.power*pppm_lkg;
     	}
 
+        	plab.power = plab.power_t + (plab.caches->local_result.power +
+    			plab.missb->local_result.power +
+    			plab.ifb->local_result.power +
+    			plab.prefetchb->local_result.power) *pppm_lkg;
+    	if (cache_p==Write_back)
+    	{
+    		plab.power = plab.power + plab.wbb->local_result.power*pppm_lkg;
+    	}
+
+
     	ccache.power = ccache.power_t + (ccache.caches->local_result.power +
     			ccache.missb->local_result.power +
     			ccache.ifb->local_result.power +
@@ -4165,7 +4258,8 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     	LSQ->power = LSQ->power_t + LSQ->local_result.power *pppm_lkg;
 		//No LSQ in GPUs (Syed)
    	LSQ->power.reset();
-    	power     = power + dcache.power + LSQ->power +sharedmemory.power + ccache.power + tcache.power;
+    	//power     = power + dcache.power + LSQ->power +sharedmemory.power + ccache.power + tcache.power;
+    	power     = power + dcache.power + plab.power + LSQ->power +sharedmemory.power + ccache.power + tcache.power;
 
     	if ((coredynp.core_ty==OOO) && (XML->sys.core[ithCore].load_buffer_size >0))
     	{
@@ -4185,6 +4279,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
       tcache.rt_power.reset();
       ccache.rt_power.reset();
       dcache.rt_power.reset();
+      plab.rt_power.reset();
       LSQ->rt_power.reset();
 
 
@@ -4206,6 +4301,18 @@ void LoadStoreU::computeEnergy(bool is_tdp)
     	{
     		dcache.rt_power = dcache.rt_power + dcache.wbb->local_result.power*pppm_lkg;
     	}
+
+
+	plab.rt_power = plab.power_t + (plab.caches->local_result.power +
+    			plab.missb->local_result.power +
+    			plab.ifb->local_result.power +
+    			plab.prefetchb->local_result.power )*pppm_lkg;
+    	if (cache_p==Write_back)
+    	{
+    		plab.rt_power = plab.rt_power + plab.wbb->local_result.power*pppm_lkg;
+    	}
+
+
 
     	ccache.rt_power = ccache.power_t + (ccache.caches->local_result.power +
     			ccache.missb->local_result.power +
@@ -4229,7 +4336,8 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 
     	LSQ->rt_power = LSQ->power_t + LSQ->local_result.power *pppm_lkg;
 		LSQ->rt_power.reset();
-    	rt_power     = rt_power + dcache.rt_power + LSQ->rt_power + sharedmemory.rt_power + ccache.rt_power + tcache.rt_power;
+    	//rt_power     = rt_power + dcache.rt_power + LSQ->rt_power + sharedmemory.rt_power + ccache.rt_power + tcache.rt_power;
+    	rt_power     = rt_power + dcache.rt_power + plab.rt_power + LSQ->rt_power + sharedmemory.rt_power + ccache.rt_power + tcache.rt_power;
 
     	if ((coredynp.core_ty==OOO) && (XML->sys.core[ithCore].load_buffer_size >0))
     	{
@@ -4269,6 +4377,17 @@ void LoadStoreU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 		cout << indent_str_next << "Gate Leakage = " << dcache.power.readOp.gate_leakage << " W" << endl;
 		cout << indent_str_next << "Runtime Dynamic = " << dcache.rt_power.readOp.dynamic/executionTime << " W" << endl;
 		cout <<endl;
+                
+                cout << indent_str << "LAB:" << endl;
+		cout << indent_str_next << "Area = " << plab.area.get_area()*1e-6<< " mm^2" << endl;
+		cout << indent_str_next << "Peak Dynamic = " << plab.power.readOp.dynamic*clockRate << " W" << endl;
+		cout << indent_str_next << "Subthreshold Leakage = "
+			<< (long_channel? plab.power.readOp.longer_channel_leakage:plab.power.readOp.leakage )<<" W" << endl;
+		cout << indent_str_next << "Gate Leakage = " << plab.power.readOp.gate_leakage << " W" << endl;
+		cout << indent_str_next << "Runtime Dynamic = " << plab.rt_power.readOp.dynamic/executionTime << " W" << endl;
+		cout <<endl;
+
+
 
 		cout << indent_str << "Constant Cache:" << endl;
 		cout << indent_str_next << "Area = " << ccache.area.get_area()*1e-6<< " mm^2" << endl;
@@ -4337,6 +4456,16 @@ void LoadStoreU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 		cout << indent_str_next << "Data Cache    Peak Dynamic = " << dcache.rt_power.readOp.dynamic*clockRate << " W" << endl;
 		cout << indent_str_next << "Data Cache    Subthreshold Leakage = " << dcache.rt_power.readOp.leakage <<" W" << endl;
 		cout << indent_str_next << "Data Cache    Gate Leakage = " << dcache.rt_power.readOp.gate_leakage << " W" << endl;
+
+                cout << indent_str << "LAB:" << endl;
+		cout << indent_str_next << "Area = " << plab.area.get_area()*1e-6<< " mm^2" << endl;
+		cout << indent_str_next << "Peak Dynamic = " << plab.power.readOp.dynamic*clockRate << " W" << endl;
+		cout << indent_str_next << "Subthreshold Leakage = "
+			<< (long_channel? plab.power.readOp.longer_channel_leakage:plab.power.readOp.leakage )<<" W" << endl;
+		cout << indent_str_next << "Gate Leakage = " << plab.power.readOp.gate_leakage << " W" << endl;
+		cout << indent_str_next << "Runtime Dynamic = " << plab.rt_power.readOp.dynamic/executionTime << " W" << endl;
+		cout <<endl;
+
 
 		cout << indent_str_next << "Constant Cache    Peak Dynamic = " << ccache.rt_power.readOp.dynamic*clockRate << " W" << endl;
 		cout << indent_str_next << "Constant Cache    Subthreshold Leakage = " << ccache.rt_power.readOp.leakage <<" W" << endl;

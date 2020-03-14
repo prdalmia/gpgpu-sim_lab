@@ -38,7 +38,7 @@ void init_mcpat(const gpgpu_sim_config &config, class gpgpu_sim_wrapper *wrapper
 
 }
 
-void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config *shdr_config, class gpgpu_sim_wrapper *wrapper, class power_stat_t *power_stats, unsigned stat_sample_freq, unsigned tot_cycle, unsigned cycle, unsigned tot_inst, unsigned inst){
+void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config *shdr_config, class gpgpu_sim_wrapper *wrapper, class power_stat_t *power_stats, unsigned stat_sample_freq, unsigned tot_cycle, unsigned cycle, unsigned tot_inst, unsigned inst, unsigned long long lab_cache_accesses, unsigned long long lab_cache_misses){
 
 	static bool mcpat_init=true;
 
@@ -68,8 +68,8 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 
 		wrapper->set_l1cache_power(power_stats->get_l1d_read_hits(), power_stats->get_l1d_read_misses(),
 				power_stats->get_l1d_write_hits(), power_stats->get_l1d_write_misses());
-	wrapper->set_lab_power(power_stats->get_lab_read_hits(), power_stats->get_lab_read_misses(),
-				power_stats->get_lab_write_hits(), power_stats->get_lab_write_misses());
+//	wrapper->set_lab_power(	power_stats->get_lab_write_hits(), power_stats->get_lab_write_misses());
+	wrapper->set_lab_power((lab_cache_accesses - lab_cache_misses), lab_cache_misses);
 
 
 		wrapper->set_l2cache_power(power_stats->get_l2_read_hits(), power_stats->get_l2_read_misses(),
@@ -110,10 +110,11 @@ void mcpat_cycle(const gpgpu_sim_config &config, const struct shader_core_config
 
 		wrapper->update_components_power();
 		wrapper->print_trace_files();
-		power_stats->save_stats();
+	        //rohan:  update the prev stat index using current stat idx
+                power_stats->save_stats();
 
 		wrapper->detect_print_steady_state(0,tot_inst+inst);
-
+                // rohan: compute energy on a kernel to kernel basis (max, min)
 		wrapper->power_metrics_calculations();
 
 

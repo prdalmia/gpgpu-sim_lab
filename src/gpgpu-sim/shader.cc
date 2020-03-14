@@ -1479,6 +1479,8 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
 
 }
 
+
+// rohan : uses function overloading
 void ldst_unit::get_cache_stats(cache_stats &cs) {
     // Adds stats to 'cs' from each cache
     if(m_L1D)
@@ -2737,7 +2739,8 @@ void gpgpu_sim::shader_print_scheduler_stat( FILE* fout, bool print_dynamic_info
     fprintf( fout, "\n" );
 }
 
-void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
+//void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
+void gpgpu_sim::shader_print_cache_stats( FILE *fout ) {
 
     // L1I
     struct cache_sub_stats total_css;
@@ -2818,7 +2821,8 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
    fprintf( fout, "\tLAB_total_cache_accesses = %llu\n", total_lab_accesses );
    fprintf( fout, "\tLAB_total_cache_misses = %llu\n", total_lab_misses );
    fprintf( fout, "\tLAB_total_cache_miss_rate = %.4lf\n", (float)total_lab_misses / (float)total_lab_accesses );
-
+   lab_cache_accesses = total_lab_accesses;
+   lab_cache_misses = total_lab_misses;
 
     // L1C
     if(!m_shader_config->m_L1C_config.disabled()){

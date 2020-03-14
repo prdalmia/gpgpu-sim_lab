@@ -501,7 +501,7 @@ private:
    void print_dram_stats(FILE *fout) const;
    void shader_print_runtime_stat( FILE *fout );
    void shader_print_l1_miss_stat( FILE *fout ) const;
-   void shader_print_cache_stats( FILE *fout ) const;
+   void shader_print_cache_stats( FILE *fout );
    void shader_print_scheduler_stat( FILE* fout, bool print_dynamic_info ) const;
    void visualizer_printstat();
    void print_shader_cycle_distro( FILE *fout ) const;
@@ -556,7 +556,8 @@ private:
    std::vector<unsigned> m_executed_kernel_uids; //< uids of kernel launches for stat printout
    std::string executed_kernel_info_string(); //< format the kernel information into a string for stat printout
    void clear_executed_kernel_info(); //< clear the kernel information after stat printout
-
+   // rohan: for lab stats
+   unsigned long long lab_cache_accesses, lab_cache_misses;
 
 public:
    unsigned long long  gpu_sim_insn;

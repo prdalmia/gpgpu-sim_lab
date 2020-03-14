@@ -77,7 +77,7 @@ public:
 	void set_tcache_power(double accesses, double misses);
 	void set_shrd_mem_power(double accesses);
 	void set_l1cache_power(double read_accesses, double read_misses, double write_accesses, double write_misses);
-	void set_lab_power(double read_accesses, double read_misses, double write_accesses, double write_misses);
+	void set_lab_power(double write_accesses, double write_misses);
 	void set_l2cache_power(double read_accesses, double read_misses, double write_accesses, double write_misses);
 	void set_idle_core_power(double num_idle_core);
 	void set_duty_cycle_power(double duty_cycle);

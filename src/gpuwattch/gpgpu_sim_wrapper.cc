@@ -31,7 +31,7 @@
 #define SFU_BASE_POWER  0
 
 
-static const char * pwr_cmp_label[] = {"IBP,", "ICP,", "DCP,", "TCP,", "CCP,", "SHRDP,", "RFP,", "SPP,",
+static const char * pwr_cmp_label[] = {"IBP,", "ICP,", "DCP,", "LABP", "TCP,", "CCP,", "SHRDP,", "RFP,", "SPP,",
 								"SFUP,", "FPUP,", "SCHEDP,", "L2CP,", "MCP,", "NOCP,", "DRAMP,",
 								"PIPEP,", "IDLE_COREP,", "CONST_DYNAMICP"};
 
@@ -39,6 +39,7 @@ enum pwr_cmp_t {
    IBP=0,
    ICP,
    DCP,
+   LABP,
    TCP,
    CCP,
    SHRDP,
@@ -317,14 +318,14 @@ void gpgpu_sim_wrapper::set_l1cache_power(double read_hits, double read_misses, 
 
 }
 
-void gpgpu_sim_wrapper::set_lab_power(double read_hits, double read_misses, double write_hits, double write_misses)
+void gpgpu_sim_wrapper::set_lab_power(double write_hits, double write_misses)
 {
-	p->sys.core[0].plab.read_accesses = read_hits * p->sys.scaling_coefficients[DC_RH] +read_misses * p->sys.scaling_coefficients[LAB_RM];
-	p->sys.core[0].plab.read_misses =  read_misses * p->sys.scaling_coefficients[LAB_RM];
-	p->sys.core[0].plab.write_accesses = write_hits * p->sys.scaling_coefficients[DC_WH]+write_misses * p->sys.scaling_coefficients[DC_WM];
-	p->sys.core[0].plab.write_misses = write_misses * p->sys.scaling_coefficients[DC_WM];
-	sample_perf_counters[LAB_RH]=read_hits;
-	sample_perf_counters[LAB_RM]=read_misses;
+	//p->sys.core[0].plab.read_accesses = read_hits * p->sys.scaling_coefficients[DC_RH] +read_misses * p->sys.scaling_coefficients[LAB_RM];
+	//p->sys.core[0].plab.read_misses =  read_misses * p->sys.scaling_coefficients[LAB_RM];
+	p->sys.core[0].plab.write_accesses = write_hits * p->sys.scaling_coefficients[LAB_WH]+write_misses * p->sys.scaling_coefficients[LAB_WM];
+	p->sys.core[0].plab.write_misses = write_misses * p->sys.scaling_coefficients[LAB_WM];
+	//sample_perf_counters[LAB_RH]=read_hits;
+	//sample_perf_counters[LAB_RM]=read_misses;
 	sample_perf_counters[LAB_WH]=write_hits;
 	sample_perf_counters[LAB_WM]=write_misses;
 	// TODO: coalescing logic is counted as part of the caches power (this is not valid for no-caches architectures)
@@ -504,21 +505,24 @@ void gpgpu_sim_wrapper::update_coefficients()
 
 	initpower_coeff[SHRD_ACC]=proc->cores[0]->get_coefficient_sharedmemory_readhits();
 	effpower_coeff[SHRD_ACC]=initpower_coeff[SHRD_ACC]*p->sys.scaling_coefficients[SHRD_ACC];
-
+        // rohan - get_coeff comes from core.h which is basically a power model. This in turn needs data cache which is modelled in array.h. This basically invokes CACTI and computes power. Deoending on config file, we add a scaling factor probably 
 	initpower_coeff[DC_RH]=(proc->cores[0]->get_coefficient_dcache_readhits() + proc->get_coefficient_readcoalescing());
 	initpower_coeff[DC_RM]=(proc->cores[0]->get_coefficient_dcache_readmisses() + proc->get_coefficient_readcoalescing());
 	initpower_coeff[DC_WH]=(proc->cores[0]->get_coefficient_dcache_writehits() + proc->get_coefficient_writecoalescing());
 	initpower_coeff[DC_WM]=(proc->cores[0]->get_coefficient_dcache_writemisses() + proc->get_coefficient_writecoalescing());
 
-	initpower_coeff[DC_RH]=(proc->cores[0]->get_coefficient_plab_readhits() + proc->get_coefficient_readcoalescing());
-	initpower_coeff[DC_RM]=(proc->cores[0]->get_coefficient_plab_readmisses() + proc->get_coefficient_readcoalescing());
-	initpower_coeff[DC_WH]=(proc->cores[0]->get_coefficient_plab_writehits() + proc->get_coefficient_writecoalescing());
-	initpower_coeff[DC_WM]=(proc->cores[0]->get_coefficient_plab_writemisses() + proc->get_coefficient_writecoalescing());
+	//initpower_coeff[DC_RH]=(proc->cores[0]->get_coefficient_plab_readhits() + proc->get_coefficient_readcoalescing());
+	//initpower_coeff[DC_RM]=(proc->cores[0]->get_coefficient_plab_readmisses() + proc->get_coefficient_readcoalescing());
+	initpower_coeff[LAB_WH]=(proc->cores[0]->get_coefficient_plab_writehits() + proc->get_coefficient_writecoalescing());
+	initpower_coeff[LAB_WM]=(proc->cores[0]->get_coefficient_plab_writemisses() + proc->get_coefficient_writecoalescing());
 
+        // rohan initpower_coeff = ; p->sys.scaling_coefficients = comes from XML file using parse_XML.cc. This initpower comes from CACTI and depending on scaling fator from XLM, we scale it as per architecture 
 	effpower_coeff[DC_RH]=initpower_coeff[DC_RH]*p->sys.scaling_coefficients[DC_RH];
 	effpower_coeff[DC_RM]=initpower_coeff[DC_RM]*p->sys.scaling_coefficients[DC_RM];
 	effpower_coeff[DC_WH]=initpower_coeff[DC_WH]*p->sys.scaling_coefficients[DC_WH];
 	effpower_coeff[DC_WM]=initpower_coeff[DC_WM]*p->sys.scaling_coefficients[DC_WM];
+	effpower_coeff[LAB_WH]=initpower_coeff[LAB_WH]*p->sys.scaling_coefficients[LAB_WH];
+	effpower_coeff[LAB_WM]=initpower_coeff[LAB_WM]*p->sys.scaling_coefficients[LAB_WM];
 
 	initpower_coeff[L2_RH]=proc->get_coefficient_l2_read_hits();
 	initpower_coeff[L2_RM]=proc->get_coefficient_l2_read_misses();
@@ -561,6 +565,8 @@ void gpgpu_sim_wrapper::update_coefficients()
 	}
 }
 
+
+// rohan getting this power form CACTI
 void gpgpu_sim_wrapper::update_components_power()
 {
 
@@ -578,7 +584,7 @@ void gpgpu_sim_wrapper::update_components_power()
 
 	sample_cmp_pwr[DCP]=proc->cores[0]->lsu->dcache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 	
-        sample_cmp_pwr[DCP]=proc->cores[0]->lsu->plab.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
+        sample_cmp_pwr[LABP]=proc->cores[0]->lsu->plab.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 
 	sample_cmp_pwr[TCP]=proc->cores[0]->lsu->tcache.rt_power.readOp.dynamic/(proc->cores[0]->executionTime);
 

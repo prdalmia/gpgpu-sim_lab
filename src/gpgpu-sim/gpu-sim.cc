@@ -748,6 +748,9 @@ gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config )
     gpu_tot_issued_cta = 0;
     m_total_cta_launched = 0;
     gpu_deadlock = false;
+    lab_cache_accesses = 0;
+    lab_cache_misses = 0;
+    
 
 
     m_cluster = new simt_core_cluster*[m_shader_config->n_simt_clusters];
@@ -1656,7 +1659,8 @@ void gpgpu_sim::cycle()
          }
          // Update core icnt/cache stats for GPUWattch
          m_cluster[i]->get_icnt_stats(m_power_stats->pwr_mem_stat->n_simt_to_mem[CURRENT_STAT_IDX][i], m_power_stats->pwr_mem_stat->n_mem_to_simt[CURRENT_STAT_IDX][i]);
-         m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
+         // rohan: per simt core cluster, updates the stats present in the power_stats file - as passing the structure as parameter below.
+	 m_cluster[i]->get_cache_stats(m_power_stats->pwr_mem_stat->core_cache_stats[CURRENT_STAT_IDX]);
          m_cluster[i]->get_current_occupancy(gpu_occupancy.aggregate_warp_slot_filled, gpu_occupancy.aggregate_theoretical_warp_slots);
 
       }
@@ -1680,7 +1684,7 @@ void gpgpu_sim::cycle()
       // McPAT main cycle (interface with McPAT)
 #ifdef GPGPUSIM_POWER_MODEL
       if(m_config.g_power_simulation_enabled){
-          mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn);
+          mcpat_cycle(m_config, getShaderCoreConfig(), m_gpgpusim_wrapper, m_power_stats, m_config.gpu_stat_sample_freq, gpu_tot_sim_cycle, gpu_sim_cycle, gpu_tot_sim_insn, gpu_sim_insn, lab_cache_accesses, lab_cache_misses);
       }
 #endif
 

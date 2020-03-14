@@ -371,7 +371,7 @@ class Core :public Component {
 
         //lab
 
-        
+        // rohan : remove read for LAB after compiling once 
 	float get_coefficient_plab_readhits()
 	{
 		float value=0;

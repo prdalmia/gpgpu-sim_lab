@@ -43,7 +43,7 @@
 
 using namespace std;
 
-const char * perf_count_label[] = {"TOT_INST,", "FP_INT,", "IC_H,", "IC_M,", "DC_RH,", "DC_RM,", "DC_WH,", "DC_WM,",
+const char * perf_count_label[] = {"TOT_INST,", "FP_INT,", "IC_H,", "IC_M,", "DC_RH,", "DC_RM,", "DC_WH,", "DC_WM,", "LAB_WH,", "LAB_WM,",
                                 "TC_H,", "TC_M,", "CC_H,", "CC_M,", "SHRD_ACC,", "REG_RD,", "REG_WR,", "NON_REG_OPs,",
                                 "SP_ACC,", "SFU_ACC,", "FPU_ACC,", "MEM_RD,","MEM_WR,", "MEM_PRE,", "L2_RH,", "L2_RM,", "L2_WH,",
                                 "L2_WM,", "NOC_A,", "PIPE_A,", "IDLE_CORE_N,", "CONST_DYNAMICN"};
@@ -117,6 +117,8 @@ void ParseXML::parse(char* filepath)
         if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"DC_RM")==0) {sys.scaling_coefficients[DC_RM]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
         if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"DC_WH")==0) {sys.scaling_coefficients[DC_WH]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
         if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"DC_WM")==0) {sys.scaling_coefficients[DC_WM]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
+        if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"LAB_WH")==0) {sys.scaling_coefficients[LAB_WH]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
+        if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"LAB_WM")==0) {sys.scaling_coefficients[LAB_WM]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
         if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"TC_H")==0) {sys.scaling_coefficients[TC_H]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
         if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"TC_M")==0) {sys.scaling_coefficients[TC_M]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
         if (strcmp(xNode2.getChildNode("param",i).getAttribute("name"),"CC_H")==0) {sys.scaling_coefficients[CC_H]=atof(xNode2.getChildNode("param",i).getAttribute("value"));continue;}
