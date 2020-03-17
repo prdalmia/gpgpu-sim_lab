@@ -1028,7 +1028,7 @@ public:
 			printf("Printing mem access generated\n");
 			std::list<mem_access_t>::iterator it;	
 			for (it = m_accessq.begin(); it != m_accessq.end(); ++it){
-   				 printf("MEM_TXN_GEN:%s:%x, Size:%d \n",mem_access_type_str(it->get_type()), it->get_addr(),it->get_size());
+   				 printf("MEM_TXN_GEN:%s:%llu, Size:%d \n",mem_access_type_str(it->get_type()), it->get_addr(),it->get_size());
 			}	
 		}
     }   
@@ -1073,7 +1073,7 @@ public:
     // accessors
     virtual void print_insn(FILE *fp) const 
     {
-        fprintf(fp," [inst @ pc=0x%04x] ", pc );
+        fprintf(fp," [inst @ pc=0x%04llu] ", pc );
         for (int i=(int)m_config->warp_size-1; i>=0; i--)
             fprintf(fp, "%c", ((m_warp_active_mask[i])?'1':'0') );
     }
