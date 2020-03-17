@@ -511,7 +511,7 @@ void ptx_print_insn( address_type pc, FILE *fp )
 {
    std::map<unsigned,function_info*>::iterator f = g_pc_to_finfo.find(pc);
    if( f == g_pc_to_finfo.end() ) {
-       fprintf(fp,"<no instruction at address 0x%x>", pc );
+       fprintf(fp,"<no instruction at address 0x%%llu>", pc );
        return;
    }
    function_info *finfo = f->second;

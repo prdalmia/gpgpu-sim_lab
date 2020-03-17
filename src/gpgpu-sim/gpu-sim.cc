@@ -263,7 +263,7 @@ void shader_core_config::reg_options(class OptionParser * opp)
    option_parser_register(opp, "-gpgpu_cache:lab", OPT_CSTR, &m_lab_config.m_config_string,
                   "per-shader lab config "
                   " {<nsets>:<bsize>:<assoc>:<wr>:<alloc> | none}",
-                  "1:8:8192:L:m" );
+                  "1:128:256:L:m" );
     option_parser_register(opp, "-lab_latency", OPT_UINT32, &m_lab_config.lab_latency,
                  "LAB Latency",
                  "20");
