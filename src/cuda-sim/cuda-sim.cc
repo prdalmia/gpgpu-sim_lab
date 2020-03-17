@@ -526,7 +526,7 @@ std::string ptx_get_insn_str( address_type pc )
        #define STR_SIZE 255
        char buff[STR_SIZE];
        buff[STR_SIZE - 1] = '\0';
-       snprintf(buff, STR_SIZE,"<no instruction at address 0x%x>", pc );
+       snprintf(buff, STR_SIZE,"<no instruction at address 0x%llu>", pc );
        return std::string(buff);
    }
    function_info *finfo = f->second;
