@@ -886,7 +886,7 @@ public:
     bool valid() const { return m_decoded; }
     virtual void print_insn( FILE *fp ) const 
     {
-        fprintf(fp," [inst @ pc=0%llu%04%llu] ", pc );
+        fprintf(fp," [inst @ pc=0x%04llu] ", pc );
     }
     bool is_load() const { return (op == LOAD_OP ||op==TENSOR_CORE_LOAD_OP || memory_op == memory_load); }
     bool is_store() const { return (op == STORE_OP ||op==TENSOR_CORE_STORE_OP || memory_op == memory_store); }
@@ -1028,7 +1028,7 @@ public:
 			printf("Printing mem access generated\n");
 			std::list<mem_access_t>::iterator it;	
 			for (it = m_accessq.begin(); it != m_accessq.end(); ++it){
-   				 printf("MEM_TXN_GEN:%s:%llu, Size:%d \n",mem_access_type_str(it->get_type()), it->get_addr(),it->get_size());
+   				 printf("MEM_TXN_GEN:%s:%x, Size:%d \n",mem_access_type_str(it->get_type()), it->get_addr(),it->get_size());
 			}	
 		}
     }   
@@ -1073,7 +1073,7 @@ public:
     // accessors
     virtual void print_insn(FILE *fp) const 
     {
-        fprintf(fp," [inst @ pc=0x%04llu] ", pc );
+        fprintf(fp," [inst @ pc=0x%04x] ", pc );
         for (int i=(int)m_config->warp_size-1; i>=0; i--)
             fprintf(fp, "%c", ((m_warp_active_mask[i])?'1':'0') );
     }
