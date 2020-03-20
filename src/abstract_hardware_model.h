@@ -406,7 +406,7 @@ public:
     void update( simt_mask_t &thread_done, addr_vector_t &next_pc, address_type recvg_pc, op_type next_inst_op,unsigned next_inst_size, address_type next_inst_pc );
 
     const simt_mask_t &get_active_mask() const;
-    void     get_pdom_stack_top_info( unsigned *pc, unsigned *rpc ) const;
+    void     get_pdom_stack_top_info( addr_t *pc, addr_t *rpc ) const;
     unsigned get_rp() const;
     void     print(FILE *fp) const;
     void     resume(char * fname) ;

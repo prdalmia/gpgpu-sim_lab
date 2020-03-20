@@ -110,7 +110,7 @@ void spill_log_to_file (FILE *fout, int final, unsigned long long  current_cycle
 
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned translate_pc_to_ptxlineno(unsigned pc);
+unsigned translate_pc_to_ptxlineno(addr_t pc);
 
 static int n_thread_CFloggers = 0;
 static thread_CFlocality** thread_CFlogger = NULL;

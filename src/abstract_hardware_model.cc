@@ -933,7 +933,7 @@ const simt_mask_t &simt_stack::get_active_mask() const
     return m_stack.back().m_active_mask;
 }
 
-void simt_stack::get_pdom_stack_top_info( unsigned *pc, unsigned *rpc ) const
+void simt_stack::get_pdom_stack_top_info( addr_t *pc, addr_t *rpc ) const
 {
    assert(m_stack.size() > 0);
    *pc = m_stack.back().m_pc;
@@ -1165,7 +1165,7 @@ void core_t::updateSIMTStack(unsigned warpId, warp_inst_t * inst)
 //! Get the warp to be executed using the data taken form the SIMT stack
 warp_inst_t core_t::getExecuteWarp(unsigned warpId)
 {
-    unsigned pc,rpc;
+    addr_t pc,rpc;
     m_simt_stack[warpId]->get_pdom_stack_top_info(&pc,&rpc);
     warp_inst_t wi= *ptx_fetch_inst(pc);
     wi.set_active(m_simt_stack[warpId]->get_active_mask());

@@ -1012,7 +1012,7 @@ private:
 };
 
 struct insn_latency_info {
-   unsigned pc;
+   addr_t pc;
    unsigned long latency;
 };
 
