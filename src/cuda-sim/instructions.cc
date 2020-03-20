@@ -2122,7 +2122,7 @@ void call_impl( const ptx_instruction *pI, ptx_thread_info *thread )
    }
 
    gpgpu_sim *gpu = thread->get_gpu();
-   unsigned callee_pc=0, callee_rpc=0;
+   addr_t callee_pc=0, callee_rpc=0;
    if( gpu->simd_model() == POST_DOMINATOR ) {
       thread->get_core()->get_pdom_stack_top_info(thread->get_hw_wid(),&callee_pc,&callee_rpc);
       assert( callee_pc == thread->get_pc() );

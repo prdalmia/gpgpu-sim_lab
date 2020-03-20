@@ -337,7 +337,7 @@ void ptx_thread_info::cpy_tid_to_reg( dim3 tid )
    }
 }
 
-void ptx_thread_info::print_insn( unsigned pc, FILE * fp ) const
+void ptx_thread_info::print_insn( addr_t pc, FILE * fp ) const
 {
    m_func_info->print_insn(pc,fp);
 }
@@ -386,7 +386,7 @@ static void print_reg( std::string name, ptx_reg_t value, symbol_table *symtab )
    print_reg(stdout,name,value,symtab);
 }
 
-void ptx_thread_info::callstack_push( unsigned pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
+void ptx_thread_info::callstack_push( addr_t pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
 {
    m_RPC = -1;
    m_RPC_updated = true;
@@ -400,7 +400,7 @@ void ptx_thread_info::callstack_push( unsigned pc, unsigned rpc, const symbol *r
 }
 
 //ptxplus version of callstack_push.
-void ptx_thread_info::callstack_push_plus( unsigned pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
+void ptx_thread_info::callstack_push_plus( addr_t pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
 {
    m_RPC = -1;
    m_RPC_updated = true;

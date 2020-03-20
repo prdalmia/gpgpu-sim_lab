@@ -296,7 +296,7 @@ type_info *symbol_table::get_array_type( type_info *base_type, unsigned array_di
    return pt;
 }
 
-void symbol_table::set_label_address( const symbol *label, unsigned addr )
+void symbol_table::set_label_address( const symbol *label, unsigned long long  addr )
 {
    std::map<std::string, symbol *>::iterator i=m_symbols.find(label->name());
    assert( i != m_symbols.end() );
@@ -1388,10 +1388,10 @@ function_info::function_info(int entry_point )
    pdom_done = false; //initialize it to false
 }
 
-unsigned function_info::print_insn( unsigned pc, FILE * fp ) const
+unsigned function_info::print_insn( addr_t pc, FILE * fp ) const
 {
    unsigned inst_size=1; // return offset to next instruction or 1 if unknown
-   unsigned index = pc - m_start_PC;
+   addr_t index = pc - m_start_PC;
    char command[1024];
    char buffer[1024];
    memset(command, 0, 1024);
@@ -1417,9 +1417,9 @@ unsigned function_info::print_insn( unsigned pc, FILE * fp ) const
    return inst_size;
 }
 
-std::string function_info::get_insn_str( unsigned pc ) const
+std::string function_info::get_insn_str( addr_t pc ) const
 {
-   unsigned index = pc - m_start_PC;
+   addr_t index = pc - m_start_PC;
    if ( index >= m_instr_mem_size ) {
       char buff[STR_SIZE];
       buff[STR_SIZE-1] = '\0';

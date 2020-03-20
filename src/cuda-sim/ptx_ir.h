@@ -319,7 +319,7 @@ public:
    type_info *add_type( memory_space_t space_spec, int scalar_type_spec, int vector_spec, int alignment_spec, int extern_spec );
    type_info *add_type( function_info *func );
    type_info *get_array_type( type_info *base_type, unsigned array_dim ); 
-   void set_label_address( const symbol *label, unsigned addr );
+   void set_label_address( const symbol *label, unsigned long long addr );
    unsigned next_reg_num() { return ++m_reg_allocator;}
    addr_t get_shared_next() { return m_shared_next;}
    addr_t get_sstarr_next() { return m_sstarr_next;}
@@ -1244,8 +1244,8 @@ public:
    {
       return m_name;
    }
-   unsigned print_insn( unsigned pc, FILE * fp ) const;
-    std::string get_insn_str( unsigned pc ) const;
+   unsigned print_insn( addr_t pc, FILE * fp ) const;
+    std::string get_insn_str( addr_t pc ) const;
    void add_inst( const std::list<ptx_instruction*> &instructions )
    {
       m_instructions = instructions;
@@ -1330,9 +1330,9 @@ public:
    {
       return m_return_var_sym;
    }
-   const ptx_instruction *get_instruction( unsigned PC ) const
+   const ptx_instruction *get_instruction( addr_t PC ) const
    {
-      unsigned index = PC - m_start_PC;
+      addr_t index = PC - m_start_PC;
       if( index < m_instr_mem_size ) 
          return m_instr_mem[index];
       return NULL;
@@ -1409,8 +1409,8 @@ private:
    bool pdom_done; //flag to check whether pdom is completed or not
    std::string m_name;
    ptx_instruction **m_instr_mem;
-   unsigned m_start_PC;
-   unsigned m_instr_mem_size;
+   addr_t m_start_PC;
+   addr_t m_instr_mem_size;
    std::map<std::string,param_t> m_kernel_params;
    std::map<unsigned,param_info> m_ptx_kernel_param_info;
    std::vector< std::pair<size_t, unsigned> > m_param_configs;

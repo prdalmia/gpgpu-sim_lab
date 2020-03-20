@@ -223,8 +223,8 @@ struct stack_entry {
    bool m_valid;
    symbol_table  *m_symbol_table;
    function_info *m_func_info;
-   unsigned       m_PC;
-   unsigned       m_RPC;
+   addr_t     m_PC;
+   addr_t      m_RPC;
    const symbol  *m_return_var_src;
    const symbol  *m_return_var_dst;
    unsigned       m_call_uid;
@@ -394,11 +394,11 @@ public:
    {
       return m_branch_taken;
    }
-   unsigned get_pc() const
+   addr_t get_pc() const
    {
       return m_PC;
    }
-   void set_npc( unsigned npc )
+   void set_npc( addr_t npc )
    {
       m_NPC = npc;
    }
@@ -420,7 +420,7 @@ public:
       m_RPC_updated = false;
       m_last_was_call = false;
    }
-   unsigned get_return_PC()
+   addr_t get_return_PC()
    {
        return m_callstack.back().m_PC;
    }
@@ -492,9 +492,9 @@ private:
    unsigned m_hw_ctaid;
 
    unsigned m_icount;
-   unsigned m_PC;
-   unsigned m_NPC;
-   unsigned m_RPC;
+   addr_t m_PC;
+   addr_t m_NPC;
+   addr_t m_RPC;
    bool m_RPC_updated;
    bool m_last_was_call;
    unsigned m_cycle_done;
