@@ -332,7 +332,7 @@ public:
    {
       return m_func_info; 
    }
-   void print_insn( unsigned pc, FILE * fp ) const;
+   void print_insn( addr_t pc, FILE * fp ) const;
    void set_info( function_info *func );
    unsigned get_uid() const
    {

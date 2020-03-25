@@ -1191,7 +1191,7 @@ void core_t::initilizeSIMTStack(unsigned warp_count, unsigned warp_size)
     m_warp_count = warp_count;
 }
 
-void core_t::get_pdom_stack_top_info( unsigned warpId, unsigned *pc, unsigned *rpc ) const
+void core_t::get_pdom_stack_top_info( unsigned warpId, addr_t *pc, addr_t *rpc ) const
 {
     m_simt_stack[warpId]->get_pdom_stack_top_info(pc,rpc);
 }
