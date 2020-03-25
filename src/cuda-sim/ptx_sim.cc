@@ -386,7 +386,7 @@ static void print_reg( std::string name, ptx_reg_t value, symbol_table *symtab )
    print_reg(stdout,name,value,symtab);
 }
 
-void ptx_thread_info::callstack_push( addr_t pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
+void ptx_thread_info::callstack_push( addr_t pc, addr_t rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
 {
    m_RPC = -1;
    m_RPC_updated = true;
@@ -400,7 +400,7 @@ void ptx_thread_info::callstack_push( addr_t pc, unsigned rpc, const symbol *ret
 }
 
 //ptxplus version of callstack_push.
-void ptx_thread_info::callstack_push_plus( addr_t pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
+void ptx_thread_info::callstack_push_plus( addr_t pc, addr_t rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
 {
    m_RPC = -1;
    m_RPC_updated = true;

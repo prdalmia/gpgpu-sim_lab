@@ -403,9 +403,9 @@ public:
       m_NPC = npc;
    }
    void set_npc( const function_info *f );
-   void callstack_push( unsigned npc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid );
+   void callstack_push( addr_t npc, addr_taddr_t rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid );
    bool callstack_pop();
-   void callstack_push_plus( unsigned npc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid );
+   void callstack_push_plus( addr_t npc, addr_t rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid );
    bool callstack_pop_plus();
    void dump_callstack() const;
    std::string get_location() const;
