@@ -208,7 +208,7 @@ struct stack_entry {
       m_call_uid = 0;
       m_valid = false;
    }
-   stack_entry( symbol_table *s, function_info *f, unsigned pc, unsigned rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
+   stack_entry( symbol_table *s, function_info *f, addr_t pc, addr_t rpc, const symbol *return_var_src, const symbol *return_var_dst, unsigned call_uid )
    {
       m_symbol_table=s;
       m_func_info=f;
