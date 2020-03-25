@@ -1233,7 +1233,7 @@ class core_t {
         void initilizeSIMTStack(unsigned warp_count, unsigned warps_size);
         void deleteSIMTStack();
         warp_inst_t getExecuteWarp(unsigned warpId);
-        void get_pdom_stack_top_info( unsigned warpId, unsigned *pc, unsigned *rpc ) const;
+        void get_pdom_stack_top_info( unsigned warpId, addr_t *pc, addr_t *rpc ) const;
         kernel_info_t * get_kernel_info(){ return m_kernel;}
         class ptx_thread_info ** get_thread_info() { return m_thread; }
         unsigned get_warp_size() const { return m_warp_size; }
