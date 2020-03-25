@@ -27,7 +27,6 @@
 
 #ifndef GPU_SIM_H
 #define GPU_SIM_H
-
 #include "../option_parser.h"
 #include "../abstract_hardware_model.h"
 #include "../trace.h"
@@ -445,7 +444,7 @@ public:
    void update_stats();
    void deadlock_check();
 
-   void get_pdom_stack_top_info( unsigned sid, unsigned tid, unsigned *pc, unsigned *rpc );
+   void get_pdom_stack_top_info( unsigned sid, unsigned tid, addr_t *pc, addr_t *rpc );
 
    int shared_mem_size() const;
    int shared_mem_per_block() const;

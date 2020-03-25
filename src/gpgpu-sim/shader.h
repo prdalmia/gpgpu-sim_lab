@@ -1817,7 +1817,7 @@ public:
     
     // accessors
     virtual bool warp_waiting_at_barrier( unsigned warp_id ) const;
-    void get_pdom_stack_top_info( unsigned tid, unsigned *pc, unsigned *rpc ) const;
+    void get_pdom_stack_top_info( unsigned tid, addr_t *pc, addr_t *rpc ) const;
     float get_current_occupancy( unsigned long long & active, unsigned long long & total ) const;
 
 // used by pipeline timing model components:
@@ -2098,7 +2098,7 @@ public:
         m_response_fifo.push_back(mf);
     }
 
-    void get_pdom_stack_top_info( unsigned sid, unsigned tid, unsigned *pc, unsigned *rpc ) const;
+    void get_pdom_stack_top_info( unsigned sid, unsigned tid, addr_t *pc, addr_t *rpc ) const;
     unsigned max_cta( const kernel_info_t &kernel );
     unsigned get_not_completed() const;
     void print_not_completed( FILE *fp ) const;

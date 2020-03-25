@@ -494,13 +494,13 @@ address_type shader_core_ctx::next_pc( int tid ) const
     return the_thread->get_pc(); // PC should already be updatd to next PC at this point (was set in shader_decode() last time thread ran)
 }
 
-void gpgpu_sim::get_pdom_stack_top_info( unsigned sid, unsigned tid, unsigned *pc, unsigned *rpc )
+void gpgpu_sim::get_pdom_stack_top_info( unsigned sid, unsigned tid, addr_t *pc, addr_t *rpc )
 {
     unsigned cluster_id = m_shader_config->sid_to_cluster(sid);
     m_cluster[cluster_id]->get_pdom_stack_top_info(sid,tid,pc,rpc);
 }
 
-void shader_core_ctx::get_pdom_stack_top_info( unsigned tid, unsigned *pc, unsigned *rpc ) const
+void shader_core_ctx::get_pdom_stack_top_info( unsigned tid, addr_t *pc, addr_t *rpc ) const
 {
     unsigned warp_id = tid/m_config->warp_size;
     m_simt_stack[warp_id]->get_pdom_stack_top_info(pc,rpc);
@@ -4277,7 +4277,7 @@ void simt_core_cluster::icnt_cycle()
     }
 }
 
-void simt_core_cluster::get_pdom_stack_top_info( unsigned sid, unsigned tid, unsigned *pc, unsigned *rpc ) const
+void simt_core_cluster::get_pdom_stack_top_info( unsigned sid, unsigned tid, addr_t *pc, addr_t *rpc ) const
 {
     unsigned cid = m_config->sid_to_cid(sid);
     m_core[cid]->get_pdom_stack_top_info(tid,pc,rpc);
