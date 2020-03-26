@@ -195,7 +195,7 @@ void memory_stats_t::memlatstat_dram_access(mem_fetch *mf)
    }
    if (mf->get_pc() != (unsigned long long)-1) {
 
-   printf("the pc is 0x%llu\n", mf->get_pc());
+ //  printf("the pc is 0x%llu\n", mf->get_pc());
      ptx_file_line_stats_add_dram_traffic(mf->get_pc(), mf->get_data_size());
    }
 }
