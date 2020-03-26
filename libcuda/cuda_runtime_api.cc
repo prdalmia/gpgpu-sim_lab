@@ -1520,7 +1520,7 @@ __host__ cudaError_t CUDARTAPI cudaLaunch( const char *hostFun )
 	if(gpu->resume_option==1 && (grid->get_uid()<gpu->resume_kernel))
 	{
 		char f1name[2048];
-	    snprintf(f1name,2048,"checkpoint_files/global_mem_%d.txt", grid->get_uid());
+	    snprintf(f1name,2048,"checkpoint_files/global_mem_%d.txt", gpu->resume_kernel - 1);
 
 	    g_checkpoint->load_global_mem(global_mem, f1name);	
 		printf("Skipping kernel %d as resuming from kernel %d\n",grid->get_uid(),gpu->resume_kernel );
