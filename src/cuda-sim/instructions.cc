@@ -1850,7 +1850,7 @@ void mma_impl( const ptx_instruction *pI, core_t *core, warp_inst_t inst )
 			if(debug_tensorcore){
 				printf("Thread%d_Iteration=%d\n:",thrd,operand_num);
 				for(k=0;k<nelem;k++){
-					printf("%x ",v[k].u64);
+					printf("%llu ",v[k].u64);
 				}
 				printf("\n");
 			}
@@ -2028,7 +2028,7 @@ void mma_impl( const ptx_instruction *pI, core_t *core, warp_inst_t inst )
 
 				printf("thread%d:",thrd);
 				for(k=0;k<8;k++){
-					printf("%x ",matrix_d[row_t[k]][col_t[k]].f16);
+					printf("%llu ",matrix_d[row_t[k]][col_t[k]].f16);
 				}
 				printf("\n");
 			}
@@ -2039,7 +2039,7 @@ void mma_impl( const ptx_instruction *pI, core_t *core, warp_inst_t inst )
 			nw_data4.s64=((matrix_d[row_t[6]][col_t[6]].s64   & 0xffff))|((matrix_d[row_t[7]][col_t[7]].s64&0xffff)<<16);
    			thread->set_vector_operand_values(dst,nw_data1,nw_data2,nw_data3,nw_data4);
 			if(debug_tensorcore)
-		 		printf("thread%d=%x,%x,%x,%x",thrd,nw_data1.s64,nw_data2.s64,nw_data3.s64,nw_data4.s64);
+		 		printf("thread%d=%llu,%llu,%llu,%llu",thrd,nw_data1.s64,nw_data2.s64,nw_data3.s64,nw_data4.s64);
 		
 		}
 		else{
@@ -3180,7 +3180,7 @@ void mma_st_impl( const ptx_instruction *pI, core_t *core, warp_inst_t &inst )
 			}
 	
 			if(debug_tensorcore)
-				printf("wmma:store:thread%d=%x,%x,%x,%x,%x,%x,%x,%x\n",thrd,nw_v[0].s64,nw_v[1].s64,nw_v[2].s64,nw_v[3].s64,nw_v[4].s64,nw_v[5].s64,nw_v[6].s64,nw_v[7].s64);   
+				printf("wmma:store:thread%d=%x,%x,%llu,%llu,%llu,%llu,%llu,%llu\n",thrd,nw_v[0].s64,nw_v[1].s64,nw_v[2].s64,nw_v[3].s64,nw_v[4].s64,nw_v[5].s64,nw_v[6].s64,nw_v[7].s64);   
 		}
 	}
    	
@@ -3342,7 +3342,7 @@ void mma_ld_impl( const ptx_instruction *pI, core_t *core, warp_inst_t &inst )
 		if(type==F16_TYPE){
 			printf("\nmma_ld:thread%d= ",thrd);
 			for(i=0;i<16;i++){
-				printf("%x ",data[i].u64);
+				printf("%llu: ",data[i].u64);
 			}
 			printf("\n");
 			

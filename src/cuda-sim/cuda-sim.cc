@@ -511,7 +511,7 @@ void ptx_print_insn( address_type pc, FILE *fp )
 {
    std::map<addr_t,function_info*>::iterator f = g_pc_to_finfo.find(pc);
    if( f == g_pc_to_finfo.end() ) {
-       fprintf(fp,"<no instruction at address 0x%%llu>", pc );
+       fprintf(fp,"<no instruction at address 0x%llu>", pc );
        return;
    }
    function_info *finfo = f->second;
@@ -1185,7 +1185,7 @@ void function_info::add_param_data( unsigned argn, struct gpgpu_ptx_sim_arg *arg
             abort();     
          }
          unsigned num_bits = 8*args->m_nbytes;
-         printf("GPGPU-Sim PTX: deferred allocation of shared region for \"%s\" from 0x%x to 0x%x (shared memory space)\n",
+         printf("GPGPU-Sim PTX: deferred allocation of shared region for \"%s\" from 0x%llu to 0x%llu (shared memory space)\n",
                 p->name().c_str(),
                 m_symtab->get_shared_next(),
                 m_symtab->get_shared_next() + num_bits/8 );
@@ -1302,7 +1302,7 @@ void function_info::list_param( FILE *fout ) const
       std::string name = p.get_name();
       symbol *param = m_symtab->lookup(name.c_str());
       addr_t param_addr = param->get_address();
-      fprintf(fout, "%s: %#08x\n", name.c_str(), param_addr);
+      fprintf(fout, "%s: %#08llu\n", name.c_str(), param_addr);
    }
    fflush(fout);
 }
@@ -2079,7 +2079,7 @@ void read_sim_environment_variables()
    if ( dbg_pc && strlen(dbg_pc) ) {
       printf("GPGPU-Sim PTX: printing debug information for instruction with PC = %s\n", dbg_pc );
       fflush(stdout);
-      sscanf(dbg_pc,"%d", &g_debug_pc);
+      sscanf(dbg_pc,"%llu", &g_debug_pc);
    }
 
 #if CUDART_VERSION > 1010

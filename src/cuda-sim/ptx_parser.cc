@@ -463,7 +463,7 @@ void add_identifier( const char *identifier, int array_dim, unsigned array_ident
          assert( (num_bits%8) == 0  );
          addr = g_current_symbol_table->get_sstarr_next();
          addr_pad = pad_address(addr, num_bits/8, 128);
-         printf("from 0x%x to 0x%lx (sstarr memory space)\n",
+         printf("from 0x%llu to 0x%lllu (sstarr memory space)\n",
                  addr+addr_pad,
                  addr+addr_pad + num_bits/8);
             fflush(stdout);
@@ -544,7 +544,7 @@ void add_identifier( const char *identifier, int array_dim, unsigned array_ident
       printf("GPGPU-Sim PTX: encountered texture directive %s.\n", identifier);
       break;
    case param_space_local:
-      printf("GPGPU-Sim PTX: allocating stack frame region for .param \"%s\" from 0x%x to 0x%lx\n",
+      printf("GPGPU-Sim PTX: allocating stack frame region for .param \"%s\" from 0x%llu to 0x%llu\n",
              identifier,
              g_current_symbol_table->get_local_next(),
              g_current_symbol_table->get_local_next() + num_bits/8 );
@@ -578,7 +578,7 @@ void add_constptr(const char* identifier1, const char* identifier2, int offset)
 
    unsigned addr = s2->get_address();
 
-   printf("GPGPU-Sim PTX: moving \"%s\" from 0x%x to 0x%x (%s+%x)\n",
+   printf("GPGPU-Sim PTX: moving \"%s\" from 0x%x to 0x%llu (%s+%x)\n",
       identifier1, s1->get_address(), addr+offset, identifier2, offset);
 
    s1->set_address( addr + offset );
