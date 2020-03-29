@@ -607,7 +607,7 @@ void warp_inst_t::memory_coalescing_arch_atomic( bool is_write, mem_access_type 
                continue;
 
            new_addr_type addr = m_per_scalar_thread[thread].memreqaddr[0];
-           unsigned block_address = line_size_based_tag_func(addr,segment_size);
+           addr_t block_address = line_size_based_tag_func(addr,segment_size);
            unsigned chunk = (addr&127)/32; // which 32-byte chunk within in a 128-byte chunk does this thread access?
 
            // can only write to one segment
