@@ -384,7 +384,7 @@ public:
    bool is_done() { return m_thread_done;}
    unsigned donecycle() const { return m_cycle_done; }
 
-   unsigned next_instr()
+   addr_t next_instr()
    {
       m_icount++;
       m_branch_taken = false;
@@ -413,7 +413,7 @@ public:
    const ptx_instruction *get_inst( addr_t pc ) const;
    bool rpc_updated() const { return m_RPC_updated; }
    bool last_was_call() const { return m_last_was_call; }
-   unsigned get_rpc() const { return m_RPC; }
+   addr_t get_rpc() const { return m_RPC; }
    void clearRPC()
    {
       m_RPC = -1;
