@@ -730,7 +730,7 @@ void shader_core_ctx::decode()
 {
     if( m_inst_fetch_buffer.m_valid ) {
         // decode 1 or 2 instructions and place them into ibuffer
-        address_type pc = m_inst_fetch_buffer.m_pc;
+         address_type pc = m_inst_fetch_buffer.m_pc;
         const warp_inst_t* pI1 = ptx_fetch_inst(pc);
         m_warp[m_inst_fetch_buffer.m_warp_id].ibuffer_fill(0,pI1);
         m_warp[m_inst_fetch_buffer.m_warp_id].inc_inst_in_pipeline();
@@ -1467,11 +1467,12 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
    if( m_L1D ) {
        m_L1D->print( fp, dl1_accesses, dl1_misses );
    }
-         
+
+   */      
       for( const std::pair<new_addr_type, unsigned long> p : lab_data_map){
           printf("\tThe address %x was accessed %d times\n", p.first, p.second);
     }
-*/
+
 
    if( m_lab ) {
        m_lab->print( fp, dl1_accesses, dl1_misses );
@@ -1879,7 +1880,7 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
-                   //lab_data_map[mf_next->get_addr()]++;
+                    lab_data_map[mf_next->get_addr()]++;
                     //delete data;
                     //mf_next->set_atomicdone();
                }
