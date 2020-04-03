@@ -1470,8 +1470,13 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
 
    */      
       for( const std::pair<new_addr_type, unsigned long> p : lab_data_map){
-          printf("\tThe address %x was accessed %d times\n", p.first, p.second);
+          printf("\taddress[%llu] = %d\n", p.first, p.second);
     }
+
+    for( const std::pair<new_addr_type, unsigned long> p : lab_replace_data_map){
+          printf("\tR address[%llu] = %d\n", p.first, p.second);
+    }
+
 
 
    if( m_lab ) {
@@ -1847,6 +1852,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    {
                    events.pop_back();
                     m_icnt->push(lab_event.m_evicted_block.mf);
+                    lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr()]++;
                      // printf(" Block with address %x is evicted and is sent down\n", lab_event.m_evicted_block.mf->get_addr() );
                    } 
                }
