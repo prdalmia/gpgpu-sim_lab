@@ -1468,7 +1468,8 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
        m_L1D->print( fp, dl1_accesses, dl1_misses );
    }
 
-   */      
+   */    
+     if( m_sid == 0){  
       for( const std::pair<new_addr_type, unsigned long> p : lab_data_map){
           printf("\taddress[%llu] = %d\n", p.first, p.second);
     }
@@ -1476,7 +1477,7 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
     for( const std::pair<new_addr_type, unsigned long> p : lab_replace_data_map){
           printf("\tR address[%llu] = %d\n", p.first, p.second);
     }
-
+     }
 
 
    if( m_lab ) {
