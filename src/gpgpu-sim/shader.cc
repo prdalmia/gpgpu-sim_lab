@@ -2031,9 +2031,10 @@ void ldst_unit::flush(){
 
     for (unsigned i=0; i < flush_queue.size(); i++){
            m_icnt->push(flush_queue[i]);
-           
-          // printf("The flush queue has MF for addresses %x\n ", flush_queue[i]->get_addr());
-    	}
+           if(m_sid ==0){
+           printf("The flush queue has MF for addresses %llu\n ", flush_queue[i]->get_addr());
+           }    	
+        }
     m_flush_lab = true;
     }
     
