@@ -1853,7 +1853,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    {
                    events.pop_back();
                     m_icnt->push(lab_event.m_evicted_block.mf);
-                    lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(128)]++;
+                    lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
                      // printf(" Block with address %x is evicted and is sent down\n", lab_event.m_evicted_block.mf->get_addr() );
                    } 
                }
@@ -1887,7 +1887,7 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
-                    lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(128)]++;
+                    lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
                     //delete data;
                     //mf_next->set_atomicdone();
                }
