@@ -46,6 +46,7 @@
 #include <limits.h>
 #include "traffic_breakdown.h"
 #include "shader_trace.h"
+#include<iostream>
 
 #define PRIORITIZE_MSHR_OVER_WB 1
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -2864,6 +2865,176 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
         fprintf(fout, "\tL1T_total_cache_pending_hits = %llu\n", total_css.pending_hits);
         fprintf(fout, "\tL1T_total_cache_reservation_fails = %llu\n", total_css.res_fails);
     }
+}
+
+long double gpgpu_sim::compute_lab_power( FILE *fout, unsigned lab_size ) {
+
+ fprintf(fout, "LAB_energy computation:\n");
+    unsigned total_lab_misses = 0, total_lab_accesses = 0, total_lab_hits = 0;
+    for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
+         unsigned cluster_lab_misses = 0, cluster_lab_accesses = 0;
+         m_cluster[ i ]->print_cache_stats( fout, cluster_lab_accesses, cluster_lab_misses );
+         total_lab_misses += cluster_lab_misses;
+         total_lab_accesses += cluster_lab_accesses;
+   }
+     
+   fprintf( fout, "\t Rohan Associativity is  = %u \n", lab_size );
+   total_lab_hits = total_lab_accesses - total_lab_misses;
+
+      
+    
+    long double scaling_coeff_DC_WH = 24.66;
+    long double scaling_coeff_DC_WM = 39.79;
+    long double scaled_lab_misses = total_lab_misses *  scaling_coeff_DC_WM;
+    long double scaled_lab_hits = total_lab_hits *  scaling_coeff_DC_WH;
+    long double scaled_lab_accesses = total_lab_misses *  scaling_coeff_DC_WM + total_lab_hits *  scaling_coeff_DC_WH;
+
+
+    std::cout << std::setprecision(20); // show 16 digits of precision
+    std::cout<<"Sacled lab misses = "<<scaled_lab_misses<<std::endl;
+    std::cout<<"Sacled lab hits = "<<scaled_lab_hits<<std::endl;
+    std::cout<<"Sacled lab maccesses = "<<scaled_lab_accesses<<std::endl;
+
+    long double cacti_readop_dyn = 0.0;
+    long double cacti_writeop_dyn = 0.0;
+    long double cacti_xbarop_dyn = 0.0;
+    long double total_power = 0.0;
+    switch (lab_size) {
+        case 8:    
+            cacti_readop_dyn    = 0.00000000000038162;
+            cacti_writeop_dyn   = 0.0000000000294963;
+            cacti_xbarop_dyn    = 0.0000000000814435;
+
+            total_power = (cacti_readop_dyn * scaled_lab_misses) +
+                          (cacti_writeop_dyn * scaled_lab_accesses) +
+                          (cacti_xbarop_dyn * scaled_lab_hits);
+            std::cout << std::setprecision(20); // show 16 digits of precision
+            std::cout << " Rohan  is cacti_readop_dyn = " << cacti_readop_dyn <<std::endl;
+
+            std::cout << " Rohan  is cacti_writeop_dyn = "<< cacti_writeop_dyn << std::endl;
+            std::cout<<"Rohan  is cacti_readop_dyn = "<< cacti_readop_dyn <<std::endl;
+            std::cout<<"Rohan  is cacti_xbarop_dyn = " << cacti_xbarop_dyn << std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_readop_dyn * scaled_lab_misses) <<std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_writeop_dyn * scaled_lab_accesses)<< std::endl;
+            std::cout << "LAB Power is  = "<< total_power << std::endl;
+
+            break;
+        case 16:    
+            cacti_readop_dyn    = 0.00000000000038162;
+            cacti_writeop_dyn   = 0.0000000000294963;
+            cacti_xbarop_dyn    = 0.0000000000814435;
+
+            total_power = (cacti_readop_dyn * scaled_lab_misses) +
+                          (cacti_writeop_dyn * scaled_lab_accesses) +
+                          (cacti_xbarop_dyn * scaled_lab_hits);
+
+
+            //fprintf( fout, "\t Rohan  is cacti_writeop_dyn = %Lf \n", cacti_writeop_dyn );
+            //fprintf( fout, "\t Rohan  is cacti_readop_dyn = %Lf \n", cacti_readop_dyn );
+            //fprintf( fout, "\t Rohan  is cacti_xbarop_dyn = %Lf \n", cacti_xbarop_dyn );
+            //fprintf( fout, "\t Rohan 1st term = %Lf \n", (cacti_readop_dyn * scaled_lab_misses) );
+            //fprintf( fout, "\t Rohan 1st term = %Lf \n", (cacti_writeop_dyn * scaled_lab_accesses) );
+            //fprintf( fout, "\t Rohan 1st term = %Lf \n", (cacti_xbarop_dyn * scaled_lab_hits) );
+            
+            
+            //fprintf( fout, "LAB Power is  = %lu \n", total_power );
+            std::cout << std::setprecision(20); // show 16 digits of precision
+            std::cout << " Rohan  is cacti_readop_dyn = " << cacti_readop_dyn <<std::endl;
+
+            std::cout << " Rohan  is cacti_writeop_dyn = "<< cacti_writeop_dyn << std::endl;
+            std::cout<<"Rohan  is cacti_readop_dyn = "<< cacti_readop_dyn <<std::endl;
+            std::cout<<"Rohan  is cacti_xbarop_dyn = " << cacti_xbarop_dyn << std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_readop_dyn * scaled_lab_misses) <<std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_writeop_dyn * scaled_lab_accesses)<< std::endl;
+            std::cout << "LAB Power is  = "<< total_power << std::endl;
+
+            break;
+
+        case 64:    
+            cacti_readop_dyn    = 0.00000000000131331;
+            cacti_writeop_dyn   = 0.0000000000435388;
+            cacti_xbarop_dyn    = 0.0000000000814435;
+
+            total_power = (cacti_readop_dyn * scaled_lab_misses) +
+                          (cacti_writeop_dyn * scaled_lab_accesses) +
+                          (cacti_xbarop_dyn * scaled_lab_hits);
+            std::cout << std::setprecision(20); // show 16 digits of precision
+            std::cout << " Rohan  is cacti_readop_dyn = " << cacti_readop_dyn <<std::endl;
+
+            std::cout << " Rohan  is cacti_writeop_dyn = "<< cacti_writeop_dyn << std::endl;
+            std::cout<<"Rohan  is cacti_readop_dyn = "<< cacti_readop_dyn <<std::endl;
+            std::cout<<"Rohan  is cacti_xbarop_dyn = " << cacti_xbarop_dyn << std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_readop_dyn * scaled_lab_misses) <<std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_writeop_dyn * scaled_lab_accesses)<< std::endl;
+            std::cout << "LAB Power is  = "<< total_power << std::endl;
+
+            break;
+
+        case 128:    
+            cacti_readop_dyn    = 0.000000000001481;
+            cacti_writeop_dyn   = 0.0000000000689075;
+            cacti_xbarop_dyn    = 0.0000000000814435;
+
+            total_power = (cacti_readop_dyn * scaled_lab_misses) +
+                          (cacti_writeop_dyn * scaled_lab_accesses) +
+                          (cacti_xbarop_dyn * scaled_lab_hits);
+            std::cout << std::setprecision(20); // show 16 digits of precision
+            std::cout << " Rohan  is cacti_readop_dyn = " << cacti_readop_dyn <<std::endl;
+
+            std::cout << " Rohan  is cacti_writeop_dyn = "<< cacti_writeop_dyn << std::endl;
+            std::cout<<"Rohan  is cacti_readop_dyn = "<< cacti_readop_dyn <<std::endl;
+            std::cout<<"Rohan  is cacti_xbarop_dyn = " << cacti_xbarop_dyn << std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_readop_dyn * scaled_lab_misses) <<std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_writeop_dyn * scaled_lab_accesses)<< std::endl;
+            std::cout << "LAB Power is  = "<< total_power << std::endl;
+
+            break;
+
+        case 256:    
+            cacti_readop_dyn    = 0.00000000000170802;
+            cacti_writeop_dyn   = 0.0000000000922555;
+            cacti_xbarop_dyn    = 0.0000000000814435;
+
+            total_power = (cacti_readop_dyn * scaled_lab_misses) +
+                          (cacti_writeop_dyn * scaled_lab_accesses) +
+                          (cacti_xbarop_dyn * scaled_lab_hits);
+             
+	    std::cout << std::setprecision(20); // show 16 digits of precision
+            std::cout << " Rohan  is cacti_readop_dyn = " << cacti_readop_dyn <<std::endl;
+
+            std::cout << " Rohan  is cacti_writeop_dyn = "<< cacti_writeop_dyn << std::endl;
+            std::cout<<"Rohan  is cacti_readop_dyn = "<< cacti_readop_dyn <<std::endl;
+            std::cout<<"Rohan  is cacti_xbarop_dyn = " << cacti_xbarop_dyn << std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_readop_dyn * scaled_lab_misses) <<std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_writeop_dyn * scaled_lab_accesses)<< std::endl;
+            std::cout << "LAB Power is  = "<< total_power << std::endl;
+
+            break;
+
+        case 2048:    
+            cacti_readop_dyn    = 0.00000000000621468;
+            cacti_writeop_dyn   = 0.000000000433206;
+            cacti_xbarop_dyn    = 0.0000000000814435;
+
+            total_power = (cacti_readop_dyn * scaled_lab_misses) +
+                          (cacti_writeop_dyn * scaled_lab_accesses) +
+                          (cacti_xbarop_dyn * scaled_lab_hits);
+            std::cout << std::setprecision(20); // show 16 digits of precision
+            std::cout << " Rohan  is cacti_readop_dyn = " << cacti_readop_dyn <<std::endl;
+
+            std::cout << " Rohan  is cacti_writeop_dyn = "<< cacti_writeop_dyn << std::endl;
+            std::cout<<"Rohan  is cacti_readop_dyn = "<< cacti_readop_dyn <<std::endl;
+            std::cout<<"Rohan  is cacti_xbarop_dyn = " << cacti_xbarop_dyn << std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_readop_dyn * scaled_lab_misses) <<std::endl;
+            std::cout<<"Rohan 1st term = " << (cacti_writeop_dyn * scaled_lab_accesses)<< std::endl;
+            std::cout << "LAB Power is  = "<< total_power << std::endl;
+
+            break;
+        default: break;
+    
+    }
+    
+    return total_power;
 }
 
 void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const

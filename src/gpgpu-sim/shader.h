@@ -1425,11 +1425,13 @@ struct shader_core_config : public core_config
         m_lab_config.init(m_lab_config.m_config_string,FuncCachePreferNone);
         gpgpu_cache_texl1_linesize = m_L1T_config.get_line_sz();
         gpgpu_cache_constl1_linesize = m_L1C_config.get_line_sz();
+        gpgpu_cache_lab_linesize = m_lab_config.get_num_lines() ;
         m_valid = true;
     }
     void reg_options(class OptionParser * opp );
     unsigned max_cta( const kernel_info_t &k ) const;
     unsigned num_shader() const { return n_simt_clusters*n_simt_cores_per_cluster; }
+    unsigned lab_size() const { return gpgpu_cache_lab_linesize; }
     unsigned sid_to_cluster( unsigned sid ) const { return sid / n_simt_cores_per_cluster; }
     unsigned sid_to_cid( unsigned sid )     const { return sid % n_simt_cores_per_cluster; }
     unsigned cid_to_sid( unsigned cid, unsigned cluster_id ) const { return cluster_id*n_simt_cores_per_cluster + cid; }

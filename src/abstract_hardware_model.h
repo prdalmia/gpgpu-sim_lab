@@ -383,6 +383,7 @@ struct core_config {
     // texture and constant cache line sizes (used to determine number of memory accesses)
     unsigned gpgpu_cache_texl1_linesize;
     unsigned gpgpu_cache_constl1_linesize;
+    unsigned gpgpu_cache_lab_linesize;
 
 	unsigned gpgpu_max_insn_issue_per_warp;
 	bool gmem_skip_L1D; // on = global memory access always skip the L1 cache

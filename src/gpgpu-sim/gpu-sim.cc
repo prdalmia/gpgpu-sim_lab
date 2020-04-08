@@ -725,9 +725,9 @@ void gpgpu_sim::stop_all_running_kernels(){
 
 void set_ptx_warp_size(const struct core_config * warp_size);
 
-gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config ) 
+gpgpu_sim::gpgpu_sim( const gpgpu_sim_config &config) 
     : gpgpu_t(config), m_config(config)
-{ 
+{
     m_shader_config = &m_config.m_shader_config;
     m_memory_config = &m_config.m_memory_config;
     set_ptx_warp_size(m_shader_config);
@@ -1167,7 +1167,11 @@ void gpgpu_sim::gpu_print_stat()
    m_shader_stats->print(stdout);
 #ifdef GPGPUSIM_POWER_MODEL
    if(m_config.g_power_simulation_enabled){
-	   m_gpgpusim_wrapper->print_power_kernel_stats(gpu_sim_cycle, gpu_tot_sim_cycle, gpu_tot_sim_insn + gpu_sim_insn, kernel_info_str, true );
+           unsigned lab_size_temp = m_config.lab_size();
+           long double lab_kernel_power = compute_lab_power(stdout, lab_size_temp);
+	   m_gpgpusim_wrapper->print_power_kernel_stats(gpu_sim_cycle, gpu_tot_sim_cycle, gpu_tot_sim_insn + gpu_sim_insn, kernel_info_str, true, lab_kernel_power);
+           //unsigned lab_size_temp = m_config.lab_size();
+           //compute_lab_power(stdout, lab_size_temp);
 	   mcpat_reset_perf_count(m_gpgpusim_wrapper);
    }
 #endif

@@ -610,7 +610,7 @@ void gpgpu_sim_wrapper::compute()
 {
 	proc->compute();
 }
-void gpgpu_sim_wrapper::print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace)
+void gpgpu_sim_wrapper::print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace, long double lab_kernel_power)
 {
 	   detect_print_steady_state(1,init_value);
 	   if(g_power_simulation_enabled){
@@ -650,6 +650,8 @@ void gpgpu_sim_wrapper::print_power_kernel_stats(double gpu_sim_cycle, double gp
 		   powerfile<<"gpu_tot_avg_power = "<< gpu_tot_power.avg/total_sample_count<<std::endl;
 		   powerfile<<"gpu_tot_max_power = "<<gpu_tot_power.max<<std::endl;
 		   powerfile<<"gpu_tot_min_power = "<<gpu_tot_power.min<<std::endl;
+		   powerfile<<"gpu_lab_power = "<<lab_kernel_power<<std::endl;
+		   powerfile<<"gpu_tot_avg_power + lab = "<< (gpu_tot_power.avg/total_sample_count) + lab_kernel_power<<std::endl;
 		   powerfile<<std::endl<<std::endl;
 		   powerfile.flush();
 

@@ -68,7 +68,7 @@ public:
 	void update_components_power();
 	void update_coefficients();
 	void reset_counters();
-	void print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace);
+	void print_power_kernel_stats(double gpu_sim_cycle, double gpu_tot_sim_cycle, double init_value, const std::string & kernel_info_string, bool print_trace, long double lab_kernel_power);
 	void power_metrics_calculations();
 	void set_inst_power(bool clk_gated_lanes, double tot_cycles, double busy_cycles, double tot_inst, double int_inst, double fp_inst, double load_inst, double store_inst, double committed_inst);
 	void set_regfile_power(double reads, double writes, double ops);

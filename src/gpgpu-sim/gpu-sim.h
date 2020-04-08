@@ -331,6 +331,7 @@ public:
     }
 
     unsigned num_shader() const { return m_shader_config.num_shader(); }
+    unsigned lab_size() const { return m_shader_config.lab_size(); }
     unsigned num_cluster() const { return m_shader_config.n_simt_clusters; }
     unsigned get_max_concurrent_kernel() const { return max_concurrent_kernel; }
     unsigned checkpoint_option;
@@ -356,6 +357,8 @@ private:
     double icnt_period;
     double dram_period;
     double l2_period;
+    
+    //double lab_size;
 
     // GPGPU-Sim timing model options
     unsigned gpu_max_cycle_opt;
@@ -422,7 +425,7 @@ struct occupancy_stats {
 
 class gpgpu_sim : public gpgpu_t {
 public:
-   gpgpu_sim( const gpgpu_sim_config &config );
+   gpgpu_sim( const gpgpu_sim_config &config);
 
    void set_prop( struct cudaDeviceProp *prop );
 
@@ -501,6 +504,7 @@ private:
    void shader_print_runtime_stat( FILE *fout );
    void shader_print_l1_miss_stat( FILE *fout ) const;
    void shader_print_cache_stats( FILE *fout ) const;
+   long double compute_lab_power(FILE *fout, unsigned lab_size);
    void shader_print_scheduler_stat( FILE* fout, bool print_dynamic_info ) const;
    void visualizer_printstat();
    void print_shader_cycle_distro( FILE *fout ) const;
