@@ -1471,7 +1471,7 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
    */    
      if( m_sid == 0){  
       for( const std::pair<new_addr_type, unsigned long> p : lab_data_map){
-          printf("\taddress[%llx] = %d\n", p.first, p.second);
+          printf("\taddress[%llx] = %d\n and max cta is %d", p.first, p.second, lab_block_map[p.first]);
     }
 
     for( const std::pair<new_addr_type, unsigned long> p : lab_replace_data_map){
@@ -1887,7 +1887,10 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
-                    lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
+                if(m_core->get_sid() == 0){ 
+                   lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
+                   lab_block_map[ mf_next->get_addr() & ~(new_addr_type)(127)] = m_core->get_n_active_cta();
+                    }
                     //delete data;
                     //mf_next->set_atomicdone();
                }
