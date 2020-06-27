@@ -267,6 +267,9 @@ void shader_core_config::reg_options(class OptionParser * opp)
     option_parser_register(opp, "-lab_latency", OPT_UINT32, &m_lab_config.lab_latency,
                  "LAB Latency",
                  "20");
+    option_parser_register(opp, "-additional_cache", OPT_UINT32, &m_L1D_config.additional_cache,
+                 "Additional L1 cache",
+                 "0");             
     option_parser_register(opp, "-gpgpu_cache:dl1PrefL1", OPT_CSTR, &m_L1D_config.m_config_stringPrefL1,
                    "per-shader L1 data cache config "
                    " {<nsets>:<bsize>:<assoc>,<rep>:<wr>:<alloc>:<wr_alloc>,<mshr>:<N>:<merge>,<mq> | none}",

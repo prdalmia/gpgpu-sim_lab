@@ -1468,7 +1468,8 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
        m_L1D->print( fp, dl1_accesses, dl1_misses );
    }
 
-   */    
+   */   
+   /*
      if( m_sid == 0){  
       for( const std::pair<new_addr_type, unsigned long> p : lab_data_map){
           printf("\taddress[%llx] = %d and max cta is %lx\n", p.first, p.second, lab_block_map[p.first]);
@@ -1478,7 +1479,7 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
           printf("\tReplacement[%llx] = %d\n", p.first, p.second);
     }
      }
-
+*/
 
    if( m_lab ) {
        m_lab->print( fp, dl1_accesses, dl1_misses );
@@ -1853,7 +1854,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    {
                    events.pop_back();
                     m_icnt->push(lab_event.m_evicted_block.mf);
-                    lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
+                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
                      // printf(" Block with address %x is evicted and is sent down\n", lab_event.m_evicted_block.mf->get_addr() );
                    } 
                }
@@ -1887,11 +1888,13 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
+                /*
                 if(m_core->get_sid() == 0){ 
                    lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
                    lab_block_map[ mf_next->get_addr() & ~(new_addr_type)(127)] = m_core->get_n_active_cta();
                   printf("Time %lld Atomic accesses to address[%llx] = %d\n", gpu_sim_cycle+gpu_tot_sim_cycle,  (mf_next->get_addr() & ~(new_addr_type)(127)), lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]);
                   }
+                 */ 
                     //delete data;
                     //mf_next->set_atomicdone();
                }
@@ -2035,9 +2038,11 @@ void ldst_unit::flush(){
 
     for (unsigned i=0; i < flush_queue.size(); i++){
            m_icnt->push(flush_queue[i]);
+          /*
            if(m_sid ==0){
            printf("The flush queue has MF for addresses %llu\n ", flush_queue[i]->get_addr());
-           }    	
+           }
+          */    	
         }
     m_flush_lab = true;
     }
@@ -3256,7 +3261,15 @@ unsigned int shader_core_config::max_cta( const kernel_info_t &k ) const
     		     m_L1D_config.set_assoc(64); //L1 is 32KB and shd=96KB
     		else
     			assert(0);
-
+             
+             if(m_L1D_config.additional_cache != 0)
+            {
+              if(m_L1D_config.additional_cache == 1){ 
+              m_L1D_config.set_assoc(m_L1D_config.get_assoc() + 16);
+              }
+              else 
+              m_L1D_config.set_assoc(m_L1D_config.get_assoc()*2);
+            }            
     		 printf ("GPGPU-Sim: Reconfigure L1 cache in Volta Archi to %uKB\n", m_L1D_config.get_total_size_inKB());
     	}
 
