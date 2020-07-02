@@ -1861,7 +1861,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 
                const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
 									mf_next->get_addr(),
-									mf_next->get_data_size(),
+									64,
 									mf_next->is_write(),
 									mf_next->get_access_warp_mask(),
 									mf_next->get_access_byte_mask(),
@@ -1876,7 +1876,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                                       mf_next->get_sid(), 
                                       mf_next->get_tpc(), 
                                      mf_next->get_mem_config());
-               
+               printf("the request copy size is %d\n", mf_copy->get_data_size());
                 m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
 
                 mf_copy->set_atomicdone();
