@@ -1867,6 +1867,8 @@ void ldst_unit::Lab_latency_queue_cycle()
 									mf_next->get_access_byte_mask(),
 									mf_next->get_access_sector_mask());
 
+               printf("the request size is %d\n", mf_next->get_data_size());                      
+
                mem_fetch *mf_copy = new mem_fetch(*ma,
                                       &mf_next->get_inst(),
                                       mf_next->get_ctrl_size(),
