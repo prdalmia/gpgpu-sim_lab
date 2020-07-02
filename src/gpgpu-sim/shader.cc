@@ -1861,7 +1861,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 
                const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
 									mf_next->get_addr(),
-									64,
+									32,
 									mf_next->is_write(),
 									mf_next->get_access_warp_mask(),
 									mf_next->get_access_byte_mask(),
