@@ -143,6 +143,9 @@ unsigned mem_fetch::get_num_flits(bool simt_to_mem){
 	// If atomic, write going to memory, or read coming back from memory, size = ctrl + data. Else, only ctrl
 	if( isatomic() || (simt_to_mem && get_is_write()) || !(simt_to_mem || get_is_write()) )
 		sz = size();
+        if (isatomic() && isatomicdone()){
+            sz = size()*4;       
+            }
 	else
 		sz = get_ctrl_size();
 
