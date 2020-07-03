@@ -143,9 +143,9 @@ unsigned mem_fetch::get_num_flits(bool simt_to_mem){
 	// If atomic, write going to memory, or read coming back from memory, size = ctrl + data. Else, only ctrl
 	if( isatomic() || (simt_to_mem && get_is_write()) || !(simt_to_mem || get_is_write()) ){
 		sz = size();
-        if (isatomic() && isatomicdone()){
+        if (isatomic() && isatomicdone() && simt_to_mem){
             sz = sz*4;
-            printf("the flit  size for atomic is %d\n", (sz/icnt_flit_size) + ( (sz % icnt_flit_size)? 1:0));        
+            //printf("the flit  size for atomic is %d\n", (sz/icnt_flit_size) + ( (sz % icnt_flit_size)? 1:0));        
             }
     }
 	else
