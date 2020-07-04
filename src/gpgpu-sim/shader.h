@@ -1332,7 +1332,7 @@ protected:
    std::deque<mem_fetch* > l1_latency_queue; 
    std::deque<mem_fetch* > m_next_global_queue;
    std::deque<mem_fetch* > lab_latency_queue;
-   //std::map < new_addr_type , unsigned long> lab_data_map;
+   std::map < new_addr_type , unsigned long> lab_data_map;
    //std::map < new_addr_type , unsigned long> lab_block_map;
    //std::map < new_addr_type , unsigned long> lab_replace_data_map;
    void L1_latency_queue_cycle();
