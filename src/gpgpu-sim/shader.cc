@@ -1891,11 +1891,11 @@ void ldst_unit::Lab_latency_queue_cycle()
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
                 
-                if(m_core->get_sid() == 0){ 
-                   lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
+              //  if(m_core->get_sid() == 0){ 
+                  // lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
                    //lab_block_map[ mf_next->get_addr() & ~(new_addr_type)(127)] = m_core->get_n_active_cta();
-                  printf("Time %lld Atomic access to address[%llx] with actual address [%llx] and repetition was  = %d\n", gpu_sim_cycle+gpu_tot_sim_cycle,  (mf_next->get_addr() & ~(new_addr_type)(127)), mf_next->get_addr(), lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]);
-                  }
+                 // printf("Time %lld Atomic access to address[%llx] with actual address [%llx] and repetition was  = %d\n", gpu_sim_cycle+gpu_tot_sim_cycle,  (mf_next->get_addr() & ~(new_addr_type)(127)), mf_next->get_addr(), lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]);
+                 // }
                   
                     //delete data;
                     //mf_next->set_atomicdone();
@@ -2047,7 +2047,7 @@ void ldst_unit::flush(){
           */    	
         }
     m_flush_lab = true;
-    lab_data_map.clear();
+    //lab_data_map.clear();
     }
     
 }
