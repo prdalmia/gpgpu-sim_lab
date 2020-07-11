@@ -77,10 +77,12 @@ struct evicted_block_info {
 	new_addr_type m_block_addr;
 	unsigned m_modified_size;
     mem_fetch* mf;
+    unsigned sectors_used;
 	evicted_block_info() {
 		m_block_addr = 0;
 		m_modified_size = 0;
         mf = NULL;
+        sectors_used = 0;
 	}
 	void set_info(new_addr_type block_addr, unsigned modified_size){
 		m_block_addr = block_addr;
@@ -110,7 +112,9 @@ struct lab_block_t {
         m_alloc_time = 0;
         m_fill_time = 0;
 		m_last_access_time = 0;
-		m_status = INVALID;
+        sector_use_count = 0;
+        m_status = INVALID;
+        for(i = 0; i < 4; i++   )
     }
 
 
@@ -122,6 +126,7 @@ struct lab_block_t {
 		m_last_access_time = time;
 		m_fill_time = 0;
         mf_for_block = mf;
+        sector_allocate(mf);
 		m_status = RESERVED;
 	}
 
@@ -162,6 +167,23 @@ struct lab_block_t {
 	{
 	    	m_last_access_time = time;
 	}
+    void sector_allocate(mem_fetch* sector_mf)
+	{
+        for ( int i = 0; i < 4 ; i ++){
+            if(sectors[i] != NULL){ 
+            if(sectors[i]->get_addr() == sector_mf->get_addr())
+            {
+               return;
+            }
+            }
+            else{
+              sectors[i] = sector_mf;
+              increment_sectors_used_count();
+              break;
+            }
+            }
+        
+	}
 	 unsigned long long get_alloc_time()
 	{
 	  	return m_alloc_time;
@@ -171,7 +193,23 @@ struct lab_block_t {
 	  	return mf_for_block;
 	}
 
-	 void print_status() {
+    void increment_sectors_used_count()
+    {
+        sector_use_count++;
+    
+    }
+    
+     void reset_sectors_used_count(){
+        sector_use_count = 0;
+    }
+
+    void reset_sectors(){
+        for ( int i = 0; i < 4 ; i ++){
+            sectors[i] != NULL;
+        }
+    }
+
+	void print_status() {
 		 printf("m_block_addr is %llu, status = %u\n", m_block_addr, m_status);
 	}
 
@@ -185,6 +223,8 @@ struct lab_block_t {
 
         new_addr_type    m_tag;
         new_addr_type    m_block_addr;
+        mem_fetch*       sectors[4];
+       unsigned sector_use_count;
         
 private:
         

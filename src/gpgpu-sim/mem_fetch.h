@@ -90,6 +90,7 @@ public:
    unsigned get_sub_partition_id() const { return m_raw_addr.sub_partition; }
    bool     get_is_write() const { return m_access.is_write(); }
    unsigned get_request_uid() const { return m_request_uid; }
+   unsigned get_num_sectors() const { return m_num_sectors; }
    unsigned get_sid() const { return m_sid; }
    unsigned get_tpc() const { return m_tpc; }
    unsigned get_wid() const { return m_wid; }
@@ -98,7 +99,8 @@ public:
    enum mf_type get_type() const { return m_type; }
    bool isatomic() const;
    bool isatomicdone() const {return m_atomic_completed;} 
-   void set_atomicdone() {m_atomic_completed = true;} 
+   void set_atomicdone() {m_atomic_completed = true;}
+   void set_num_sectors(unsigned t) { m_num_sectors = t; } 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
    void set_icnt_receive_time( unsigned t ) { m_icnt_receive_time=t; }
    unsigned get_timestamp() const { return m_timestamp; }
@@ -134,6 +136,7 @@ private:
 
    // request type, address, size, mask
    mem_access_t m_access;
+   unsigned m_num_sectors;
    unsigned m_data_size; // how much data is being written
    unsigned m_ctrl_size; // how big would all this meta data be in hardware (does not necessarily match actual size of mem_fetch)
    new_addr_type m_partition_addr; // linear physical address *within* dram partition (partition bank select bits squeezed out)

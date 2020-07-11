@@ -60,6 +60,7 @@ mem_fetch::mem_fetch( const mem_access_t &access,
    m_type = m_access.is_write()?WRITE_REQUEST:READ_REQUEST;
    m_timestamp = gpu_sim_cycle + gpu_tot_sim_cycle;
    m_timestamp2 = 0;
+   m_num_sectors = 0;
    m_atomic_completed = 0;
    m_status = MEM_FETCH_INITIALIZED;
    m_status_change = gpu_sim_cycle + gpu_tot_sim_cycle;
@@ -143,8 +144,8 @@ unsigned mem_fetch::get_num_flits(bool simt_to_mem){
 	// If atomic, write going to memory, or read coming back from memory, size = ctrl + data. Else, only ctrl
 	if( isatomic() || (simt_to_mem && get_is_write()) || !(simt_to_mem || get_is_write()) ){
 		sz = size();
-        if (isatomic() && isatomicdone() && simt_to_mem){
-            sz = sz*1;
+        if (isatomic() && isatomicdone()){
+            sz = sz*get_num_sectors();
             //printf("the flit  size for atomic is %d\n", (sz/icnt_flit_size) + ( (sz % icnt_flit_size)? 1:0));        
             }
     }
