@@ -1853,7 +1853,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    if(lab_event.m_cache_event_type == WRITE_BACK_REQUEST_SENT)
                    {
                    events.pop_back();
-                   lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
+                   //lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
                     printf(" Block with address %x is evicted and is sent down with sectors %d\n", lab_event.m_evicted_block.mf->get_addr(), lab_event.m_evicted_block.mf->get_num_sectors()); 
                     m_icnt->push(lab_event.m_evicted_block.mf);
                  //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;

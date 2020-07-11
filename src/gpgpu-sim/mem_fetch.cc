@@ -145,8 +145,8 @@ unsigned mem_fetch::get_num_flits(bool simt_to_mem){
 	if( isatomic() || (simt_to_mem && get_is_write()) || !(simt_to_mem || get_is_write()) ){
 		sz = size();
         if (isatomic() && isatomicdone()){
-            sz = sz*get_num_sectors();
-            printf("the flit  size for atomic is %d and num sectors is %d \n", (sz/icnt_flit_size) + ( (sz % icnt_flit_size)? 1:0), get_num_sectors());        
+            //sz = sz*get_num_sectors();
+            //printf("the flit  size for atomic is %d and num sectors is %d \n", (sz/icnt_flit_size) + ( (sz % icnt_flit_size)? 1:0), get_num_sectors());        
             }
     }
 	else
