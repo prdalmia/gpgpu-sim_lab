@@ -114,7 +114,7 @@ struct lab_block_t {
 		m_last_access_time = 0;
         sector_use_count = 0;
         m_status = INVALID;
-        for(i = 0; i < 4; i++   )
+        reset_sectors();
     }
 
 
