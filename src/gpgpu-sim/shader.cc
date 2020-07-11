@@ -1821,7 +1821,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                                   
 
 			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
-             //    printf(" Request recieved for block %x\n", mf_next->get_addr() );
+                printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 		   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
