@@ -196,7 +196,7 @@ struct lab_block_t {
     void increment_sectors_used_count()
     {
         sector_use_count++;
-    
+        assert( sector_use_count < 5);   
     }
     
      void reset_sectors_used_count(){
