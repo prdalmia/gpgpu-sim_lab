@@ -167,7 +167,31 @@ struct lab_block_t {
 	{
 	    	m_last_access_time = time;
 	}
-    void sector_allocate(mem_fetch* sector_mf)
+	 unsigned long long get_alloc_time()
+	{
+	  	return m_alloc_time;
+	}
+     mem_fetch * get_mf()
+	{
+	  	return mf_for_block;
+	}
+/*
+    void increment_sectors_used_count()
+    {
+        sector_use_count++;
+        assert( sector_use_count < 5);   
+    }
+    
+     void reset_sectors_used_count(){
+        sector_use_count = 0;
+    }
+
+    void reset_sectors(){
+        for ( int i = 0; i < 4 ; i ++){
+            sectors[i] != NULL;
+        }
+    }
+      void sector_allocate(mem_fetch* sector_mf)
 	{
         for ( int i = 0; i < 4 ; i ++){
             if(sectors[i] != NULL){ 
@@ -184,31 +208,7 @@ struct lab_block_t {
             }
         
 	}
-	 unsigned long long get_alloc_time()
-	{
-	  	return m_alloc_time;
-	}
-     mem_fetch * get_mf()
-	{
-	  	return mf_for_block;
-	}
-
-    void increment_sectors_used_count()
-    {
-        sector_use_count++;
-        assert( sector_use_count < 5);   
-    }
-    
-     void reset_sectors_used_count(){
-        sector_use_count = 0;
-    }
-
-    void reset_sectors(){
-        for ( int i = 0; i < 4 ; i ++){
-            sectors[i] != NULL;
-        }
-    }
-
+*/
 	void print_status() {
 		 printf("m_block_addr is %llu, status = %u\n", m_block_addr, m_status);
 	}
@@ -223,7 +223,7 @@ struct lab_block_t {
 
         new_addr_type    m_tag;
         new_addr_type    m_block_addr;
-        mem_fetch*       sectors[4];
+        //mem_fetch*       sectors[4];
        unsigned sector_use_count;
         
 private:
