@@ -114,7 +114,7 @@ struct lab_block_t {
 		m_last_access_time = 0;
         sector_use_count = 0;
         m_status = INVALID;
-        reset_sectors();
+        //reset_sectors();
     }
 
 
@@ -126,7 +126,7 @@ struct lab_block_t {
 		m_last_access_time = time;
 		m_fill_time = 0;
         mf_for_block = mf;
-        sector_allocate(mf);
+        //sector_allocate(mf);
 		m_status = RESERVED;
 	}
 
