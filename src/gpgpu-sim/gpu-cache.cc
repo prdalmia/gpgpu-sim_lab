@@ -368,7 +368,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
         m_pending_hit++;
     case HIT: 
         m_lines[idx]->set_last_access_time(time);
-        m_lines[idx]->sector_allocate(mf);
+        //m_lines[idx]->sector_allocate(mf);
         break;
     case MISS:
         m_miss++;
@@ -377,9 +377,9 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
             //if( m_lines[idx]->is_modified_line()) {
                 if( m_lines[idx]->is_valid_line()) {
                 wb = true;
-                evicted.sectors_used = m_lines[idx]->sector_use_count;
-                m_lines[idx]->reset_sectors_used_count();
-                m_lines[idx]->reset_sectors();
+                //evicted.sectors_used = m_lines[idx]->sector_use_count;
+                //m_lines[idx]->reset_sectors_used_count();
+                //m_lines[idx]->reset_sectors();
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
                 evicted.mf = m_lines[idx]->get_mf();
             }
