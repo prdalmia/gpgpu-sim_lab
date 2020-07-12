@@ -1821,7 +1821,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                                   
 
 			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
-                printf(" Request recieved for block %x\n", mf_next->get_addr() );
+               // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 		   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
@@ -1854,7 +1854,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    {
                    events.pop_back();
                    lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
-                   // printf(" Block with address %x is evicted and is sent down with sectors %d\n", lab_event.m_evicted_block.mf->get_addr(), lab_event.m_evicted_block.mf->get_num_sectors()); 
+                    printf(" Block with address %x is evicted and is sent down with sectors %d\n", lab_event.m_evicted_block.mf->get_addr(), lab_event.m_evicted_block.mf->get_num_sectors()); 
                     m_icnt->push(lab_event.m_evicted_block.mf);
                  //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
                 
