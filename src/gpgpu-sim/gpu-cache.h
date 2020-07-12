@@ -114,7 +114,7 @@ struct lab_block_t {
 		m_last_access_time = 0;
         sector_use_count = 0;
         m_status = INVALID;
-        //reset_sectors();
+        reset_sectors();
     }
 
 
@@ -126,7 +126,7 @@ struct lab_block_t {
 		m_last_access_time = time;
 		m_fill_time = 0;
         mf_for_block = mf;
-        //sector_allocate(mf);
+        sector_allocate(mf);
 		m_status = RESERVED;
 	}
 
@@ -167,6 +167,7 @@ struct lab_block_t {
 	{
 	    	m_last_access_time = time;
 	}
+  
 	 unsigned long long get_alloc_time()
 	{
 	  	return m_alloc_time;
@@ -175,7 +176,7 @@ struct lab_block_t {
 	{
 	  	return mf_for_block;
 	}
-/*
+
     void increment_sectors_used_count()
     {
         sector_use_count++;
@@ -191,6 +192,7 @@ struct lab_block_t {
             sectors[i] != NULL;
         }
     }
+
       void sector_allocate(mem_fetch* sector_mf)
 	{
         for ( int i = 0; i < 4 ; i ++){
@@ -208,7 +210,7 @@ struct lab_block_t {
             }
         
 	}
-*/
+
 	void print_status() {
 		 printf("m_block_addr is %llu, status = %u\n", m_block_addr, m_status);
 	}
@@ -223,7 +225,7 @@ struct lab_block_t {
 
         new_addr_type    m_tag;
         new_addr_type    m_block_addr;
-        //mem_fetch*       sectors[4];
+        mem_fetch*       sectors[4];
        unsigned sector_use_count;
         
 private:
