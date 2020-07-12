@@ -189,7 +189,7 @@ struct lab_block_t {
 
     void reset_sectors(){
         for ( int i = 0; i < 4 ; i ++){
-            sectors[i] != NULL;
+            sectors[i] = NULL;
         }
     }
 
