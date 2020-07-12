@@ -368,7 +368,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
         m_pending_hit++;
     case HIT: 
         m_lines[idx]->set_last_access_time(time);
-        //m_lines[idx]->sector_allocate(mf);
+        m_lines[idx]->sector_allocate(mf);
         break;
     case MISS:
         m_miss++;
