@@ -1873,9 +1873,8 @@ void ldst_unit::Lab_latency_queue_cycle()
                    events.pop_back();
                    for( int i = 0; i < lab_event.m_evicted_block.sectors_used; i++){
                     m_icnt->push(lab_event.m_evicted_block.mf[i]);
-                    printf(" Block with address %x  will be evicted with size %d\n", lab_event.m_evicted_block.mf[i]->get_addr(), lab_event.m_evicted_block.mf[i]->get_access_size() );
-                    assert(lab_event.m_evicted_block.mf[i]->get_access_size() > 0);
-                    assert(lab_event.m_evicted_block.mf[i]->get_status() != MEM_FETCH_DELETED);
+                   // assert(lab_event.m_evicted_block.mf[i]->get_access_size() > 0);
+                    //assert(lab_event.m_evicted_block.mf[i]->get_status() != MEM_FETCH_DELETED);
                    }
                     
                  //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
