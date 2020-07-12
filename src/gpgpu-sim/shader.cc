@@ -1818,14 +1818,31 @@ void ldst_unit::Lab_latency_queue_cycle()
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
-                                  
+            const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
+									mf_next->get_addr(),
+									mf_next->get_data_size(),
+									mf_next->is_write(),
+									mf_next->get_access_warp_mask(),
+									mf_next->get_access_byte_mask(),
+									mf_next->get_access_sector_mask());
 
-			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+               //printf("the request size is %d\n", mf_next->get_data_size());                      
+
+            mem_fetch *mf_copy = new mem_fetch(*ma,
+                                    &mf_next->get_inst(),
+                                    mf_next->get_ctrl_size(),
+                                    mf_next->get_wid(),
+                                    mf_next->get_sid(), 
+                                    mf_next->get_tpc(), 
+                                    mf_next->get_mem_config());
+                                                          
+
+			enum cache_request_status status = m_lab->access(mf_copy->get_addr(),mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle,events);
                // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 		   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
-
+           
 		   if ( status == HIT) {
 			   assert( !read_sent );
 			   lab_latency_queue[0] = NULL;
@@ -1862,23 +1879,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    } 
                }
 
-               const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
-									mf_next->get_addr(),
-									mf_next->get_data_size(),
-									mf_next->is_write(),
-									mf_next->get_access_warp_mask(),
-									mf_next->get_access_byte_mask(),
-									mf_next->get_access_sector_mask());
-
-               //printf("the request size is %d\n", mf_next->get_data_size());                      
-
-               mem_fetch *mf_copy = new mem_fetch(*ma,
-                                      &mf_next->get_inst(),
-                                      mf_next->get_ctrl_size(),
-                                      mf_next->get_wid(),
-                                      mf_next->get_sid(), 
-                                      mf_next->get_tpc(), 
-                                     mf_next->get_mem_config());
+            
                //printf("the request copy size is %d\n", mf_copy->get_data_size());
                 m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
 
