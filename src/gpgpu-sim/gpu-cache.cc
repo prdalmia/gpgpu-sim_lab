@@ -342,11 +342,11 @@ enum cache_request_status lab_array::probe( new_addr_type addr, unsigned &idx , 
 
 }
 
-enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf, std::list<cache_event> &events )
+enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,mem_fetch* mf, std::list<cache_event> &events, mem_fetch* mf_copy )
 {
     //bool wb=false;
     evicted_block_info evicted;
-    enum cache_request_status result = access(addr,time,evicted,mf);
+    enum cache_request_status result = access(addr,time,evicted,mf, mf_copy);
     if(evicted.mf){
     events.push_back(cache_event(WRITE_BACK_REQUEST_SENT, evicted));
     }
@@ -354,7 +354,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time,m
     return result;
 }
 
-enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, evicted_block_info &evicted, mem_fetch* mf )
+enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, evicted_block_info &evicted, mem_fetch* mf, mem_fetch* mf_copy )
 {
     m_access++;
     is_used = true;
@@ -368,7 +368,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
         m_pending_hit++;
     case HIT: 
         m_lines[idx]->set_last_access_time(time);
-        m_lines[idx]->sector_allocate(mf);
+        m_lines[idx]->sector_allocate(mf_copy);
         break;
     case MISS:
         m_miss++;
