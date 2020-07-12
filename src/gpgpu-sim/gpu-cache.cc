@@ -378,7 +378,7 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
                 if( m_lines[idx]->is_valid_line()) {
                 wb = true;
                 evicted.sectors_used = m_lines[idx]->sector_use_count;
-                 printf(" Block with address %x , block address %xx is evicted and is sent down with sectors %d\n", addr, m_lines[idx]->m_block_addr, m_lines[idx]->sector_use_count); 
+                 printf(" Block with address %x , block address %x is evicted and is sent down with sectors %d\n", addr, m_lines[idx]->m_block_addr, m_lines[idx]->sector_use_count); 
                 m_lines[idx]->reset_sectors_used_count();
                 m_lines[idx]->reset_sectors();
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
