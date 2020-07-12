@@ -1858,6 +1858,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 				   for(unsigned i=0; i< dec_ack; ++i)
 				      m_core->store_ack(mf_next);
 			   }
+               mf_copy->set_atomicdone();
         
 		   } else if ( status == RESERVATION_FAIL ) {
 			   assert( !read_sent );
