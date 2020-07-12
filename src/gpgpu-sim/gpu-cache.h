@@ -1570,7 +1570,11 @@ public:
     	m_config=config;
     	m_lab_array->update_cache_parameters(config);
     }
-    enum cache_request_status access( new_addr_type addr, mem_fetch *mf, unsigned time, std::list<cache_event> &events, mem_fetch *mf_copy ) 
+    enum cache_request_status access( new_addr_type addr, mem_fetch *mf, unsigned time, std::list<cache_event> &events ) 
+    {
+        
+    }
+    enum cache_request_status access_lab( new_addr_type addr, mem_fetch *mf, unsigned time, std::list<cache_event> &events, mem_fetch *mf_copy ) 
     {
         return m_lab_array->access(addr, time, mf, events, mf_copy);
     }
