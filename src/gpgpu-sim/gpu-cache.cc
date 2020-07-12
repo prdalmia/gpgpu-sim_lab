@@ -369,18 +369,16 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
     case HIT: 
         m_lines[idx]->set_last_access_time(time);
         m_lines[idx]->sector_allocate(mf);
-        printf(" Access for idx %d is a HIT for which the sector use count is %d\n", idx, m_lines[idx]->sector_use_count);
         break;
     case MISS:
         m_miss++;
-        printf(" Access for idx %d is a MISS for which the sector use count is %d\n", idx, m_lines[idx]->sector_use_count);
     shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
         if ( m_config.m_alloc_policy == ON_MISS ) {
             //if( m_lines[idx]->is_modified_line()) {
                 if( m_lines[idx]->is_valid_line()) {
                 wb = true;
                 evicted.sectors_used = m_lines[idx]->sector_use_count;
-                 printf(" Block with address %x , block address %x is evicted , where idx is %d and is sent down with sectors %d\n", addr, m_lines[idx]->m_block_addr, idx, m_lines[idx]->sector_use_count); 
+                 //printf(" Block with address %x , block address %x is evicted , where idx is %d and is sent down with sectors %d\n", addr, m_lines[idx]->m_block_addr, idx, m_lines[idx]->sector_use_count); 
                 m_lines[idx]->reset_sectors_used_count();
                 m_lines[idx]->reset_sectors();
                 m_lines[idx]->set_status(INVALID);
