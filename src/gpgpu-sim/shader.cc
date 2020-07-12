@@ -1837,7 +1837,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                                     mf_next->get_mem_config());
                                                           
 
-			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+			enum cache_request_status status = m_lab->access(mf_copy->get_addr(),mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle,events);
                // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 		   bool write_sent = was_write_sent(events);
@@ -1851,12 +1851,12 @@ void ldst_unit::Lab_latency_queue_cycle()
 			   if(mf_next->get_inst().is_store() && !write_sent)
 			   {
 				   unsigned dec_ack = (m_config->m_L1D_config.get_mshr_type() == SECTOR_ASSOC)?
-				   						(mf_next->get_data_size()/SECTOR_SIZE) : 1;
+				   						(mf_copy->get_data_size()/SECTOR_SIZE) : 1;
 
-				   mf_next->set_reply();
+				   mf_copy->set_reply();
 
 				   for(unsigned i=0; i< dec_ack; ++i)
-				      m_core->store_ack(mf_next);
+				      m_core->store_ack(mf_copy);
 			   }
         
 		   } else if ( status == RESERVATION_FAIL ) {
