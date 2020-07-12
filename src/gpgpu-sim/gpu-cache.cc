@@ -378,12 +378,15 @@ enum cache_request_status lab_array::access( new_addr_type addr, unsigned time, 
                 if( m_lines[idx]->is_valid_line()) {
                 wb = true;
                 evicted.sectors_used = m_lines[idx]->sector_use_count;
+                for (int i =0 ; i < m_lines[idx]->sector_use_count; i++){
+                    evicted.mf[i] = m_lines[idx]->sectors[i];
+                }
                  //printf(" Block with address %x , block address %x is evicted , where idx is %d and is sent down with sectors %d\n", addr, m_lines[idx]->m_block_addr, idx, m_lines[idx]->sector_use_count); 
                 m_lines[idx]->reset_sectors_used_count();
                 m_lines[idx]->reset_sectors();
                 m_lines[idx]->set_status(INVALID);
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
-                evicted.mf = m_lines[idx]->get_mf();
+                //evicted.mf = m_lines[idx]->get_mf();
             }
             //m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf);
         }

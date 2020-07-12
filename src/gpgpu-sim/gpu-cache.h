@@ -76,12 +76,14 @@ enum cache_event_type {
 struct evicted_block_info {
 	new_addr_type m_block_addr;
 	unsigned m_modified_size;
-    mem_fetch* mf;
+    mem_fetch* mf[4];
     unsigned sectors_used;
 	evicted_block_info() {
 		m_block_addr = 0;
 		m_modified_size = 0;
-        mf = NULL;
+        for(int i = 0; i < 4 ; i++){
+            mf[i] = NULL;
+         }
         sectors_used = 0;
 	}
 	void set_info(new_addr_type block_addr, unsigned modified_size){

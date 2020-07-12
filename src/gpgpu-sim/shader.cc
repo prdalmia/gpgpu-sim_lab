@@ -1853,8 +1853,10 @@ void ldst_unit::Lab_latency_queue_cycle()
                    if(lab_event.m_cache_event_type == WRITE_BACK_REQUEST_SENT)
                    {
                    events.pop_back();
-                   lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
-                    m_icnt->push(lab_event.m_evicted_block.mf);
+                   for( int i = 0; i < lab_event.m_evicted_block.sectors_used; i++){
+                    m_icnt->push(lab_event.m_evicted_block.mf[i]);
+                   }
+                    
                  //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
                 
                    } 
