@@ -424,10 +424,13 @@ std::deque<mem_fetch*> lab_array::flush()
 {
     
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(m_lines[i]->is_valid_line()) {  
-            m_lines[i]->set_status(INVALID);          
+    	if(m_lines[i]->is_valid_line()) {             
            mem_fetch *mf =  m_lines[i]->get_mf();
-           flush_queue.push_back(mf);
+           mf->set_num_sectors(m_lines[i]->sector_use_count);
+           m_lines[i]->reset_sectors_used_count();
+           m_lines[i]->reset_sectors();
+           m_lines[i]->set_status(INVALID); 
+           flush_queue.push_back(mf);           
     	}
 
     return flush_queue;
