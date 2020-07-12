@@ -426,13 +426,19 @@ void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch *mf)
 std::deque<mem_fetch*> lab_array::flush() 
 {
     
-    for (unsigned i=0; i < m_config.get_num_lines(); i++)
+    for (unsigned i=0; i < m_config.get_num_lines(); i++){
     	if(m_lines[i]->is_valid_line()) {  
-            m_lines[i]->set_status(INVALID);          
-           mem_fetch *mf =  m_lines[i]->get_mf();
+            m_lines[i]->set_status(INVALID);
+            for (int j =0 ; j < m_lines[i]->sector_use_count; j++){
+                    mem_fetch* mf = m_lines[i]->sectors[j];
+                         
+           //mem_fetch *mf =  m_lines[i]->get_mf();
            flush_queue.push_back(mf);
     	}
-
+        m_lines[i]->reset_sectors_used_count();
+        m_lines[i]->reset_sectors();
+        }
+    }
     return flush_queue;
 }
 
