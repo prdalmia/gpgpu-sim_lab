@@ -1140,6 +1140,49 @@ void baseline_cache::send_read_request(new_addr_type addr, new_addr_type block_a
     	assert(0);
 }
 
+void baseline_cache::send_atomic_request(new_addr_type addr, new_addr_type block_addr, unsigned cache_index, mem_fetch *mf,
+		unsigned time, bool &do_miss, bool &wb, evicted_block_info &evicted, std::list<cache_event> &events, bool read_only, bool wa){
+
+	new_addr_type mshr_addr = m_config.mshr_addr(mf->get_addr());
+    bool mshr_hit = m_mshrs.probe(mshr_addr);
+    bool mshr_avail = !m_mshrs.full(mshr_addr);
+    if ( mshr_hit && mshr_avail ) {
+    	if(read_only)
+    		m_tag_array->access(block_addr,time,cache_index,mf);
+    	else
+    		m_tag_array->access(block_addr,time,cache_index,wb,evicted,mf);
+
+        m_mshrs.add(mshr_addr,mf);
+        do_miss = true;
+
+    } else if ( !mshr_hit && mshr_avail && (m_miss_queue.size() < m_config.m_miss_queue_size) ) {
+    	if(read_only)
+    		m_tag_array->access(block_addr,time,cache_index,mf);
+    	else
+    		m_tag_array->access(block_addr,time,cache_index,wb,evicted,mf);
+
+        m_mshrs.add(mshr_addr,mf);
+        if(m_config.is_streaming() && m_config.m_cache_type == SECTOR){
+			m_tag_array->add_pending_line(mf);
+		}
+        m_extra_mf_fields[mf] = extra_mf_fields(mshr_addr,mf->get_addr(),cache_index, mf->get_data_size(), m_config);
+        mf->set_data_size( m_config.get_atom_sz() );
+        mf->set_addr( mshr_addr );
+        m_miss_queue.push_back(mf);
+        mf->set_status(m_miss_queue_status,time);
+        if(!wa)
+        	events.push_back(cache_event(READ_REQUEST_SENT));
+
+        do_miss = true;
+    }
+    else if(mshr_hit && !mshr_avail)
+        m_stats.inc_fail_stats(mf->get_access_type(), MSHR_MERGE_ENRTY_FAIL);
+    else if (!mshr_hit && !mshr_avail)
+    	 m_stats.inc_fail_stats(mf->get_access_type(), MSHR_ENRTY_FAIL);
+    else
+    	assert(0);
+}
+
 
 /// Sends write request to lower level memory (write or writeback)
 void data_cache::send_write_request(mem_fetch *mf, cache_event request, unsigned time, std::list<cache_event> &events){
@@ -1528,6 +1571,13 @@ data_cache::rd_miss_base( new_addr_type addr,
                        cache_index,
                        mf, time, do_miss, wb, evicted, events, false, false);
 
+    if(mf->isatomic() == true){
+        send_atomic_request( addr,
+                       block_addr,
+                       cache_index,
+                       mf, time, do_miss, wb, evicted, events, false, false);
+    }                   
+
     if( do_miss ){
         // If evicted block is modified and not a write-through
         // (already modified lower level)
@@ -1610,7 +1660,20 @@ data_cache::process_tag_probe( bool wr,
         	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
         	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
         }
-    }else{ // Read
+    }
+else if (mf->isatomic() == true){  
+        if(probe_status == HIT){
+           // mf->do_atomic();
+        }else if ( probe_status != RESERVATION_FAIL ) {
+            access_status = (this->*m_rd_miss)( addr,
+                                       cache_index,
+                                       mf, time, events, probe_status );
+        }else{
+        	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
+        	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
+        }
+    }
+        else{ // Read
         if(probe_status == HIT){
             access_status = (this->*m_rd_hit)( addr,
                                       cache_index,

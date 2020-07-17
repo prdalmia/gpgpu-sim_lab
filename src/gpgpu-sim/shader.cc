@@ -1709,7 +1709,9 @@ void ldst_unit::L1_latency_queue_cycle()
 						   }
 					   }
 			   }
-
+              if(mf_next->isatomic()){
+                    m_core->decrement_atomic_count(mf_next->get_wid(),mf_next->get_access_warp_mask().count());
+              }
 			   //For write hit in WB policy
 			   if(mf_next->get_inst().is_store() && !write_sent)
 			   {
@@ -1789,7 +1791,7 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    const mem_access_t &access = inst.accessq_back();
 
    bool bypassL1D = false; 
-   if ( CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) ) {
+   if ( CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) && inst.isatomic() != true) {
        bypassL1D = true; 
    } else if (inst.space.is_global()) { // global memory access 
        // skip L1 cache if the option is enabled
@@ -2253,6 +2255,9 @@ void ldst_unit::writeback()
             if( m_L1D && m_L1D->access_ready() ) {
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
+                if(m_next_wb.isatomic()){
+                    m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
+                }
                 delete mf;
                 serviced_client = next_client; 
             }
