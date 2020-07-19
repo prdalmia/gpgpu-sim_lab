@@ -1695,7 +1695,11 @@ void ldst_unit::L1_latency_queue_cycle()
 		   if ( status == HIT ) {
 			   assert( !read_sent );
 			   l1_latency_queue[0] = NULL;
-			   if ( mf_next->get_inst().is_load() ) {
+               if(mf_next->isatomic()){
+                          mf_next->do_atomic();
+                          m_core->decrement_atomic_count(mf_next->get_wid(),mf_next->get_access_warp_mask().count());
+              }
+			   if ( mf_next->get_inst().is_load() || mf_next->isatomic() ) {
 				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
 					   if (mf_next->get_inst().out[r] > 0)
 					   {
@@ -1708,10 +1712,10 @@ void ldst_unit::L1_latency_queue_cycle()
 							m_core->warp_inst_complete(mf_next->get_inst());
 						   }
 					   }
+
+                        
 			   }
-              if(mf_next->isatomic()){
-                    m_core->decrement_atomic_count(mf_next->get_wid(),mf_next->get_access_warp_mask().count());
-              }
+             
 			   //For write hit in WB policy
 			   if(mf_next->get_inst().is_store() && !write_sent)
 			   {
@@ -2256,6 +2260,7 @@ void ldst_unit::writeback()
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
                 if(m_next_wb.isatomic()){
+                    mf->do_atomic();
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
                 }
                 delete mf;
