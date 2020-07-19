@@ -44,7 +44,8 @@ enum cache_block_state {
     INVALID=0,
     RESERVED,
     VALID,
-    MODIFIED
+    MODIFIED,
+    OWNED
 };
 
 enum cache_request_status {
@@ -53,8 +54,8 @@ enum cache_request_status {
     MISS,
     RESERVATION_FAIL, 
 	SECTOR_MISS,
-    NUM_CACHE_REQUEST_STATUS
-};
+    NUM_CACHE_REQUEST_STATUS,
+    REMOTE_OWNED};
 
 enum cache_reservation_fail_reason {
 	LINE_ALLOC_FAIL= 0,// all line are reserved

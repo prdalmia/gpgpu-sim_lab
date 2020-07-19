@@ -276,6 +276,10 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
 					idx = index;
 					return HIT;
             	}
+              else if(line->get_status(mask) == OWNED){
+					idx = index;
+					return REMOTE_OWNED;
+              }  
             	else {
             		idx = index;
             		return SECTOR_MISS;
@@ -1139,7 +1143,6 @@ void baseline_cache::send_read_request(new_addr_type addr, new_addr_type block_a
     else
     	assert(0);
 }
-
 /// Sends write request to lower level memory (write or writeback)
 void data_cache::send_write_request(mem_fetch *mf, cache_event request, unsigned time, std::list<cache_event> &events){
 

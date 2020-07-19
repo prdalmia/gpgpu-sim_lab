@@ -718,6 +718,7 @@ MA_TUP_BEGIN( mem_access_type ) \
    MA_TUP( INST_ACC_R ), \
    MA_TUP( L1_WR_ALLOC_R ), \
    MA_TUP( L2_WR_ALLOC_R ), \
+   MA_TUP( REMOTE_INV_R ), \
    MA_TUP( NUM_MEM_ACCESS_TYPE ) \
 MA_TUP_END( mem_access_type ) 
 

@@ -38,7 +38,7 @@ enum mf_type {
    READ_REPLY, // send to shader
    WRITE_ACK,
    GET_OWN,
-   INVALIDATION,
+   INVALIDATION, 
 };
 
 #define MF_TUP_BEGIN(X) enum X {
@@ -98,6 +98,7 @@ public:
    bool istexture() const;
    bool isconst() const;
    enum mf_type get_type() const { return m_type; }
+   void set_type(enum mf_type type)  { m_type = type; }
    bool isatomic() const;
 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
