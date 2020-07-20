@@ -721,7 +721,7 @@ mem_fetch* memory_sub_partition::pop()
     mem_fetch* mf = m_L2_icnt_queue->pop();
     m_request_tracker.erase(mf);
     if ( mf && mf->isatomic() )
-        mf->do_atomic();
+    //mf->do_atomic();
     if( mf && (mf->get_access_type() == L2_WRBK_ACC || mf->get_access_type() == L1_WRBK_ACC) ) {
         delete mf;
         mf = NULL;
