@@ -1609,18 +1609,6 @@ data_cache::process_tag_probe( bool wr,
         	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
         }
     }
-else if (mf->isatomic() == true){  
-        if(probe_status == HIT){
-           // mf->do_atomic();
-        }else if ( probe_status != RESERVATION_FAIL ) {
-            access_status = (this->*m_rd_miss)( addr,
-                                       cache_index,
-                                       mf, time, events, probe_status );
-        }else{
-        	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
-        	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
-        }
-    }
         else{ // Read
         if(probe_status == HIT){
             access_status = (this->*m_rd_hit)( addr,

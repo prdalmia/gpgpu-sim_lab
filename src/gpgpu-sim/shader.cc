@@ -1695,6 +1695,10 @@ void ldst_unit::L1_latency_queue_cycle()
 		   if ( status == HIT ) {
 			   assert( !read_sent );
 			   l1_latency_queue[0] = NULL;
+                if(mf_next->isatomic()){
+                    mf_next->do_atomic();
+                    m_core->decrement_atomic_count(mf_next->get_wid(),mf_next->get_access_warp_mask().count());
+              }
 			   if ( mf_next->get_inst().is_load() ) {
 				   for ( unsigned r=0; r < MAX_OUTPUT_VALUES; r++)
 					   if (mf_next->get_inst().out[r] > 0)
@@ -1709,9 +1713,7 @@ void ldst_unit::L1_latency_queue_cycle()
 						   }
 					   }
 			   }
-              if(mf_next->isatomic()){
-                    m_core->decrement_atomic_count(mf_next->get_wid(),mf_next->get_access_warp_mask().count());
-              }
+             
 			   //For write hit in WB policy
 			   if(mf_next->get_inst().is_store() && !write_sent)
 			   {
@@ -1791,11 +1793,11 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    const mem_access_t &access = inst.accessq_back();
 
    bool bypassL1D = false; 
-   if ( CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) && inst.isatomic() != true) {
+   if ( (CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL)) && inst.isatomic() != true) {
        bypassL1D = true; 
    } else if (inst.space.is_global()) { // global memory access 
        // skip L1 cache if the option is enabled
-       if (m_core->get_config()->gmem_skip_L1D && (CACHE_L1 != inst.cache_op))
+       if (m_core->get_config()->gmem_skip_L1D && (CACHE_L1 != inst.cache_op)) 
            bypassL1D = true; 
    }
    if( bypassL1D ) {
@@ -2256,6 +2258,7 @@ void ldst_unit::writeback()
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
                 if(m_next_wb.isatomic()){
+                    m_next_wb.do_atomic();
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
                 }
                 delete mf;
