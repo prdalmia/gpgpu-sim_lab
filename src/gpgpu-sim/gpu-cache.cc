@@ -1062,7 +1062,7 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
     bool has_atomic = false;
     m_mshrs.mark_ready(e->second.m_block_addr, has_atomic);
     if (has_atomic) {
-        assert(m_config.m_alloc_policy == ON_MISS);
+        //assert(m_config.m_alloc_policy == ON_MISS);
         cache_block_t* block = m_tag_array->get_block(e->second.m_cache_index);
         block->set_status(MODIFIED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
     }
