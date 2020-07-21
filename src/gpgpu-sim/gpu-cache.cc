@@ -247,10 +247,70 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
     mem_access_sector_mask_t mask = mf->get_access_sector_mask();
     return probe(addr, idx, mask, probe_mode, mf);
 }
+void tag_array::evict( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf )
+{
+  
+    enum cache_request_status status = probe(addr,idx,mf);
+    if (status == HIT)
+        if( m_lines[idx]->is_modified_line()) {
+                wb = true;
+                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
+                m_lines[idx]->set_status(INVALID, mf->get_access_sector_mask());
+            }    
+}
 
+unsigned tag_array::get_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf) const {
+   unsigned set_index = m_config.set_index(addr);
+    new_addr_type tag = m_config.tag(addr);
+    mem_access_sector_mask_t mask = mf->get_access_sector_mask();
+    // check for hit or pending hit
+    for (unsigned way=0; way< m_config.m_assoc; way++) {
+        unsigned index = set_index*m_config.m_assoc+way;
+        cache_block_t *line = m_lines[index];
+        if (line->m_tag == tag) {
+           if ( line->get_status(mask) == OWNED) {
+            	if(line->is_readable(mask)) {
+					idx = index;
+					return line->m_owner;
+            	}
+           }
+           else{
+               return unsigned(-1);
+           }
+        }
+    }            
+}
+
+void tag_array::set_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf, unsigned owner_id) {
+   unsigned set_index = m_config.set_index(addr);
+    new_addr_type tag = m_config.tag(addr);
+    mem_access_sector_mask_t mask = mf->get_access_sector_mask();
+    // check for hit or pending hit
+    for (unsigned way=0; way< m_config.m_assoc; way++) {
+        unsigned index = set_index*m_config.m_assoc+way;
+        cache_block_t *line = m_lines[index];
+        if (line->m_tag == tag) {
+           if ( line->get_status(mask) == VALID || line->get_status(mask) == OWNED) {
+            	line->m_owner = owner_id;
+                if(owner_id == (unsigned)-1 ){
+                  line->set_status(VALID, mask);
+                }
+                else{
+                line->set_status(OWNED, mask);
+                }
+                
+           }
+           else{
+               bool testbool = false;
+                assert(("Setting owner for an INVALID LINE", testbool));
+           } 
+        }
+    } 
+}          
 
 enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode, mem_fetch* mf) const {
     //assert( m_config.m_write_policy == READ_ONLY );
+    
     unsigned set_index = m_config.set_index(addr);
     new_addr_type tag = m_config.tag(addr);
 
@@ -276,15 +336,17 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
 					idx = index;
 					return HIT;
             	}
-              else if(line->get_status(mask) == OWNED){
-					idx = index;
-					return REMOTE_OWNED;
-              }  
             	else {
             		idx = index;
             		return SECTOR_MISS;
             	}
 
+            }
+            else if( line->get_status(mask) == OWNED) {
+            	if(line->is_readable(mask)) {
+					idx = index;
+					return REMOTE_OWNED;
+                }
             } else if ( line->is_valid_line() && line->get_status(mask) == INVALID ) {
                 idx = index;
                 return SECTOR_MISS;
@@ -546,6 +608,11 @@ void mshr_table::add( new_addr_type block_addr, mem_fetch *mf ){
 	}
 }
 
+/// Add or merge this access
+void mshr_table::add_pending_flush( new_addr_type block_addr, mem_fetch *mf ){
+	m_data[block_addr].pending_flushing_request = true;
+}
+
 /// check is_read_after_write_pending
 bool mshr_table::is_read_after_write_pending( new_addr_type block_addr){
 	std::list<mem_fetch*> my_list = m_data[block_addr].m_list;
@@ -581,6 +648,9 @@ mem_fetch *mshr_table::next_access(){
     m_data[block_addr].m_list.pop_front();
     if ( m_data[block_addr].m_list.empty() ) {
         // release entry
+        if(m_data[block_addr].m_has_atomic){
+        result->set_eviction_request();
+        }
         m_data.erase(block_addr);
         m_current_response.pop_front();
     }
@@ -1671,6 +1741,37 @@ l1_cache::access( new_addr_type addr,
     return data_cache::access( addr, mf, time, events );
 }
 
+enum cache_request_status
+l1_cache::evict(   mem_fetch *mf,
+                unsigned time  )
+{
+   
+    new_addr_type mshr_addr = m_config.mshr_addr(mf->get_addr());
+    new_addr_type block_addr = m_config.block_addr(mf->get_addr());
+    unsigned cache_index = (unsigned)-1;
+    bool mshr_hit = m_mshrs.probe(mshr_addr);
+    std::list<cache_event> events;
+    enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
+    if ( !mshr_hit && status == HIT ) {
+
+         		
+    if(miss_queue_full(0)) {
+		m_stats.inc_fail_stats(mf->get_access_type(), MISS_QUEUE_FULL);
+		return RESERVATION_FAIL; // cannot handle request this cycle
+	}
+	// generate a write-through/evict
+	cache_block_t* block = m_tag_array->get_block(cache_index);
+	send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
+
+	// Invalidate block
+	block->set_status(INVALID, mf->get_access_sector_mask());
+    }
+    else if ( mshr_hit && status == MISS){
+       m_mshrs.add_pending_flush(mshr_addr, mf);
+    }   
+    return status;
+}
+
 // The l2 cache access function calls the base data_cache access
 // implementation.  When the L2 needs to diverge from L1, L2 specific
 // changes should be made here.
@@ -1681,6 +1782,23 @@ l2_cache::access( new_addr_type addr,
                   std::list<cache_event> &events )
 {
     return data_cache::access( addr, mf, time, events );
+}
+
+unsigned l2_cache::get_owner( new_addr_type addr,
+                  mem_fetch *mf)
+{
+     unsigned cache_index = (unsigned)-1;
+     new_addr_type block_addr = m_config.block_addr(addr);
+     return m_tag_array->get_owner( block_addr, cache_index, mf);
+}
+void
+l2_cache::set_owner( new_addr_type addr,
+                  mem_fetch *mf,
+                  unsigned owner_id)
+{
+     unsigned cache_index = (unsigned)-1;
+     new_addr_type block_addr = m_config.block_addr(addr);
+    return  m_tag_array->set_owner( block_addr, cache_index, mf, owner_id);
 }
 
 /// Access function for tex_cache

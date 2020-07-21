@@ -116,6 +116,7 @@ struct cache_block_t {
     virtual bool is_valid_line() = 0;
     virtual bool is_reserved_line() = 0;
     virtual bool is_modified_line() = 0;
+    virtual bool is_owned_line() = 0;
 
     virtual enum cache_block_state get_status( mem_access_sector_mask_t sector_mask) = 0;
     virtual void set_status(enum cache_block_state m_status, mem_access_sector_mask_t sector_mask) = 0;
@@ -134,6 +135,7 @@ struct cache_block_t {
 
     new_addr_type    m_tag;
     new_addr_type    m_block_addr;
+    unsigned         m_owner;
 
 };
 
@@ -147,6 +149,7 @@ struct line_cache_block: public cache_block_t  {
 	        m_ignore_on_fill_status = false;
 	        m_set_modified_on_fill = false;
 	        m_readable = true;
+            m_owner = unsigned(-1);
 	    }
 	    void allocate( new_addr_type tag, new_addr_type block_addr, unsigned time, mem_access_sector_mask_t sector_mask)
 	    {
@@ -183,6 +186,11 @@ struct line_cache_block: public cache_block_t  {
 		virtual bool is_modified_line()
 	    {
 	    	return m_status == MODIFIED;
+	    }
+
+        virtual bool is_owned_line()
+	    {
+	    	return m_status == OWNED;
 	    }
 
 		virtual enum cache_block_state get_status(mem_access_sector_mask_t sector_mask)
@@ -335,6 +343,7 @@ struct sector_cache_block : public cache_block_t {
     	return true;
     }
     virtual bool is_valid_line() { return  !(is_invalid_line()); }
+    virtual bool is_owned_line() { }
     virtual bool is_reserved_line() {
     	//if any of the sector is reserved, then the line is reserved
 		for(unsigned i =0; i< SECTOR_CHUNCK_SIZE; ++i) {
@@ -799,6 +808,9 @@ public:
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
     enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, mem_fetch* mf );
     enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
+    void evict( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
+    unsigned get_owner( new_addr_type addr, unsigned &idx,  mem_fetch* mf = NULL ) const;
+    void set_owner( new_addr_type addr, unsigned &idx , mem_fetch* mf = NULL, unsigned owner_id = 0 ) ;
 
     void fill( new_addr_type addr, unsigned time, mem_fetch* mf );
     void fill( unsigned idx, unsigned time, mem_fetch* mf );
@@ -871,6 +883,8 @@ public:
     bool full( new_addr_type block_addr ) const;
     /// Add or merge this access
     void add( new_addr_type block_addr, mem_fetch *mf );
+    /// Marks that a flushing request was pending
+    void add_pending_flush( new_addr_type block_addr, mem_fetch *mf );
     /// Returns true if cannot accept new fill responses
     bool busy() const {return false;}
     /// Accept a new cache fill response: mark entry ready for processing
@@ -897,8 +911,9 @@ private:
 
     struct mshr_entry {
         std::list<mem_fetch*> m_list;
+        bool pending_flushing_request;
         bool m_has_atomic; 
-        mshr_entry() : m_has_atomic(false) { }
+        mshr_entry() : m_has_atomic(false) , pending_flushing_request(false) { }
     }; 
     typedef tr1_hash_map<new_addr_type,mshr_entry> table;
     typedef tr1_hash_map<new_addr_type,mshr_entry> line_table;
@@ -908,6 +923,7 @@ private:
     // it may take several cycles to process the merged requests
     bool m_current_response_ready;
     std::list<new_addr_type> m_current_response;
+    
 };
 
 
@@ -1343,6 +1359,10 @@ public:
                                               mem_fetch *mf,
                                               unsigned time,
                                               std::list<cache_event> &events );
+   //virtual enum cache_request_status l2access( new_addr_type addr,
+   //                                          mem_fetch *mf,
+   //                                          unsigned time,
+   //                                          std::list<cache_event> &events );
 protected:
     data_cache( const char *name,
                 cache_config &config,
@@ -1529,6 +1549,9 @@ public:
                 mem_fetch *mf,
                 unsigned time,
                 std::list<cache_event> &events );
+   
+    virtual enum cache_request_status evict ( mem_fetch *mf,
+                unsigned time);
 
 protected:
     l1_cache( const char *name,
@@ -1561,6 +1584,12 @@ public:
                 mem_fetch *mf,
                 unsigned time,
                 std::list<cache_event> &events );
+                 
+   virtual  unsigned get_owner( new_addr_type addr,
+                mem_fetch *mf);
+    virtual    void set_owner( new_addr_type addr,
+                mem_fetch * mf,
+                unsigned owner_id );
 };
 
 /*****************************************************************************/

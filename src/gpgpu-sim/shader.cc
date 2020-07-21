@@ -2262,8 +2262,13 @@ void ldst_unit::writeback()
                 if(m_next_wb.isatomic()){
                     mf->do_atomic();
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
+                    if(mf->isevictionrequest()){
+                        m_L1D->evict(mf, gpu_sim_cycle+gpu_tot_sim_cycle);
+                    }
                 }
+                if (mf->isevictionrequest() != true){
                 delete mf;
+                }
                 serviced_client = next_client; 
             }
             break;
@@ -2345,6 +2350,9 @@ void ldst_unit::cycle()
                    if (m_core->get_config()->gmem_skip_L1D)
                        bypassL1D = true; 
                }
+               if(mf->isatomic()){
+                   bypassL1D = false;
+               }
                if( bypassL1D ) {
                    if ( m_next_global == NULL ) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -2352,9 +2360,15 @@ void ldst_unit::cycle()
                        m_next_global = mf;
                    }
                } else {
+                   if(mf->get_type() == INVALIDATION){
+                       //check if MSHR for that address is empty and then write back the block to L2
+                       m_L1D->evict(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
+                   }
+                   else{
                    if (m_L1D->fill_port_free()) {
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
+                   }
                    }
                }
            }

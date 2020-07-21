@@ -38,7 +38,8 @@ enum mf_type {
    READ_REPLY, // send to shader
    WRITE_ACK,
    GET_OWN,
-   INVALIDATION, 
+   INVALIDATION,
+   INVALIDATION_RESPONSE 
 };
 
 #define MF_TUP_BEGIN(X) enum X {
@@ -94,15 +95,15 @@ public:
    unsigned get_sid() const { return m_sid; }
    unsigned get_tpc() const { return m_tpc; }
    unsigned get_wid() const { return m_wid; }
-   unsigned get_owner() const { return m_owner; }
    bool istexture() const;
    bool isconst() const;
    enum mf_type get_type() const { return m_type; }
    void set_type(enum mf_type type)  { m_type = type; }
    bool isatomic() const;
+   bool isevictionrequest() const {return send_eviction_request;}
 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
-   unsigned set_owner(unsigned owner)  { m_owner = owner;}
+   void set_eviction_request(  ) { send_eviction_request = true; }
    void set_icnt_receive_time( unsigned t ) { m_icnt_receive_time=t; }
    unsigned get_timestamp() const { return m_timestamp; }
    unsigned get_return_timestamp() const { return m_timestamp2; }
@@ -130,7 +131,7 @@ private:
    unsigned m_sid;
    unsigned m_tpc;
    unsigned m_wid;
-   unsigned m_owner;
+   bool send_eviction_request;
    // where is this request now?
    enum mem_fetch_status m_status;
    unsigned long long m_status_change;

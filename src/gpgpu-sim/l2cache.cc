@@ -422,6 +422,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             mf->set_reply();
                             mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                             m_L2_icnt_queue->push(mf);
+                            if(mf->isatomic() && m_L2cache->get_owner(mf->get_addr(), mf) == unsigned(-1)){
+                                 m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
+                            }
                         }
                         m_icnt_L2_queue->pop();
                     } else {
@@ -429,28 +432,32 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         m_icnt_L2_queue->pop();
                     }
                 }else if ( status == REMOTE_OWNED ) {
-                 if(mf->get_sid() == owner.id){
+                 if(mf->get_sid() == m_L2cache->get_owner(mf->get_addr(), mf)){
+                     //if(mf->get_type() == INVALIDATION_RESPONSE){
                      if(waiting_for_ownership[mf->get_addr()].empty() != true){
                       mem_fetch * mf_pending = waiting_for_ownership[mf->get_addr()].front();
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
-                      //TODO: Change Owner
+                      m_L2cache->set_owner(mf->get_addr(), mf,  mf_pending->get_sid());
                       waiting_for_ownership[mf->get_addr()].pop();
                   }
+                   m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1);
                    m_icnt_L2_queue->pop();
                    delete mf;
+                 //}
                  }
                  else{
                  waiting_for_ownership[mf->get_addr()].push(mf);
                     
-                  //Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
+                  //TODO: Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
+                  //Currently this code can result in multple flushing requests to the same core
                   mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
                   mem_fetch *mf_flush = new mem_fetch( access, 
                                    NULL,
                                    WRITE_PACKET_SIZE, 
                                    -1, 
-                                   owner.id, 
+                                   m_L2cache->get_owner(mf->get_addr(), mf), 
                                    -1,
                                    mf->get_mem_config() );
                     mf_flush->set_type(INVALIDATION);
@@ -458,6 +465,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                     // L2 cache accepted request
                     m_icnt_L2_queue->pop();
+                }
                 }
                  else if ( status != RESERVATION_FAIL ) {
                 	if(mf->is_write() && (m_config->m_L2_config.m_write_alloc_policy == FETCH_ON_WRITE || m_config->m_L2_config.m_write_alloc_policy == LAZY_FETCH_ON_READ) && !was_writeallocate_sent(events)) {
