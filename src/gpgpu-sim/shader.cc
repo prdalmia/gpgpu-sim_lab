@@ -2363,6 +2363,7 @@ void ldst_unit::cycle()
                    if(mf->get_type() == INVALIDATION){
                        //check if MSHR for that address is empty and then write back the block to L2
                        m_L1D->evict(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
+                        m_response_fifo.pop_front();
                    }
                    else{
                    if (m_L1D->fill_port_free()) {

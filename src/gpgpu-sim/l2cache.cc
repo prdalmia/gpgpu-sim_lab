@@ -407,6 +407,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
             if ( !output_full && port_free ) {
                 std::list<cache_event> events;
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
+                //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
                 MEM_SUBPART_DPRINTF("Probing L2 cache Address=%llx, status=%u\n", mf->get_addr(), status); 
@@ -434,21 +435,23 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 }else if ( status == REMOTE_OWNED ) {
                  if(mf->get_sid() == m_L2cache->get_owner(mf->get_addr(), mf)){
                      //if(mf->get_type() == INVALIDATION_RESPONSE){
-                     if(waiting_for_ownership[mf->get_addr()].empty() != true){
-                      mem_fetch * mf_pending = waiting_for_ownership[mf->get_addr()].front();
+                     if(waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() != true){ //TODO change this and all subsequent ones to line address
+                      mem_fetch * mf_pending = waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
-                      m_L2cache->set_owner(mf->get_addr(), mf,  mf_pending->get_sid());
-                      waiting_for_ownership[mf->get_addr()].pop();
+                      m_L2cache->set_owner(mf_pending->get_addr(), mf_pending,  mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
+                      waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
                   }
-                   m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1);
+                  else{
+                   m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
+                  }
                    m_icnt_L2_queue->pop();
                    delete mf;
                  //}
                  }
                  else{
-                 waiting_for_ownership[mf->get_addr()].push(mf);
+                 waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf); //CHANGE TO LINE ADDRESS
                     
                   //TODO: Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
                   //Currently this code can result in multple flushing requests to the same core

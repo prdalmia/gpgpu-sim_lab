@@ -247,17 +247,6 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
     mem_access_sector_mask_t mask = mf->get_access_sector_mask();
     return probe(addr, idx, mask, probe_mode, mf);
 }
-void tag_array::evict( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf )
-{
-  
-    enum cache_request_status status = probe(addr,idx,mf);
-    if (status == HIT)
-        if( m_lines[idx]->is_modified_line()) {
-                wb = true;
-                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
-                m_lines[idx]->set_status(INVALID, mf->get_access_sector_mask());
-            }    
-}
 
 unsigned tag_array::get_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf) const {
    unsigned set_index = m_config.set_index(addr);
@@ -275,11 +264,13 @@ unsigned tag_array::get_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf)
             	}
            }
            else{
-               return unsigned(-1);
+               return (unsigned)-1;
            }
         }
-    }            
+    }
 }
+       
+
 
 void tag_array::set_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf, unsigned owner_id) {
    unsigned set_index = m_config.set_index(addr);
@@ -340,13 +331,10 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
             		idx = index;
             		return SECTOR_MISS;
             	}
-
             }
             else if( line->get_status(mask) == OWNED) {
-            	if(line->is_readable(mask)) {
 					idx = index;
 					return REMOTE_OWNED;
-                }
             } else if ( line->is_valid_line() && line->get_status(mask) == INVALID ) {
                 idx = index;
                 return SECTOR_MISS;
@@ -648,7 +636,7 @@ mem_fetch *mshr_table::next_access(){
     m_data[block_addr].m_list.pop_front();
     if ( m_data[block_addr].m_list.empty() ) {
         // release entry
-        if(m_data[block_addr].m_has_atomic){
+        if(m_data[block_addr].m_has_atomic && m_data[block_addr].pending_flushing_request == true){
         result->set_eviction_request();
         }
         m_data.erase(block_addr);
@@ -1752,7 +1740,7 @@ l1_cache::evict(   mem_fetch *mf,
     bool mshr_hit = m_mshrs.probe(mshr_addr);
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
-    if ( !mshr_hit && status == HIT ) {
+    if ( !mshr_hit && status == HIT ) { // DO WE HAVE TO INCLUDE SECTOR MISS?  
 
          		
     if(miss_queue_full(0)) {
