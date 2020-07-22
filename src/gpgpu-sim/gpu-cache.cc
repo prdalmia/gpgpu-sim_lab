@@ -1760,7 +1760,7 @@ l1_cache::evict(   mem_fetch *mf,
 	}
 	// generate a write-through/evict
 	cache_block_t* block = m_tag_array->get_block(cache_index);
-    mf->set_type(INVALIDATION_RESPONSE)
+    mf->set_type(INVALIDATION_RESPONSE);
 	send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
 
 	// Invalidate block
