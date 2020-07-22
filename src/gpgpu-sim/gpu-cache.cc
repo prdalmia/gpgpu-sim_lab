@@ -281,7 +281,7 @@ void tag_array::set_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf, uns
         unsigned index = set_index*m_config.m_assoc+way;
         cache_block_t *line = m_lines[index];
         if (line->m_tag == tag) {
-           if ( line->get_status(mask) == VALID || line->get_status(mask) == OWNED) {
+           if ( line->get_status(mask) == VALID || line->get_status(mask) == OWNED || line->get_status(mask) == MODIFIED) {
             	line->m_owner = owner_id;
                 if(owner_id == (unsigned)-1 ){
                   line->set_status(VALID, mask);
