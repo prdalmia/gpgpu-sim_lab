@@ -1020,9 +1020,11 @@ void baseline_cache::bandwidth_management::use_data_port(mem_fetch *mf, enum cac
         unsigned data_cycles = data_size / port_width + ((data_size % port_width > 0)? 1 : 0); 
         m_data_port_occupied_cycles += data_cycles; 
         } break; 
-    case HIT_RESERVED:
     case REMOTE_OWNED:
-    //ask Matt
+    break;
+    case HIT_RESERVED:
+    
+    
     case MISS: {
         // the data array is accessed to read out the entire line for write-back 
     	// in case of sector cache we need to write bank only the modified sectors

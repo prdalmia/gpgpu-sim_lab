@@ -457,12 +457,15 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   //Currently this code can result in multple flushing requests to the same core
                   mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
                   //ASK Matt: Is this okay?
+                  //use sid_to_cid
+                  unsigned owner =  m_L2cache->get_owner(mf->get_addr(), mf);
+                  unsigned cluster_id = owner/2;
                   mem_fetch *mf_flush = new mem_fetch( access, 
                                    NULL,
                                    mf->get_ctrl_size(), 
                                    -1, 
-                                   m_L2cache->get_owner(mf->get_addr(), mf), 
-                                   -1,
+                                   owner, 
+                                   cluster_id,
                                    mf->get_mem_config() );
                     mf_flush->set_type(INVALIDATION);
                     m_L2_icnt_queue->push(mf_flush);
