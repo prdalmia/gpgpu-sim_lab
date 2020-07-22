@@ -456,9 +456,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   //TODO: Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
                   //Currently this code can result in multple flushing requests to the same core
                   mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
+                  //ASK Matt: Is this okay?
                   mem_fetch *mf_flush = new mem_fetch( access, 
                                    NULL,
-                                   WRITE_PACKET_SIZE, 
+                                   mf->get_ctrl_size(), 
                                    -1, 
                                    m_L2cache->get_owner(mf->get_addr(), mf), 
                                    -1,

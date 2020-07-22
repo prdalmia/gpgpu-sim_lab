@@ -1756,6 +1756,7 @@ l1_cache::evict(   mem_fetch *mf,
     }
     else if ( mshr_hit && status == MISS){
        m_mshrs.add_pending_flush(mshr_addr, mf);
+       delete mf;
     }   
     return status;
 }
