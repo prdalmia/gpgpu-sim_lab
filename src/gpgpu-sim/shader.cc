@@ -1795,7 +1795,7 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    const mem_access_t &access = inst.accessq_back();
 
    bool bypassL1D = false; 
-   if ( (CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) && inst.isatomic() != true)) {
+   if ( (CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL)) && (inst.isatomic() != true)) {
        bypassL1D = true; 
    } else if (inst.space.is_global()) { // global memory access 
        // skip L1 cache if the option is enabled
