@@ -38,7 +38,7 @@ const char * cache_request_status_str(enum cache_request_status status)
       "HIT_RESERVED",
       "MISS",
       "RESERVATION_FAIL",
-	  "SECTOR_MISS"
+	  "SECTOR_MISS",
       "REMOTE_OWNED"
    }; 
 
