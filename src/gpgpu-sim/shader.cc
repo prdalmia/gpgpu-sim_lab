@@ -2350,7 +2350,7 @@ void ldst_unit::cycle()
                    if (m_core->get_config()->gmem_skip_L1D)
                        bypassL1D = true; 
                }
-               if(mf->isatomic()){
+               if(mf->isatomic() || mf->get_type() == INVALIDATION){
                    bypassL1D = false;
                }
                if( bypassL1D ) {

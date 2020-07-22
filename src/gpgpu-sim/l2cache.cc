@@ -432,7 +432,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         assert(write_sent);
                         m_icnt_L2_queue->pop();
                     }
-                }else if ( (status == REMOTE_OWNED) && mf->isatomic()) {
+                }else if ( (status == REMOTE_OWNED) && (mf->isatomic() || mf->get_type() == INVALIDATION_RESPONSE)) {
                  if(mf->get_sid() == m_L2cache->get_owner(mf->get_addr(), mf)){
                      //if(mf->get_type() == INVALIDATION_RESPONSE){
                      if(waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() != true){ //TODO change this and all subsequent ones to line address
