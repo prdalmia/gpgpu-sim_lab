@@ -447,6 +447,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                    m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
                   }
                    m_icnt_L2_queue->pop();
+                   if(mf->get_type() == INVALIDATION_RESPONSE){
+                       m_request_tracker.erase(mf);
+                   }
                    delete mf;
                  //}
                  }
