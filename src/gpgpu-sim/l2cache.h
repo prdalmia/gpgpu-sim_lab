@@ -213,6 +213,7 @@ private:
    fifo_pipeline<mem_fetch> *m_dram_L2_queue;
    fifo_pipeline<mem_fetch> *m_L2_icnt_queue; // L2 cache hit response queue
    std::map< new_addr_type , std::queue<mem_fetch *>>waiting_for_ownership;
+   std::map< new_addr_type , std::queue<unsigned>> ownership_champion;
    
    class mem_fetch *L2dramout; 
    unsigned long long int wb_addr;

@@ -425,6 +425,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             m_L2_icnt_queue->push(mf);
                             if(mf->isatomic() && (m_L2cache->get_owner(mf->get_addr(), mf) == (unsigned)-1)){
                                  m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
+                                 ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid());
                             }
                         }
                         m_icnt_L2_queue->pop();
@@ -445,6 +446,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   }
                   else{
                    m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
+                   while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty())
+                   {
+                       ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+                   }
                   }
                    m_icnt_L2_queue->pop();
                    if(mf->get_type() == INVALIDATION_RESPONSE){
@@ -454,26 +459,27 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                  //}
                  }
                  else{
-                 waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf); //CHANGE TO LINE ADDRESS
-                    
+                 waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf);
+                 ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid()); //CHANGE TO LINE ADDRESS
+                 unsigned invalidation_reciever = ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
                   //TODO: Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
                   //Currently this code can result in multple flushing requests to the same core
                   mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
                   //ASK Matt: Is this okay?
                   //use sid_to_cid
-                  unsigned owner =  m_L2cache->get_owner(mf->get_addr(), mf);
-                  unsigned cluster_id = owner/2;
+                  unsigned cluster_id = invalidation_reciever/2;
                   mem_fetch *mf_flush = new mem_fetch( access, 
                                    NULL,
                                    mf->get_ctrl_size(), 
                                    -1, 
-                                   owner, 
+                                   invalidation_reciever, 
                                    cluster_id,
                                    mf->get_mem_config() );
                     mf_flush->set_type(INVALIDATION);
                     m_L2_icnt_queue->push(mf_flush);
                     mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                     // L2 cache accepted request
+                    ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
                     m_icnt_L2_queue->pop();
                 }
                 }

@@ -45,7 +45,8 @@ enum cache_block_state {
     RESERVED,
     VALID,
     MODIFIED,
-    OWNED
+    OWNED,
+    REMOTE_OWNERSHIP
 };
 
 enum cache_request_status {

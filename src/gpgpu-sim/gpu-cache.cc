@@ -258,7 +258,7 @@ unsigned tag_array::get_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf)
         unsigned index = set_index*m_config.m_assoc+way;
         cache_block_t *line = m_lines[index];
         if (line->m_tag == tag) {
-           if ( line->get_status(mask) == OWNED) {
+           if ( line->get_status(mask) == REMOTE_OWNERSHIP) {
             	if(line->is_readable(mask)) {
 					idx = index;
 					return line->m_owner;
@@ -282,13 +282,13 @@ void tag_array::set_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf, uns
         unsigned index = set_index*m_config.m_assoc+way;
         cache_block_t *line = m_lines[index];
         if (line->m_tag == tag) {
-           if ( line->get_status(mask) == VALID || line->get_status(mask) == OWNED || line->get_status(mask) == MODIFIED) {
+           if ( line->get_status(mask) == VALID || line->get_status(mask) == OWNED || line->get_status(mask) == MODIFIED || line->get_status(mask) == REMOTE_OWNERSHIP) {
             	line->m_owner = owner_id;
                 if(owner_id == (unsigned)-1 ){
-                  line->set_status(VALID, mask);
+                  line->set_status(MODIFIED, mask);
                 }
                 else{
-                line->set_status(OWNED, mask);
+                line->set_status(REMOTE_OWNERSHIP, mask);
                 }
                 
            }
@@ -300,7 +300,7 @@ void tag_array::set_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf, uns
     } 
 }          
 
-enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode, mem_fetch* mf) const {
+enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode, mem_fetch* mf) const {
     //assert( m_config.m_write_policy == READ_ONLY );
     
     unsigned set_index = m_config.set_index(addr);
@@ -323,7 +323,7 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
             } else if ( line->get_status(mask) == VALID ) {
                 idx = index;
                 return HIT;
-            } else if ( line->get_status(mask) == MODIFIED) {
+            } else if ( line->get_status(mask) == MODIFIED || line->get_status(mask) == OWNED ) {
             	if(line->is_readable(mask)) {
 					idx = index;
 					return HIT;
@@ -333,7 +333,7 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
             		return SECTOR_MISS;
             	}
             }
-            else if( line->get_status(mask) == OWNED) {
+            else if( line->get_status(mask) == REMOTE_OWNERSHIP) {
 					idx = index;
 					return REMOTE_OWNED;
             } else if ( line->is_valid_line() && line->get_status(mask) == INVALID ) {
@@ -474,10 +474,14 @@ void tag_array::flush()
 		return;
 
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(m_lines[i]->is_modified_line()) {
+    	if(m_lines[i]->is_owned_line(){
+            ;
+        }
+        else if(m_lines[i]->is_modified_line()) {
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++)
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
     	}
+       
 
     is_used = false;
 }
@@ -488,9 +492,13 @@ void tag_array::invalidate()
 		return;
 
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
+    if(m_lines[i]->is_owned_line()) {
+            ;
+        }
+    else if{    
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++)
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
-
+    }
     is_used = false;
 }
 
@@ -1131,7 +1139,12 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
     if (has_atomic) {
         //assert(m_config.m_alloc_policy == ON_MISS);
         cache_block_t* block = m_tag_array->get_block(e->second.m_cache_index);
-        block->set_status(MODIFIED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        if(mf->isfillL1D() == true){
+        block->set_status(OWNED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        }
+        else{
+        block->set_status(VALID, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        }
     }
     m_extra_mf_fields.erase(mf);
     m_bandwidth_management.use_fill_port(mf); 

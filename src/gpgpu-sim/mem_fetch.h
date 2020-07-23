@@ -100,10 +100,12 @@ public:
    enum mf_type get_type() const { return m_type; }
    void set_type(enum mf_type type)  { m_type = type; }
    bool isatomic() const;
+   bool isfillL1D() { return fill_for_L1D;}
    bool isevictionrequest() const {return send_eviction_request;}
 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
    void set_eviction_request(  ) { send_eviction_request = true; }
+   void set_fill_L1D(  ) { fill_for_L1D = true; }
    void set_icnt_receive_time( unsigned t ) { m_icnt_receive_time=t; }
    unsigned get_timestamp() const { return m_timestamp; }
    unsigned get_return_timestamp() const { return m_timestamp2; }
@@ -132,6 +134,7 @@ private:
    unsigned m_tpc;
    unsigned m_wid;
    bool send_eviction_request;
+   bool fill_for_L1D;
    // where is this request now?
    enum mem_fetch_status m_status;
    unsigned long long m_status_change;
