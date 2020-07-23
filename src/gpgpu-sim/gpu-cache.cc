@@ -474,7 +474,7 @@ void tag_array::flush()
 		return;
 
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(m_lines[i]->is_owned_line(){
+    	if(m_lines[i]->is_owned_line()){
             ;
         }
         else if(m_lines[i]->is_modified_line()) {
