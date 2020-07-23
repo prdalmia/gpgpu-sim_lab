@@ -1569,7 +1569,7 @@ data_cache::rd_hit_base( new_addr_type addr,
     if(mf->isatomic()){ 
         assert(mf->get_access_type() == GLOBAL_ACC_R);
         cache_block_t* block = m_tag_array->get_block(cache_index);
-        block->set_status(MODIFIED, mf->get_access_sector_mask()) ;  // mark line as dirty
+     //   block->set_status(MODIFIED, mf->get_access_sector_mask()) ;  // mark line as dirty
     }
     return HIT;
 }
