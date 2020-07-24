@@ -1859,14 +1859,19 @@ void ldst_unit::flush(){
 void ldst_unit::invalidate(){
     if(flush_l1 == false){
 	// Flush L1D cache
-     m_L1D->invalidate_new(m_sid, m_memory_config, gpu_sim_cycle+gpu_tot_sim_cycle);
-    
-          /*
-           if(m_sid ==0){
-           printf("The flush queue has MF for addresses %llu\n ", flush_queue[i]->get_addr());
-           }
-          */    	
-         
+     std::vector<new_addr_type> flush_queue = m_L1D->invalidate_l1();
+    for (unsigned i=0; i < flush_queue.size(); i++){
+             mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
+        mem_fetch *mf = new mem_fetch( access, 
+                                   NULL,
+                                   WRITE_PACKET_SIZE, 
+                                   -1, 
+                                   m_sid, 
+                                   (m_sid/2),
+                                   m_memory_config );
+           m_icnt->push(mf);  
+           mf->set_type(INVALIDATION_RESPONSE);
+        }  	   
         }
         flush_l1 = true;
 }

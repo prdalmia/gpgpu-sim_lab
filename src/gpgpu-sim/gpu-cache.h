@@ -92,7 +92,8 @@ struct cache_event {
 	enum cache_event_type m_cache_event_type;
 	evicted_block_info m_evicted_block; //if it was write_back event, fill the the evicted block info
 
-	cache_event(enum cache_event_type m_cache_event){
+	
+    cache_event(enum cache_event_type m_cache_event){
 		m_cache_event_type = m_cache_event;
 	}
 
@@ -1160,6 +1161,7 @@ public:
     // flash invalidate all entries in cache
     void flush(){m_tag_array->flush();}
     void invalidate(){ m_tag_array->invalidate();}
+    std::vector<new_addr_type>invalidate_l1(){return  m_tag_array->invalidate();}
     void print(FILE *fp, unsigned &accesses, unsigned &misses) const;
     void display_state( FILE *fp ) const;
 
