@@ -454,6 +454,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                    m_icnt_L2_queue->pop();
                    if(mf->get_type() == INVALIDATION_RESPONSE){
                        m_request_tracker.erase(mf);
+                       printf("Invalidation  Response recieved from core %d\n", mf->get_sid());
                    }
                    delete mf;
                  //}
@@ -467,6 +468,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
                   //ASK Matt: Is this okay?
                   //use sid_to_cid
+                  printf("Invalidation Sent to core %d\n", invalidation_reciever);
                   unsigned cluster_id = invalidation_reciever/2;
                   mem_fetch *mf_flush = new mem_fetch( access, 
                                    NULL,
