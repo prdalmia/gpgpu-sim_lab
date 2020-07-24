@@ -322,7 +322,12 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
                 return HIT_RESERVED;
             } else if ( line->get_status(mask) == VALID ) {
                 idx = index;
+                if(line->m_owner != (unsigned)-1){
+                    return REMOTE_OWNED;
+                }
+                else{ 
                 return HIT;
+                }
             } else if ( line->get_status(mask) == MODIFIED || line->get_status(mask) == OWNED ) {
             	if(line->is_readable(mask)) {
 					idx = index;
