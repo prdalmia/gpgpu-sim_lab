@@ -822,7 +822,7 @@ public:
     cache_block_t* get_block(unsigned idx) { return m_lines[idx];}
 
     void flush(); // flush all written entries
-    void invalidate(); // invalidate all entries
+    std::vector<new_addr_type> invalidate(); // invalidate all entries
     void new_window();
 
     void print( FILE *stream, unsigned &total_access, unsigned &total_misses ) const;
@@ -832,6 +832,8 @@ public:
 	void update_cache_parameters(cache_config &config);
 	void add_pending_line(mem_fetch *mf);
 	void remove_pending_line(mem_fetch *mf);
+    std::vector< new_addr_type> flush_queue;
+
 protected:
     // This constructor is intended for use only from derived classes that wish to
     // avoid unnecessary memory allocation that takes place in the
@@ -1157,7 +1159,7 @@ public:
     mem_fetch *next_access(){return m_mshrs.next_access();}
     // flash invalidate all entries in cache
     void flush(){m_tag_array->flush();}
-    void invalidate(){m_tag_array->invalidate();}
+    std::vector<new_addr_type> invalidate(){return m_tag_array->invalidate();}
     void print(FILE *fp, unsigned &accesses, unsigned &misses) const;
     void display_state( FILE *fp ) const;
 
