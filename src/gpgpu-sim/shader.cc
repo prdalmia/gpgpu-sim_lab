@@ -1858,7 +1858,7 @@ void ldst_unit::flush(){
 
 void ldst_unit::invalidate(){
 	// Flush L1D cache
-     m_L1D->invalidate_new(m_sid, m_memory_config);
+     m_L1D->invalidate_new(m_sid, m_memory_config, gpu_sim_cycle+gpu_tot_sim_cycle);
     
           /*
            if(m_sid ==0){

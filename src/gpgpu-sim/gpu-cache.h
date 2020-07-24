@@ -1556,7 +1556,7 @@ public:
    
     virtual enum cache_request_status evict ( mem_fetch *mf,
                 unsigned time);
-    virtual  void invalidate_new(unsigned m_sid, const memory_config* mem_config);
+    virtual  void invalidate_new(unsigned m_sid, const memory_config* mem_config, unsigned time);
 
 protected:
     l1_cache( const char *name,
