@@ -484,7 +484,7 @@ void tag_array::flush()
 	if(!is_used)
 		return;
      std::list<cache_event> events;
-    for (unsigned i=0; i < m_config.get_num_lines(); i++)
+    for (unsigned i=0; i < m_config.get_num_lines(); i++){
         if(m_lines[i]->is_modified_line()|| m_lines[i]->is_owned_line()) {
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
@@ -499,7 +499,7 @@ void tag_array::flush()
                                    m_memory_config );
           send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
 }
-
+}
 
         
 
