@@ -1197,7 +1197,7 @@ void  l1_cache::invalidate_new( unsigned m_sid, const memory_config* mem_config,
            
            
            
-           mf->set_type(INVALIDATION_RESPONSE)
+           mf->set_type(INVALIDATION_RESPONSE);
            send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
 }
 }
