@@ -508,13 +508,14 @@ std::vector<new_addr_type> tag_array::invalidate()
 {
 	if(!is_used)
 		return flush_queue;
-/*
+
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
     if(!m_lines[i]->is_owned_line()){    
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++)
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
     }
- */
+ 
+/*
     for (unsigned i=0; i < m_config.get_num_lines(); i++){
          if(m_lines[i]->is_owned_line()) {
                 flush_queue.push_back(m_lines[i]->m_block_addr);
@@ -523,7 +524,8 @@ std::vector<new_addr_type> tag_array::invalidate()
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
                }
            
-}   
+} 
+*/  
     is_used = false;
     return flush_queue;
 }
@@ -1169,7 +1171,7 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
         block->set_status(OWNED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
         }
         else{
-        block->set_status(VALID, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        block->set_status(VALID), mf->get_access_sector_mask()); // mark line as dirty for atomic operation
         }
     }
     m_extra_mf_fields.erase(mf);

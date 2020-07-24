@@ -1857,9 +1857,12 @@ void ldst_unit::flush(){
 }
 
 void ldst_unit::invalidate(){
+    
+    /*
     if(flush_l1 == false){
 	// Flush L1D cache
      std::vector<new_addr_type> flush_queue = m_L1D->invalidate_l1();
+    
     for (unsigned i=0; i < flush_queue.size(); i++){
              mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
         mem_fetch *mf = new mem_fetch( access, 
@@ -1874,7 +1877,11 @@ void ldst_unit::invalidate(){
            
         }  	   
         }
+        
         flush_l1 = true;
+*/
+
+m_L1D->invalidate();
 }
 
 simd_function_unit::simd_function_unit( const shader_core_config *config )
