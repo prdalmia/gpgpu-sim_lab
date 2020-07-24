@@ -1171,7 +1171,7 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
         block->set_status(OWNED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
         }
         else{
-        block->set_status(VALID), mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        block->set_status(VALID, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
         }
     }
     m_extra_mf_fields.erase(mf);
