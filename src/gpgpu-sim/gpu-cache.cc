@@ -323,7 +323,7 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
             } else if ( line->get_status(mask) == VALID ) {
                 idx = index;
                 if(line->m_owner != (unsigned)-1){
-                    line->set_status(mask) = REMOTE_OWNERSHIP;
+                    line->set_status(REMOTE_OWNERSHIP, mask);
                     return REMOTE_OWNED;
                 }
                 else{ 
