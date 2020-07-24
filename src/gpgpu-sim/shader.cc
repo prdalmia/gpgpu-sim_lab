@@ -1858,7 +1858,7 @@ void ldst_unit::flush(){
 
 bool ldst_unit::pending_requests(){
 	// Flush L1D cache
-	return m_response_fifo.empty();
+	return m_response_fifo.empty() && m_response_fifo.front();
     
 }
 void ldst_unit::invalidate(){
