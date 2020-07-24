@@ -1189,7 +1189,7 @@ void  l1_cache::invalidate_new( unsigned m_sid, const memory_config* mem_config)
    mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
     mem_fetch *mf = new mem_fetch( access, 
                                    NULL,
-                                   WRITE_PACKET_SIZE, 
+                                   32, 
                                    -1, 
                                    m_sid, 
                                    (m_sid/2),
