@@ -1311,6 +1311,7 @@ protected:
    std::list<mem_fetch*> m_response_fifo;
    opndcoll_rfu_t *m_operand_collector;
    Scoreboard *m_scoreboard;
+   bool flush_l1;
 
    mem_fetch *m_next_global;
    warp_inst_t m_next_wb;

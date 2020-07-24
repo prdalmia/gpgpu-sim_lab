@@ -1857,6 +1857,7 @@ void ldst_unit::flush(){
 }
 
 void ldst_unit::invalidate(){
+    if(flush_l1 == false){
 	// Flush L1D cache
      m_L1D->invalidate_new(m_sid, m_memory_config, gpu_sim_cycle+gpu_tot_sim_cycle);
     
@@ -1867,6 +1868,8 @@ void ldst_unit::invalidate(){
           */    	
          
         }
+        flush_l1 = true;
+}
 
 simd_function_unit::simd_function_unit( const shader_core_config *config )
 { 
@@ -2081,6 +2084,7 @@ void ldst_unit::init( mem_fetch_interface *icnt,
     m_stats = stats;
     m_sid = sid;
     m_tpc = tpc;
+    flush_l1 = false;
     #define STRSIZE 1024
     char L1T_name[STRSIZE];
     char L1C_name[STRSIZE];
