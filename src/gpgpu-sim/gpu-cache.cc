@@ -329,14 +329,16 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
                 return HIT;
                 }
             } else if ( line->get_status(mask) == MODIFIED  ) {
-            	if(line->is_readable(mask)) {
+            	//if(line->is_readable(mask)) {
 					idx = index;
 					return HIT;
-            	}
+            	//}
+          /*
             	else {
             		idx = index;
             		return SECTOR_MISS;
             	}
+            */    
             }
             else if (line->get_status(mask) == OWNED){
                 idx = index;
