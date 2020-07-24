@@ -328,7 +328,7 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
                 else{ 
                 return HIT;
                 }
-            } else if ( line->get_status(mask) == MODIFIED || line->get_status(mask) == OWNED ) {
+            } else if ( line->get_status(mask) == MODIFIED  ) {
             	if(line->is_readable(mask)) {
 					idx = index;
 					return HIT;
@@ -337,6 +337,10 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
             		idx = index;
             		return SECTOR_MISS;
             	}
+            }
+            else if (line->get_status(mask) == OWNED){
+                idx = index;
+                return HIT;
             }
             else if( line->get_status(mask) == REMOTE_OWNERSHIP) {
 					idx = index;
