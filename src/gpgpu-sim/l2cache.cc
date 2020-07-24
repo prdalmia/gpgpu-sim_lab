@@ -426,6 +426,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             if(mf->isatomic() && (m_L2cache->get_owner(mf->get_addr(), mf) == (unsigned)-1)){
                                  m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
                                  ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid());
+                                printf("Request recieved for addr %x setting owner to %d\n", mf->get_addr() & ~(new_addr_type)(127), mf->get_sid());
                             }
                         }
                         m_icnt_L2_queue->pop();
@@ -462,6 +463,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                  else{
                  waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf);
                  ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid()); //CHANGE TO LINE ADDRESS
+                 printf("Request recieved for addr %x but couldnt get ownership for core %d\n", mf->get_addr() & ~(new_addr_type)(127), mf->get_sid());
                  unsigned invalidation_reciever = ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
                   //TODO: Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
                   //Currently this code can result in multple flushing requests to the same core
