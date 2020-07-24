@@ -1869,8 +1869,9 @@ void ldst_unit::invalidate(){
                                    m_sid, 
                                    (m_sid/2),
                                    m_memory_config );
-           m_icnt->push(mf);  
            mf->set_type(INVALIDATION_RESPONSE);
+           m_icnt->push(mf);  
+           
         }  	   
         }
         flush_l1 = true;
