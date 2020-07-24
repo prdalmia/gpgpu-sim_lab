@@ -1867,7 +1867,6 @@ void ldst_unit::invalidate(){
           */    	
          
         }
-}
 
 simd_function_unit::simd_function_unit( const shader_core_config *config )
 { 
