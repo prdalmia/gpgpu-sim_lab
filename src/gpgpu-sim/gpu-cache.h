@@ -1160,7 +1160,6 @@ public:
     // flash invalidate all entries in cache
     void flush(){m_tag_array->flush();}
     void invalidate(){ m_tag_array->invalidate();}
-    void invalidate_new(unsigned m_sid, const memory_config* mem_config);
     void print(FILE *fp, unsigned &accesses, unsigned &misses) const;
     void display_state( FILE *fp ) const;
 
@@ -1557,6 +1556,7 @@ public:
    
     virtual enum cache_request_status evict ( mem_fetch *mf,
                 unsigned time);
+    virtual  void invalidate_new(unsigned m_sid, const memory_config* mem_config);
 
 protected:
     l1_cache( const char *name,

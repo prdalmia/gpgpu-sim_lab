@@ -1182,7 +1182,7 @@ bool baseline_cache::waiting_for_fill( mem_fetch *mf ){
 }
 
 /// Checks if mf is waiting to be filled by lower memory level
-void  baseline_cache::invalidate_new( unsigned m_sid, const memory_config* mem_config){
+void  l1_cache::invalidate_new( unsigned m_sid, const memory_config* mem_config){
   std::vector<new_addr_type> flush_queue = m_tag_array->invalidate();
   std::list<cache_event> events;
   for (unsigned i=0; i < flush_queue.size(); i++){
