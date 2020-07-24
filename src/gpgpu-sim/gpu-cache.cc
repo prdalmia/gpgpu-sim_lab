@@ -1186,10 +1186,10 @@ void  l1_cache::invalidate_new( unsigned m_sid, const memory_config* mem_config,
   std::vector<new_addr_type> flush_queue = m_tag_array->invalidate();
   std::list<cache_event> events;
   for (unsigned i=0; i < flush_queue.size(); i++){
-   mem_access_t access( GLOBAL_ACC_R, flush_queue[i], 32, 1 );
+   mem_access_t access( GLOBAL_ACC_R, flush_queue[i], 8, 1 );
     mem_fetch *mf = new mem_fetch( access, 
                                    NULL,
-                                   32, 
+                                   8, 
                                    -1, 
                                    m_sid, 
                                    (m_sid/2),
@@ -1197,7 +1197,7 @@ void  l1_cache::invalidate_new( unsigned m_sid, const memory_config* mem_config,
            
            
            
-           
+           mf->set_type(INVALIDATION_RESPONSE)
            send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
 }
 }
