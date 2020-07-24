@@ -483,14 +483,25 @@ void tag_array::flush()
 {
 	if(!is_used)
 		return;
-
+     std::list<cache_event> events;
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    	if(!m_lines[i]->is_owned_line()){
-        if(m_lines[i]->is_modified_line()) {
-    	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++)
+        if(m_lines[i]->is_modified_line()|| m_lines[i]->is_owned_line()) {
+    	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
-    	}
         }
+         mem_access_t access( GLOBAL_ACC_R, m_lines[i]->m_block_addr, WRITE_PACKET_SIZE, 1 );
+         mem_fetch *mf = new mem_fetch( access, 
+                                   NULL,
+                                   WRITE_PACKET_SIZE, 
+                                   -1, 
+                                    m_core_id, 
+                                    (m_core_id/2),
+                                   m_memory_config );
+          send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
+}
+
+
+        
 
     is_used = false;
 }
@@ -499,12 +510,31 @@ void tag_array::invalidate()
 {
 	if(!is_used)
 		return;
-
+/*
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
     if(!m_lines[i]->is_owned_line()){    
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++)
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
     }
+ */
+std::list<cache_event> events;
+    for (unsigned i=0; i < m_config.get_num_lines(); i++){
+    
+        if(m_lines[i]->is_owned_line()) {
+         mem_access_t access( GLOBAL_ACC_R, m_lines[i]->m_block_addr, WRITE_PACKET_SIZE, 1 );
+         mem_fetch *mf = new mem_fetch( access, 
+                                   NULL,
+                                   WRITE_PACKET_SIZE, 
+                                   -1, 
+                                    m_core_id, 
+                                    (m_core_id/2),
+                                   m_memory_config );
+          send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
+}
+	           for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
+    		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
+        }
+}   
     is_used = false;
 }
 
