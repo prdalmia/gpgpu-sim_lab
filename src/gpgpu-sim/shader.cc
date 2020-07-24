@@ -1858,21 +1858,8 @@ void ldst_unit::flush(){
 
 void ldst_unit::invalidate(){
 	// Flush L1D cache
-    std::vector<new_addr_type> flush_queue = m_L1D->invalidate();
-    for (unsigned i=0; i < flush_queue.size(); i++){
-             mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
-    mem_fetch *mf = new mem_fetch( access, 
-                                   NULL,
-                                   WRITE_PACKET_SIZE, 
-                                   -1, 
-                                   m_sid, 
-                                   (m_sid/2),
-                                   m_memory_config );
-           
-           
-           
-           
-           m_icnt->push(mf);
+     m_L1D->invalidate(m_sid, m_memory_config);
+    
           /*
            if(m_sid ==0){
            printf("The flush queue has MF for addresses %llu\n ", flush_queue[i]->get_addr());

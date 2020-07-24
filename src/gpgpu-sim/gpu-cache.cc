@@ -1181,6 +1181,24 @@ bool baseline_cache::waiting_for_fill( mem_fetch *mf ){
     return e != m_extra_mf_fields.end();
 }
 
+/// Checks if mf is waiting to be filled by lower memory level
+void  baseline_cache::invalidate( unsigned m_sid, const memory_config* mem_config){
+  std::vector<new_addr_type> flush_queue = m_tag_array->invalidate();
+  for (unsigned i=0; i < flush_queue.size(); i++){
+   mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
+    mem_fetch *mf = new mem_fetch( access, 
+                                   NULL,
+                                   WRITE_PACKET_SIZE, 
+                                   -1, 
+                                   m_sid, 
+                                   (m_sid/2),
+                                   mem_config );
+           
+           
+           
+           
+           m_icnt->push(mf);
+}
 void baseline_cache::print(FILE *fp, unsigned &accesses, unsigned &misses) const{
     fprintf( fp, "Cache %s:\t", m_name.c_str() );
     m_tag_array->print(fp,accesses,misses);
