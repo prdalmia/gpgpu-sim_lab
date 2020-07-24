@@ -1856,6 +1856,11 @@ void ldst_unit::flush(){
     
 }
 
+bool ldst_unit::pending_requests(){
+	// Flush L1D cache
+	return m_response_fifo.empty();
+    
+}
 void ldst_unit::invalidate(){
     
     /*
@@ -3094,7 +3099,7 @@ void shader_core_config::set_pipeline_latency() {
 
 void shader_core_ctx::cycle()
 {
-	if(!isactive() && get_not_completed() == 0)
+	if(!isactive() && get_not_completed() == 0 && m_ldst_unit->pending_requests() == false)
 		return;
 
 	m_stats->shader_cycles[m_sid]++;

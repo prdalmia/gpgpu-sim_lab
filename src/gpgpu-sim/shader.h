@@ -1228,6 +1228,7 @@ public:
      
     void fill( mem_fetch *mf );
     void flush();
+    bool pending_requests();
     void invalidate();
     void writeback();
 
