@@ -491,12 +491,13 @@ void tag_array::flush()
     }
  */
     for (unsigned i=0; i < m_config.get_num_lines(); i++){
+          if(m_lines[i]->is_owned_line()) {
+                flush_queue.push_back(m_lines[i]->m_block_addr);
+        }
 	           for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
                }
-            if(m_lines[i]->is_owned_line()) {
-                flush_queue.push_back(m_lines[i]->m_block_addr);
-        }
+          
 }   
     is_used = false;
     return;
@@ -514,12 +515,13 @@ std::vector<new_addr_type> tag_array::invalidate()
     }
  */
     for (unsigned i=0; i < m_config.get_num_lines(); i++){
+         if(m_lines[i]->is_owned_line()) {
+                flush_queue.push_back(m_lines[i]->m_block_addr);
+        }
 	           for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
     		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
                }
-            if(m_lines[i]->is_owned_line()) {
-                flush_queue.push_back(m_lines[i]->m_block_addr);
-        }
+           
 }   
     is_used = false;
     return flush_queue;
