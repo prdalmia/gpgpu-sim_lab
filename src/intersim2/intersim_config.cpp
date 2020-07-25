@@ -40,7 +40,7 @@ IntersimConfig::IntersimConfig()
 
   _int_map["flit_size"] = 32;
   
-  _int_map["input_buffer_size"] = 16384;
+  _int_map["input_buffer_size"] = 1638400000;
   _int_map["ejection_buffer_size"] = 0; // if left zero the simulator will use the vc_buf_size instead
   _int_map["boundary_buffer_size"] = 16;
   
