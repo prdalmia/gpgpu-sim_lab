@@ -129,7 +129,7 @@ void InterconnectInterface::CreateInterconnect(unsigned n_shader, unsigned n_mem
   if (_icnt_config->GetInt("input_buffer_size")) {
     _input_buffer_capacity = _icnt_config->GetInt("input_buffer_size");
   } else {
-    _input_buffer_capacity = 16384;
+    _input_buffer_capacity = 163840000;
   }
   _vcs = _icnt_config->GetInt("num_vcs");
 
