@@ -1878,9 +1878,10 @@ void ldst_unit::Lab_latency_queue_cycle()
                                       mf_next->get_tpc(), 
                                      mf_next->get_mem_config());
                //printf("the request copy size is %d\n", mf_copy->get_data_size());
-                m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
+               // m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
 
                 mf_copy->set_atomicdone();
+                m_icnt->push(mf_copy);
 	   }
 
 
