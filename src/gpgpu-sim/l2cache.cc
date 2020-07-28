@@ -426,7 +426,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             if(mf->isatomic() && (m_L2cache->get_owner(mf->get_addr(), mf) == (unsigned)-1)){
                                  m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
                                  ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid());
-                                printf("Request recieved for addr %x setting owner to %d\n", mf->get_addr() & ~(new_addr_type)(127), mf->get_sid());
+                                 printf("Request recieved for addr %x setting owner to %d\n", mf->get_addr() & ~(new_addr_type)(127), mf->get_sid());
                             }
                         }
                         m_icnt_L2_queue->pop();
@@ -434,7 +434,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         assert(write_sent);
                         m_icnt_L2_queue->pop();
                     }
-                }else if ( (status == REMOTE_OWNED) && (mf->isatomic() || mf->get_type() == INVALIDATION_RESPONSE)) {
+                }
+                
+                else if ( (status == REMOTE_OWNED) && (mf->isatomic() || mf->get_type() == INVALIDATION_RESPONSE)) {
                  if(mf->get_sid() == m_L2cache->get_owner(mf->get_addr(), mf)){
                      //if(mf->get_type() == INVALIDATION_RESPONSE){
                      if(waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() != true){ //TODO change this and all subsequent ones to line address
@@ -444,8 +446,50 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       m_L2_icnt_queue->push(mf_pending);
                       m_L2cache->set_owner(mf_pending->get_addr(), mf_pending,  mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
                       waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+                      //check how to handle ownership champion 
+
+                      if(waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()){
+                       if(m_L2cache->check_pending_address(mf, pending_addr) == true && !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() ){
+                              assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
+                               unsigned invalidation_reciever = ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
+                  
+                                mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
+                               
+                                printf("Invalidation Sent to core %d\n", invalidation_reciever);
+                                unsigned cluster_id = invalidation_reciever/2;
+                                mem_fetch *mf_flush = new mem_fetch( access, 
+                                               NULL,
+                                               mf->get_ctrl_size(), 
+                                               -1, 
+                                               invalidation_reciever, 
+                                               cluster_id,
+                                               mf->get_mem_config() );
+                                mf_flush->set_type(INVALIDATION);
+                                m_L2_icnt_queue->push(mf_flush);
+                                mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
+                                // L2 cache accepted request
+                                ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+
+                          }
+                      }
                   }
-                  else{
+                  else if (m_L2cache->check_pending_address(mf, pending_addr) == true && ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() ){
+                 
+                 
+                 //pop pending address // Implement a popping address function 
+                 mem_fetch * mf_pending = waiting_for_ownership[(pending_addr & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
+                     m_L2cache->allocate_address(mf_pending, pending_addr, gpu_sim_cycle+gpu_tot_sim_cycle);
+                      mf_pending->set_reply();
+                      mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
+                      m_L2_icnt_queue->push(mf_pending);
+                      m_L2cache->set_owner(mf_pending->get_addr(), mf_pending,  mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
+                      waiting_for_ownership[(mf_pending->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+                    ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+                 //pop waiting for ownership
+                 //pop ownership_champion
+                  }
+                 }
+                 else{
                    m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
                    while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty())
                    {
@@ -458,7 +502,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                        printf("Invalidation  Response recieved from core %d\n", mf->get_sid());
                    }
                    delete mf;
-                 //}
                  }
                  else{
                  waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf);

@@ -78,13 +78,16 @@ enum cache_event_type {
 struct evicted_block_info {
 	new_addr_type m_block_addr;
 	unsigned m_modified_size;
+    unsigned owner_id;
 	evicted_block_info() {
 		m_block_addr = 0;
 		m_modified_size = 0;
+        owner_id = unsigned(-1);
 	}
-	void set_info(new_addr_type block_addr, unsigned modified_size){
+	void set_info(new_addr_type block_addr, unsigned modified_size, unsigned owner = unsigned(-1)){
 		m_block_addr = block_addr;
 		m_modified_size = modified_size;
+        owner_id = owner;
 	}
 };
 
@@ -120,6 +123,10 @@ struct cache_block_t {
     virtual bool is_reserved_line() = 0;
     virtual bool is_modified_line() = 0;
     virtual bool is_owned_line() = 0;
+    virtual void set_pending_eviction(new_addr_type addr) =0;
+     virtual bool get_pending_address(new_addr_type &addr) = 0;
+     virtual void pop_pending_address() = 0;
+	   
 
     virtual enum cache_block_state get_status( mem_access_sector_mask_t sector_mask) = 0;
     virtual void set_status(enum cache_block_state m_status, mem_access_sector_mask_t sector_mask) = 0;
@@ -196,6 +203,11 @@ struct line_cache_block: public cache_block_t  {
 	    	return m_status == OWNED;
 	    }
 
+         virtual bool is_remote_owned_line()
+	    {
+	    	return m_status == REMOTE_OWNERSHIP;
+	    }
+
 		virtual enum cache_block_state get_status(mem_access_sector_mask_t sector_mask)
 	    {
 	    	return m_status;
@@ -244,6 +256,8 @@ private:
 	    unsigned long long     m_alloc_time;
 	    unsigned long long     m_last_access_time;
 	    unsigned long long     m_fill_time;
+        std::map< new_addr_type , std::deque<mem_fetch *>>waiting_for_ownership;
+        std::map< new_addr_type , std::deque<unsigned>> ownership_champion;
 	    cache_block_state    m_status;
 	    bool m_ignore_on_fill_status;
 	    bool m_set_modified_on_fill;
@@ -427,7 +441,22 @@ struct sector_cache_block : public cache_block_t {
 		}
 		return modified * SECTOR_SIZE;
 	}
+ 
+ 
+        virtual void set_pending_eviction(new_addr_type addr)
+	    {
+	    	return;
+	    }
+        
+        virtual bool get_pending_address(new_addr_type &addr)
+	    {
+	    	return false;
+        }
 
+        virtual void pop_pending_address()
+	    {
+	    	return;
+        }        
     virtual void print_status() {
     	 printf("m_block_addr is %llu, status = %u %u %u %u\n", m_block_addr, m_status[0], m_status[1], m_status[2], m_status[3]);
     }
@@ -809,6 +838,7 @@ public:
 
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
+    enum cache_request_status probe_l2( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
     enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, mem_fetch* mf );
     enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
     void evict( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
@@ -1594,9 +1624,20 @@ public:
                  
    virtual  unsigned get_owner( new_addr_type addr,
                 mem_fetch *mf);
+                 
     virtual    void set_owner( new_addr_type addr,
                 mem_fetch * mf,
                 unsigned owner_id );
+    virtual  enum cache_request_status process_probe( mem_fetch *mf,
+                 new_addr_type &addr_prev,
+                 unsigned &cache_index);
+    virtual  void set_pending_eviction( mem_fetch *mf,
+                 unsigned cache_index);
+    virtual  bool check_pending_address( mem_fetch *mf,
+                 new_addr_type &pending_address);
+    virtual  bool allocate_address( mem_fetch *mf,
+                  new_addr_type addr, 
+                  unsigned time );
 };
 
 /*****************************************************************************/
