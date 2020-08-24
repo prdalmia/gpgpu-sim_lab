@@ -125,9 +125,6 @@ struct cache_block_t {
     virtual bool is_reserved_line() = 0;
     virtual bool is_modified_line() = 0;
     virtual bool is_owned_line() = 0;
-    virtual void set_pending_eviction(new_addr_type addr) =0;
-     virtual bool get_pending_address(new_addr_type &addr) = 0;
-     virtual void pop_pending_address() = 0;
 	   
 
     virtual enum cache_block_state get_status( mem_access_sector_mask_t sector_mask) = 0;
@@ -443,22 +440,7 @@ struct sector_cache_block : public cache_block_t {
 		}
 		return modified * SECTOR_SIZE;
 	}
- 
- 
-        virtual void set_pending_eviction(new_addr_type addr)
-	    {
-	    	return;
-	    }
-        
-        virtual bool get_pending_address(new_addr_type &addr)
-	    {
-	    	return false;
-        }
-
-        virtual void pop_pending_address()
-	    {
-	    	return;
-        }        
+      
     virtual void print_status() {
     	 printf("m_block_addr is %llu, status = %u %u %u %u\n", m_block_addr, m_status[0], m_status[1], m_status[2], m_status[3]);
     }
