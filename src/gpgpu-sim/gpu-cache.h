@@ -1630,7 +1630,7 @@ public:
     virtual    void set_owner( new_addr_type addr,
                 mem_fetch * mf,
                 unsigned owner_id );
-    virtual enum cache_request_status l2_cache::process_probe(   mem_fetch *mf,
+    virtual enum cache_request_status process_probe(   mem_fetch *mf,
                 unsigned &cache_index );           
     virtual  mem_fetch * get_waiting_for_ownership( mem_fetch* mf, unsigned cache_index);
     virtual  void  add_waiting_for_ownership(mem_fetch *mf, unsigned cache_index);
