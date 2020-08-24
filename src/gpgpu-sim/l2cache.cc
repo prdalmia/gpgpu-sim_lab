@@ -406,12 +406,21 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
             bool port_free = m_L2cache->data_port_free(); 
             if ( !output_full && port_free ) {
                 std::list<cache_event> events;
+                //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
+                if(status == MISS || status == HIT){     
+                    unsigned int index;
+                    m_L2cache->process_probe(mf ,index);
+                if(mf->isatomic() && (m_L2cache->get_owner(mf->get_addr(), mf) == (unsigned)-1)){
+                                 m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
+                                 m_L2cache->add_ownership_champion(mf, index);
+                                 
+                            }
                 MEM_SUBPART_DPRINTF("Probing L2 cache Address=%llx, status=%u\n", mf->get_addr(), status); 
-
+                }
                 if ( status == HIT ) {
                     if( !write_sent ) {
                         // L2 cache replies
@@ -423,11 +432,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             mf->set_reply();
                             mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                             m_L2_icnt_queue->push(mf);
-                            if(mf->isatomic() && (m_L2cache->get_owner(mf->get_addr(), mf) == (unsigned)-1)){
-                                 m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
-                                 ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid());
-                                 printf("Request recieved for addr %x setting owner to %d\n", mf->get_addr() & ~(new_addr_type)(127), mf->get_sid());
-                            }
                         }
                         m_icnt_L2_queue->pop();
                     } else {
@@ -436,22 +440,45 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     }
                 }
                 
-                else if ( (status == REMOTE_OWNED) && (mf->isatomic() || mf->get_type() == INVALIDATION_RESPONSE)) {
+                else if (status == REMOTE_OWNED)  {
+                    unsigned int cache_index;
+                    m_L2cache->process_probe(mf , cache_index);
+
                  if(mf->get_sid() == m_L2cache->get_owner(mf->get_addr(), mf)){
-                     //if(mf->get_type() == INVALIDATION_RESPONSE){
-                     if(waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() != true){ //TODO change this and all subsequent ones to line address
-                      mem_fetch * mf_pending = waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
+                         //L2 cache will check if somebody is waiting for ownership at that address
+                         // if yes make that next request the current owner and send the block to the new owner
+                     // This needs to be replaced by index?
+                      mem_fetch * mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
+                     
+                     if (mf_pending){
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
                       m_L2cache->set_owner(mf_pending->get_addr(), mf_pending,  mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
-                      waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
-                      //check how to handle ownership champion 
+                      m_L2cache->remove_from_ownership_queue(cache_index);
+                      //pop request from waiting for ownership queue
+                     }
+                      else{
+                          assert(m_L2cache->get_ownership_champion(mf, cache_index) == mf->get_sid());
+                          m_L2cache->remove_from_ownership_champion_queue(cache_index);
+                          m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
+                  // while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty())
+                  // {
+                  //     ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+                  // }
 
-                      if(waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()){
-                       if(m_L2cache->check_pending_address(mf, pending_addr) == true && !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() ){
-                              assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
-                               unsigned invalidation_reciever = ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
+                      }
+                      m_icnt_L2_queue->pop();
+                       if(mf->get_type() == INVALIDATION_RESPONSE){
+                       m_request_tracker.erase(mf);
+                   }
+                      }
+                     else{
+                         m_L2cache->add_waiting_for_ownership(mf, cache_index);
+                         m_L2cache->add_ownership_champion(mf, cache_index);
+                         // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
+                         //need to add this to the ownership champion queue
+                         unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
                   
                                 mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
                                
@@ -468,67 +495,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                 m_L2_icnt_queue->push(mf_flush);
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
-                                ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
+                                m_L2cache->remove_from_ownership_champion_queue(cache_index);
 
-                          }
-                      }
-                  }
-                  else if (m_L2cache->check_pending_address(mf, pending_addr) == true && ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty() ){
-                 
-                 
-                 //pop pending address // Implement a popping address function 
-                 mem_fetch * mf_pending = waiting_for_ownership[(pending_addr & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
-                     m_L2cache->allocate_address(mf_pending, pending_addr, gpu_sim_cycle+gpu_tot_sim_cycle);
-                      mf_pending->set_reply();
-                      mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-                      m_L2_icnt_queue->push(mf_pending);
-                      m_L2cache->set_owner(mf_pending->get_addr(), mf_pending,  mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
-                      waiting_for_ownership[(mf_pending->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
-                    ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
-                 //pop waiting for ownership
-                 //pop ownership_champion
-                  }
-                 }
-                 else{
-                   m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
-                   while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty())
-                   {
-                       ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
-                   }
-                  }
-                   m_icnt_L2_queue->pop();
-                   if(mf->get_type() == INVALIDATION_RESPONSE){
-                       m_request_tracker.erase(mf);
-                       printf("Invalidation  Response recieved from core %d\n", mf->get_sid());
-                   }
-                   delete mf;
-                 }
-                 else{
-                 waiting_for_ownership[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf);
-                 ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].push(mf->get_sid()); //CHANGE TO LINE ADDRESS
-                 printf("Request recieved for addr %x but couldnt get ownership for core %d\n", mf->get_addr() & ~(new_addr_type)(127), mf->get_sid());
-                 unsigned invalidation_reciever = ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].front();
-                  //TODO: Track the current owner and sid who the last request was sent to and then send the request to the next one in the queue
-                  //Currently this code can result in multple flushing requests to the same core
-                  mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
-                  //ASK Matt: Is this okay?
-                  //use sid_to_cid
-                  printf("Invalidation Sent to core %d\n", invalidation_reciever);
-                  unsigned cluster_id = invalidation_reciever/2;
-                  mem_fetch *mf_flush = new mem_fetch( access, 
-                                   NULL,
-                                   mf->get_ctrl_size(), 
-                                   -1, 
-                                   invalidation_reciever, 
-                                   cluster_id,
-                                   mf->get_mem_config() );
-                    mf_flush->set_type(INVALIDATION);
-                    m_L2_icnt_queue->push(mf_flush);
-                    mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-                    // L2 cache accepted request
-                    ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
-                    m_icnt_L2_queue->pop();
-                }
+
+                     } 
+
                 }
                  else if ( status != RESERVATION_FAIL ) {
                 	if(mf->is_write() && (m_config->m_L2_config.m_write_alloc_policy == FETCH_ON_WRITE || m_config->m_L2_config.m_write_alloc_policy == LAZY_FETCH_ON_READ) && !was_writeallocate_sent(events)) {

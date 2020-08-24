@@ -113,6 +113,8 @@ struct cache_block_t {
     {
         m_tag=0;
         m_block_addr=0;
+        waiting_for_ownership.clear();
+        ownership_champion.clear();
     }
 
     virtual void allocate( new_addr_type tag, new_addr_type block_addr, unsigned time, mem_access_sector_mask_t sector_mask) = 0;
@@ -146,6 +148,8 @@ struct cache_block_t {
     new_addr_type    m_tag;
     new_addr_type    m_block_addr;
     unsigned         m_owner;
+    std::deque<mem_fetch *>waiting_for_ownership;
+    std::deque<unsigned> ownership_champion;
 
 };
 
@@ -256,8 +260,6 @@ private:
 	    unsigned long long     m_alloc_time;
 	    unsigned long long     m_last_access_time;
 	    unsigned long long     m_fill_time;
-        std::map< new_addr_type , std::deque<mem_fetch *>>waiting_for_ownership;
-        std::map< new_addr_type , std::deque<unsigned>> ownership_champion;
 	    cache_block_state    m_status;
 	    bool m_ignore_on_fill_status;
 	    bool m_set_modified_on_fill;
@@ -1628,16 +1630,15 @@ public:
     virtual    void set_owner( new_addr_type addr,
                 mem_fetch * mf,
                 unsigned owner_id );
-    virtual  enum cache_request_status process_probe( mem_fetch *mf,
-                 new_addr_type &addr_prev,
-                 unsigned &cache_index);
-    virtual  void set_pending_eviction( mem_fetch *mf,
-                 unsigned cache_index);
-    virtual  bool check_pending_address( mem_fetch *mf,
-                 new_addr_type &pending_address);
-    virtual  bool allocate_address( mem_fetch *mf,
-                  new_addr_type addr, 
-                  unsigned time );
+    virtual enum cache_request_status l2_cache::process_probe(   mem_fetch *mf,
+                unsigned &cache_index );           
+    virtual  mem_fetch * get_waiting_for_ownership( mem_fetch* mf, unsigned cache_index);
+    virtual  void  add_waiting_for_ownership(mem_fetch *mf, unsigned cache_index);
+    
+    virtual  void remove_from_ownership_queue(unsigned cache_index);
+    virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index);
+    virtual  unsigned get_ownership_champion( mem_fetch* mf, unsigned cache_index);
+    virtual  void remove_from_ownership_champion_queue(unsigned cache_index);
 };
 
 /*****************************************************************************/

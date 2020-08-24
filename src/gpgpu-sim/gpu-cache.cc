@@ -1913,22 +1913,6 @@ l2_cache::access( new_addr_type addr,
 {
     return data_cache::access( addr, mf, time, events );
 }
-enum cache_request_status
-l2_cache::process_probe(   mem_fetch *mf,
-                new_addr_type &addr_prev ,
-                unsigned &cache_index )
-{
-   
-   unsigned cache_index = (unsigned)-1;
-    new_addr_type block_addr = m_config.block_addr(mf->get_addr());
-    
-   
-    enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
-    cache_block_t* block = m_tag_array->get_block(cache_index);
-        addr_prev = block->m_block_addr;// mark line as dirty for atomic operation
-    return status;
-
-}
 
 unsigned l2_cache::get_owner( new_addr_type addr,
                   mem_fetch *mf)
@@ -1936,38 +1920,6 @@ unsigned l2_cache::get_owner( new_addr_type addr,
      unsigned cache_index = (unsigned)-1;
      new_addr_type block_addr = m_config.block_addr(addr);
      return m_tag_array->get_owner( block_addr, cache_index, mf);
-}
-
-
-void l2_cache::set_pending_eviction(mem_fetch *mf,
-unsigned cache_index)
-{
-     cache_block_t* block = m_tag_array->get_block(cache_index);
-     block->set_pending_eviction(mf->get_addr());
-}
-
-bool l2_cache::check_pending_address(mem_fetch *mf,
-new_addr_type &pending_address)
-{
-    unsigned cache_index = (unsigned)-1;
-    new_addr_type addr_prev = (unsigned)-1;
-    process_probe(mf, addr_prev, cache_index);
-     cache_block_t* block = m_tag_array->get_block(cache_index);
-     return block->get_pending_address(pending_address);
-}
-
-bool l2_cache::allocate_address(mem_fetch *mf,
-new_addr_type addr,
-unsigned time)
-{
-    unsigned cache_index = (unsigned)-1;
-    new_addr_type tag = addr & (~(new_addr_type)(128-1);
-    new_addr_type addr_prev = (unsigned)-1;
-    process_probe(mf, addr_prev, cache_index);
-     cache_block_t* block = m_tag_array->get_block(cache_index);
-     block->allocate(tag, tag, time, mf->get_access_sector_mask() );
-     block->pending_address_pop();
-     block->set_status(REMOTE_OWNERSHIP, mf->get_access_sector_mask() );
 }
 
 void
@@ -1978,6 +1930,66 @@ l2_cache::set_owner( new_addr_type addr,
      unsigned cache_index = (unsigned)-1;
      new_addr_type block_addr = m_config.block_addr(addr);
     return  m_tag_array->set_owner( block_addr, cache_index, mf, owner_id);
+}
+
+enum cache_request_status
+l2_cache::process_probe(   mem_fetch *mf,
+                unsigned &cache_index )
+{
+    new_addr_type block_addr = m_config.block_addr(mf->get_addr());
+    
+   
+    enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
+    return status;
+}
+
+mem_fetch * l2_cache::get_waiting_for_ownership(mem_fetch* mf, unsigned cache_index)
+{
+ cache_block_t* block = m_tag_array->get_block(cache_index);
+     if( block->waiting_for_ownership.front())
+     {
+         return block->waiting_for_ownership.front();
+     }
+      else{
+          return NULL;
+      }
+}
+
+void l2_cache::add_waiting_for_ownership(mem_fetch* mf, unsigned cache_index)
+{
+    cache_block_t* block = m_tag_array->get_block(cache_index);
+    block->waiting_for_ownership.push_back(mf);
+}
+
+void l2_cache::remove_from_ownership_queue(unsigned cache_index);
+{
+ cache_block_t* block = m_tag_array->get_block(cache_index);
+    block->waiting_for_ownership.pop();
+    
+}
+
+void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index)
+{
+    cache_block_t* block = m_tag_array->get_block(cache_index);
+    block->ownership_champion.push_back(mf->get_sid());
+}
+
+unsigned l2_cache::get_ownership_champion(new_addr_type &pending_address)
+{
+  cache_block_t* block = m_tag_array->get_block(cache_index);
+     if( block->ownership_champion.front())
+     {
+         return block->ownership_champion.front();
+     }
+      else{
+          return unsigned(-1);
+      }
+}
+void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index);
+{
+ cache_block_t* block = m_tag_array->get_block(cache_index);
+    block->ownership_champion.pop();
+    
 }
 
 /// Access function for tex_cache
