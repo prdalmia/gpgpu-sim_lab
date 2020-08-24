@@ -1961,7 +1961,7 @@ void l2_cache::add_waiting_for_ownership(mem_fetch* mf, unsigned cache_index)
     block->waiting_for_ownership.push_back(mf);
 }
 
-void l2_cache::remove_from_ownership_queue(unsigned cache_index);
+void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 {
  cache_block_t* block = m_tag_array->get_block(cache_index);
     block->waiting_for_ownership.pop();
@@ -1985,7 +1985,7 @@ unsigned l2_cache::get_ownership_champion(new_addr_type &pending_address)
           return unsigned(-1);
       }
 }
-void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index);
+void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index)
 {
  cache_block_t* block = m_tag_array->get_block(cache_index);
     block->ownership_champion.pop();
