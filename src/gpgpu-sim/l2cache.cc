@@ -496,7 +496,8 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
                                 m_L2cache->remove_from_ownership_champion_queue(cache_index);
-
+                          m_icnt_L2_queue->pop();
+                       
 
                      } 
 
