@@ -480,7 +480,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          //need to add this to the ownership champion queue
                          unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
                   
-                                mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false );
+                                mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false);
                                
                                 printf("Invalidation Sent to core %d\n", invalidation_reciever);
                                 unsigned cluster_id = invalidation_reciever/2;

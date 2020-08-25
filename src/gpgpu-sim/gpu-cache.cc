@@ -1946,7 +1946,7 @@ l2_cache::process_probe(   mem_fetch *mf,
 mem_fetch * l2_cache::get_waiting_for_ownership(mem_fetch* mf, unsigned cache_index)
 {
  cache_block_t* block = m_tag_array->get_block(cache_index);
-     if( block->waiting_for_ownership.front())
+     if( !block->waiting_for_ownership.empty())
      {
          return block->waiting_for_ownership.front();
      }
@@ -1977,7 +1977,7 @@ void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index)
 unsigned l2_cache::get_ownership_champion( mem_fetch* mf, unsigned cache_index)
 {
   cache_block_t* block = m_tag_array->get_block(cache_index);
-     if( block->ownership_champion.front())
+     if( !block->ownership_champion.empty())
      {
          return block->ownership_champion.front();
      }
