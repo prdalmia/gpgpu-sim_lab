@@ -455,7 +455,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
-                      if(m_L2cache->get_line_address(mf_pending, cache_index) != mf->get_addr()){
+                      if(m_L2cache->get_line_address(mf, cache_index) != mf_pending->get_addr()){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
                       }
                       m_L2cache->remove_from_ownership_queue(cache_index);
