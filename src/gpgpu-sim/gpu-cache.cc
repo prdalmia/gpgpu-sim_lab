@@ -1895,7 +1895,7 @@ l1_cache::evict(   mem_fetch *mf,
 	// Invalidate block
 	block->set_status(INVALID, mf->get_access_sector_mask());
     }
-    else if ( mshr_hit && status == MISS){
+    else if ( mshr_hit){
        m_mshrs.add_pending_flush(mshr_addr, mf);
        delete mf;
     }   
