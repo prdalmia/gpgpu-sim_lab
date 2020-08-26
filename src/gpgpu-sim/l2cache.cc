@@ -444,7 +444,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     unsigned int cache_index;
                     m_L2cache->process_probe(mf , cache_index);
 
-                 if((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) && (m_L2cache->get_line_address(mf, cache_index) == mf->get_addr())){ //need to change this logic
+                 if((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) && (m_L2cache->get_line_address(mf, cache_index) == (mf->get_addr()  & ~(new_addr_type)(127)))){ //need to change this logic
                           //L2 cache will check if somebody is waiting for ownership at that address
                          // if yes make that next request the current owner and send the block to the new owner
                      // This needs to be replaced by index?
@@ -456,7 +456,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
-                      if(m_L2cache->get_line_address(mf, cache_index) != mf_pending->get_addr()){
+                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
                       }
                       m_L2cache->remove_from_ownership_queue(cache_index);
