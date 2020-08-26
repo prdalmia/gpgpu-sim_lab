@@ -414,8 +414,8 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(status == MISS || status == HIT){     
                     unsigned int index;
                     m_L2cache->process_probe(mf ,index);
-                if(mf->isatomic() && (m_L2cache->get_owner(mf->get_addr(), mf) == (unsigned)-1)){
-                                 m_L2cache->set_owner(mf->get_addr(), mf, mf->get_sid());
+                if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
+                                 m_L2cache->set_owner( mf, index, mf->get_sid());
                                  m_L2cache->add_ownership_champion(mf, index);
                                  
                             }
@@ -444,8 +444,8 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     unsigned int cache_index;
                     m_L2cache->process_probe(mf , cache_index);
 
-                 if(mf->get_sid() == m_L2cache->get_owner(mf->get_addr(), mf)){
-                         //L2 cache will check if somebody is waiting for ownership at that address
+                 if((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) && (m_L2cache->get_line_address(mf, cache_index) == mf->get_addr())){ //need to change this logic
+                          //L2 cache will check if somebody is waiting for ownership at that address
                          // if yes make that next request the current owner and send the block to the new owner
                      // This needs to be replaced by index?
                       mem_fetch * mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
@@ -454,15 +454,15 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
-                      m_L2cache->set_owner(mf_pending->get_addr(), mf_pending,  mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
+                      m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
                       m_L2cache->remove_from_ownership_queue(cache_index);
                       //pop request from waiting for ownership queue
                      }
                       else{
                           assert(m_L2cache->get_ownership_champion(mf, cache_index) == mf->get_sid());
                           m_L2cache->remove_from_ownership_champion_queue(cache_index);
-                          m_L2cache->set_owner(mf->get_addr(), mf, (unsigned)-1); //CHANGE TO LINE ADDRESS
-                  // while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty())
+                          m_L2cache->set_owner( mf, cache_index, (unsigned)-1); //CHANGE TO LINE ADDRESS
+                  // while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.c_sz-1))].empty())
                   // {
                   //     ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
                   // }

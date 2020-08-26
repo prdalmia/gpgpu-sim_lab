@@ -1914,22 +1914,44 @@ l2_cache::access( new_addr_type addr,
     return data_cache::access( addr, mf, time, events );
 }
 
-unsigned l2_cache::get_owner( new_addr_type addr,
-                  mem_fetch *mf)
+unsigned l2_cache::get_owner( mem_fetch *mf, unsigned cache_index)
 {
-     unsigned cache_index = (unsigned)-1;
-     new_addr_type block_addr = m_config.block_addr(addr);
-     return m_tag_array->get_owner( block_addr, cache_index, mf);
+    
+    cache_block_t* block = m_tag_array->get_block(cache_index);
+    if (block->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)
+    {
+        return block->m_owner;
+    }
+    else{
+        return unsigned(-1);
+    }
 }
 
 void
-l2_cache::set_owner( new_addr_type addr,
-                  mem_fetch *mf,
+l2_cache::set_owner(mem_fetch *mf,
+                    unsigned cache_index,
                   unsigned owner_id)
 {
-     unsigned cache_index = (unsigned)-1;
-     new_addr_type block_addr = m_config.block_addr(addr);
-    return  m_tag_array->set_owner( block_addr, cache_index, mf, owner_id);
+ 
+     mem_access_sector_mask_t mask = mf->get_access_sector_mask();
+     new_addr_type tag = m_config.block_addr(mf->get_addr());
+     cache_block_t* block = m_tag_array->get_block(cache_index);
+    if (block->m_tag == tag) {
+           if ( block->get_status(mask) == VALID || block->get_status(mask) == OWNED || block->get_status(mask) == MODIFIED || block->get_status(mask) == REMOTE_OWNERSHIP) {
+            	block->m_owner = owner_id;
+                if(owner_id == (unsigned)-1 ){
+                  block->set_status(MODIFIED, mask);
+                }
+                else{
+                block->set_status(REMOTE_OWNERSHIP, mask);
+                }
+                
+           }
+           else{
+               bool testbool = false;
+                assert(("Setting owner for an INVALID LINE", testbool));
+           } 
+        }  
 }
 
 enum cache_request_status
@@ -1989,6 +2011,13 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index)
 {
  cache_block_t* block = m_tag_array->get_block(cache_index);
     block->ownership_champion.pop_front();
+    
+}
+
+new_addr_type l2_cache::get_line_address(mem_fetch* mf, unsigned cache_index)
+{
+ cache_block_t* block = m_tag_array->get_block(cache_index);
+    return block->m_tag;
     
 }
 

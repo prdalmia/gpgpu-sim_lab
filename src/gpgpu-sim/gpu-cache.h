@@ -1606,11 +1606,11 @@ public:
                 unsigned time,
                 std::list<cache_event> &events );
                  
-   virtual  unsigned get_owner( new_addr_type addr,
-                mem_fetch *mf);
+   virtual  unsigned get_owner(mem_fetch *mf,
+                        unsigned cache_index);
                  
-    virtual    void set_owner( new_addr_type addr,
-                mem_fetch * mf,
+    virtual    void set_owner( mem_fetch * mf,
+                unsigned cache_index,
                 unsigned owner_id );
     virtual enum cache_request_status process_probe(   mem_fetch *mf,
                 unsigned &cache_index );           
@@ -1621,6 +1621,7 @@ public:
     virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index);
     virtual  unsigned get_ownership_champion( mem_fetch* mf, unsigned cache_index);
     virtual  void remove_from_ownership_champion_queue(unsigned cache_index);
+    virtual  new_addr_type get_line_address(mem_fetch* mf, unsigned cache_index);
 };
 
 /*****************************************************************************/
