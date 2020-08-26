@@ -2021,6 +2021,15 @@ new_addr_type l2_cache::get_line_address(mem_fetch* mf, unsigned cache_index)
     
 }
 
+void l2_cache::allocate(mem_fetch* mf, unsigned cache_index, unsigned time)
+{
+    new_addr_type block_addr = m_config.block_addr(mf->get_addr());
+    new_addr_type tag = m_config.tag(mf->get_addr());
+ cache_block_t* block = m_tag_array->get_block(cache_index);
+    block->allocate(tag, block_addr, time, mf->get_access_sector_mask());  
+    block->set_status(REMOTE_OWNERSHIP, mf->get_access_sector_mask());
+    
+}
 /// Access function for tex_cache
 /// return values: RESERVATION_FAIL if request could not be accepted
 /// otherwise returns HIT_RESERVED or MISS; NOTE: *never* returns HIT

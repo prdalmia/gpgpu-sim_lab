@@ -455,6 +455,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2_icnt_queue->push(mf_pending);
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
+                      if(m_L2cache->get_line_address(mf_pending, cache_index) != mf->get_addr()){
+                      m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
+                      }
                       m_L2cache->remove_from_ownership_queue(cache_index);
                       //pop request from waiting for ownership queue
                      }
@@ -480,8 +483,8 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          //need to add this to the ownership champion queue
                          unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
                   
-                                mem_access_t access( mf->get_access_type(), mf->get_addr(), mf->get_ctrl_size(), false);
-                               
+                                mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
+                               // you also have to do the stuff which would have happenend if there was a replacement
                                 printf("Invalidation Sent to core %d\n", invalidation_reciever);
                                 unsigned cluster_id = invalidation_reciever/2;
                                 mem_fetch *mf_flush = new mem_fetch( access, 

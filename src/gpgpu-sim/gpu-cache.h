@@ -1622,6 +1622,7 @@ public:
     virtual  unsigned get_ownership_champion( mem_fetch* mf, unsigned cache_index);
     virtual  void remove_from_ownership_champion_queue(unsigned cache_index);
     virtual  new_addr_type get_line_address(mem_fetch* mf, unsigned cache_index);
+    virtual  void allocate(mem_fetch* mf, unsigned cache_index, unsigned time);
 };
 
 /*****************************************************************************/
