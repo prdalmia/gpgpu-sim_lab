@@ -408,6 +408,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
+                printf("Request recieved from core %d for address %x", mf->get_sid(), mf->get_addr() );
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
