@@ -448,6 +448,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           //L2 cache will check if somebody is waiting for ownership at that address
                          // if yes make that next request the current owner and send the block to the new owner
                      // This needs to be replaced by index?
+                     
                       mem_fetch * mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
                      
                      if (mf_pending){
@@ -477,6 +478,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                    }
                       }
                      else{
+                         assert(mf->get_type() != INVALIDATION_RESPONSE);
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index);
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
