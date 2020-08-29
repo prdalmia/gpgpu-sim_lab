@@ -3112,6 +3112,10 @@ void shader_core_ctx::cycle()
 
 	m_stats->shader_cycles[m_sid]++;
     writeback();
+    if (m_sid ==4)
+{    
+    m_ldst_unit->print(stdout);
+}
     execute();
     read_operands();
     issue();
