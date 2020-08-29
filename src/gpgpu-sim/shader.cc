@@ -2292,7 +2292,7 @@ void ldst_unit::writeback()
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
                 if (mf->get_sid() == 4){
-                    printf("The address for which a writeback is taking place is %x", mf->get_addr());
+                    printf("The address for which a writeback is taking place is %x\n", mf->get_addr());
                 }
                 if(m_next_wb.isatomic()){
                     mf->do_atomic();
@@ -2404,7 +2404,7 @@ void ldst_unit::cycle()
                    if (m_L1D->fill_port_free()) {
                        mf->set_fill_L1D();
                        if(mf->get_sid() == 4){
-                       printf("Going to fill address %x for core %d", mf->get_addr(), mf->get_sid());
+                       printf("Going to fill address %x for core %d\n", mf->get_addr(), mf->get_sid());
                        }
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
