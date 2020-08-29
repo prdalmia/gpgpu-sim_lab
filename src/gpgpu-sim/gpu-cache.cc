@@ -1867,9 +1867,7 @@ l1_cache::access( new_addr_type addr,
                   std::list<cache_event> &events )
 {
     return data_cache::access( addr, mf, time, events );
-    if(mf->isatomic() == true){
-        printf("Core %d has a recieved an atomic transaction for address %x\n", mf->get_sid(), mf->get_addr());
-    }
+   
 }
 
 enum cache_request_status
@@ -1915,9 +1913,7 @@ l2_cache::access( new_addr_type addr,
                   std::list<cache_event> &events )
 {
     return data_cache::access( addr, mf, time, events );
-    if(mf->isatomic() == true){
-        printf("L2 cache  has a recieved an atomic transaction from core %d for address %x\n", mf->get_sid(), mf->get_addr());
-    }
+    
 }
 
 unsigned l2_cache::get_owner( mem_fetch *mf, unsigned cache_index)
