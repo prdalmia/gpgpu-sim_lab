@@ -1832,6 +1832,7 @@ public:
     void get_cache_stats(cache_stats &cs);
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
+    void get_ldst() const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
 
@@ -2104,6 +2105,7 @@ public:
     void get_cache_stats(cache_stats &cs) const;
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
     void get_L1D_sub_stats(struct cache_sub_stats &css) const;
+    void get_ldst() const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
 

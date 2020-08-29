@@ -3112,10 +3112,6 @@ void shader_core_ctx::cycle()
 
 	m_stats->shader_cycles[m_sid]++;
     writeback();
-    if (m_sid ==4)
-{    
-    m_ldst_unit->print(stdout);
-}
     execute();
     read_operands();
     issue();
@@ -3501,6 +3497,10 @@ void shader_core_ctx::get_L1I_sub_stats(struct cache_sub_stats &css) const{
 void shader_core_ctx::get_L1D_sub_stats(struct cache_sub_stats &css) const{
     m_ldst_unit->get_L1D_sub_stats(css);
 }
+void shader_core_ctx::get_ldst() const{
+    m_ldst_unit->print(stdout);
+}
+
 void shader_core_ctx::get_L1C_sub_stats(struct cache_sub_stats &css) const{
     m_ldst_unit->get_L1C_sub_stats(css);
 }
@@ -4135,6 +4135,11 @@ void simt_core_cluster::get_L1D_sub_stats(struct cache_sub_stats &css) const{
     }
     css = total_css;
 }
+void simt_core_cluster::get_ldst() const{
+   
+        m_core[4]->get_ldst();
+}
+
 void simt_core_cluster::get_L1C_sub_stats(struct cache_sub_stats &css) const{
     struct cache_sub_stats temp_css;
     struct cache_sub_stats total_css;
