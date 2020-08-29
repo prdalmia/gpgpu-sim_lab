@@ -2291,6 +2291,9 @@ void ldst_unit::writeback()
             if( m_L1D && m_L1D->access_ready() ) {
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
+                if (mf->get_sid() == 4){
+                    printf("The address for which a writeback is taking place is %x", mf->get_addr());
+                }
                 if(m_next_wb.isatomic()){
                     mf->do_atomic();
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
