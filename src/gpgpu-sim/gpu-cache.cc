@@ -358,7 +358,6 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
                 if ( m_config.m_replacement_policy == LRU ) {
                     if ( line->get_last_access_time() < valid_timestamp ) {
                         valid_timestamp = line->get_last_access_time();
-                        assert(line->get_status(mask) != OWNED);
                         valid_line = index;
                     }
                 } else if ( m_config.m_replacement_policy == FIFO ) {
@@ -378,6 +377,7 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
     if ( invalid_line != (unsigned)-1 ) {
         idx = invalid_line;
     } else if ( valid_line != (unsigned)-1) {
+        assert(m_lines[valid_line]->get_status(mask) != OWNED);
         idx = valid_line;
     } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
 
