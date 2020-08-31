@@ -551,7 +551,10 @@ void tag_array::fill( new_addr_type addr, unsigned time, mem_access_sector_mask_
     //assert( m_config.m_alloc_policy == ON_FILL );
     unsigned idx;
     enum cache_request_status status = probe(addr,idx,mask);
-    assert(m_lines[idx]->m_tag != 0xc0006c00);
+    if(m_lines[idx]->get_status(mask) == OWNED);
+    {
+        printf("ABORT");
+    }
     //assert(status==MISS||status==SECTOR_MISS); // MSHR should have prevented redundant memory request
     if(status==MISS)
     	m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mask );
@@ -1850,9 +1853,6 @@ data_cache::access( new_addr_type addr,
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe( block_addr, cache_index, mf, true);
-        if(mf->get_addr() == 0xc0006c00 && mf->get_sid() == 4){
-            printf("Cache Index L1 is %d", cache_index);
-                   }
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
