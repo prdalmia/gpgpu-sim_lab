@@ -551,9 +551,9 @@ void tag_array::fill( new_addr_type addr, unsigned time, mem_access_sector_mask_
     //assert( m_config.m_alloc_policy == ON_FILL );
     unsigned idx;
     enum cache_request_status status = probe(addr,idx,mask);
-    if(m_lines[idx]->get_status(mask) == OWNED);
+    if(m_lines[idx]->get_status(mask) == OWNED && m_lines[idx]->m_tag == 0xc0006c00);
     {
-        printf("ABORT");
+        printf("ABORT\n");
     }
     //assert(status==MISS||status==SECTOR_MISS); // MSHR should have prevented redundant memory request
     if(status==MISS)
