@@ -514,7 +514,7 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
         m_miss++;
         shader_cache_access_log(m_core_id, m_type_id, 1); // log cache misses
         if ( m_config.m_alloc_policy == ON_MISS ) {
-            if( m_lines[idx]->is_modified_line()) {
+            if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
             }
