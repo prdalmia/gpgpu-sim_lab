@@ -305,7 +305,6 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
     
     unsigned set_index = m_config.set_index(addr);
     new_addr_type tag = m_config.tag(addr);
-
     unsigned invalid_line = (unsigned)-1;
     unsigned valid_line = (unsigned)-1;
     unsigned long long valid_timestamp = (unsigned)-1;
@@ -369,6 +368,8 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
             }
         }
     }
+
+    
     if ( all_reserved ) {
         assert( m_config.m_alloc_policy == ON_MISS ); 
         return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
@@ -380,7 +381,10 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
         assert(m_lines[valid_line]->get_status(mask) != OWNED);
         idx = valid_line;
     } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
-
+ 
+   if(addr = 0xc0006c00){
+        printf("Index for addreess %x is %d core is %d", mf->get_addr(), idx, mf->get_sid());
+    }
 
     if(probe_mode && m_config.is_streaming()){
 		line_table::const_iterator i = pending_lines.find(m_config.block_addr(addr));
