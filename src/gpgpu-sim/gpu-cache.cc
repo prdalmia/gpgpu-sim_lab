@@ -382,9 +382,6 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
         idx = valid_line;
     } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
  
-   if(addr = 0xc0006c00){
-        printf("Index for addreess %x is %d core is %d", mf->get_addr(), idx, mf->get_sid());
-    }
 
     if(probe_mode && m_config.is_streaming()){
 		line_table::const_iterator i = pending_lines.find(m_config.block_addr(addr));
@@ -1853,6 +1850,9 @@ data_cache::access( new_addr_type addr,
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe( block_addr, cache_index, mf, true);
+        if(mf->get_addr() == 0xc0006c00 && mf->get_sid() == 4){
+            printf("Cache Index L1 is %d", cache_index);
+                   }
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
