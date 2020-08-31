@@ -1688,9 +1688,6 @@ void ldst_unit::L1_latency_queue_cycle()
 		    mem_fetch* mf_next = l1_latency_queue[0];
 			std::list<cache_event> events;
 			enum cache_request_status status = m_L1D->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
-           if(mf_next->get_addr() == 0xc0006c00){
-               printf("Core %d has a recieved an atomic transaction for address %x with status %d\n", mf_next->get_sid(), mf_next->get_addr(), status);
-           }
            // if(mf_next->isatomic() == true || mf_next->get_sid() == 4){
         //printf("Core %d has a recieved an atomic transaction for address %x\n", mf_next->get_sid(), mf_next->get_addr());
         //if(mf_next->get_addr() == 0xc00016e0){
@@ -2297,9 +2294,6 @@ void ldst_unit::writeback()
             if( m_L1D && m_L1D->access_ready() ) {
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
-                if (mf->get_sid() == 4){
-                    printf("The address for which a writeback is taking place is %x\n", mf->get_addr());
-                }
                 if(m_next_wb.isatomic()){
                     mf->do_atomic();
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
