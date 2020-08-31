@@ -460,7 +460,12 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                        printf("Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, cache_index));
                       m_L2_icnt_queue->push(mf_pending);
+                      if(mf_pending->isatomic() == true){
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
+                      }
+                      else{
+                          m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
+                      }
                       if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
                       }

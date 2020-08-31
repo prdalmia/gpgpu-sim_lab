@@ -2023,6 +2023,14 @@ new_addr_type l2_cache::get_line_address(mem_fetch* mf, unsigned cache_index)
     
 }
 
+void l2_cache::change_line_status(mem_fetch* mf, unsigned cache_index)
+{
+ cache_block_t* block = m_tag_array->get_block(cache_index);
+    block->set_status(MODIFIED, mf->get_access_sector_mask() );
+    
+}
+
+
 void l2_cache::allocate(mem_fetch* mf, unsigned cache_index, unsigned time)
 {
     new_addr_type block_addr = m_config.block_addr(mf->get_addr());
