@@ -1690,6 +1690,9 @@ void ldst_unit::L1_latency_queue_cycle()
 			enum cache_request_status status = m_L1D->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
             if(mf_next->isatomic() == true || mf_next->get_sid() == 4){
         printf("Core %d has a recieved an atomic transaction for address %x\n", mf_next->get_sid(), mf_next->get_addr());
+        if(mf_next->get_addr() == 0xc00016e0){
+            print(stdout);
+        }
     }
 		   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
