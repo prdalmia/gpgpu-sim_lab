@@ -113,7 +113,7 @@ bool mem_fetch::isatomic() const
 
 void mem_fetch::do_atomic()
 {
-    printf("Doing atomic for address with core id  %d and address %x\n", this->get_sid(), this->get_addr());
+    //printf("Doing atomic for address with core id  %d and address %x\n", this->get_sid(), this->get_addr());
     m_inst.do_atomic( m_access.get_warp_mask() );
 }
 
