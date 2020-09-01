@@ -408,9 +408,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
+                /*
                 if(mf->isatomic() == false && status == REMOTE_OWNED && mf->get_type() != INVALIDATION_RESPONSE){
                 printf("Request recieved from core %d for address %x and %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic() );
                 }
+                */
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
@@ -419,7 +421,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     m_L2cache->process_probe(mf ,index);
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
-                                 printf("Owner is core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
+                                // printf("Owner is core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
                                  m_L2cache->add_ownership_champion(mf, index);
                                  
                             }
@@ -458,7 +460,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if (mf_pending){
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
+                       if(mf->get_type() == INVALIDATION_RESPONSE){
                        printf("Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, cache_index));
+                       }
                       m_L2_icnt_queue->push(mf_pending);
                       if(mf_pending->isatomic() == true){
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
