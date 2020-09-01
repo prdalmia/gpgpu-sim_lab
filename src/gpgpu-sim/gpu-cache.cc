@@ -378,7 +378,6 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
     if ( invalid_line != (unsigned)-1 ) {
         idx = invalid_line;
     } else if ( valid_line != (unsigned)-1) {
-        assert(m_lines[valid_line]->get_status(mask) != OWNED);
         idx = valid_line;
     } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
  
