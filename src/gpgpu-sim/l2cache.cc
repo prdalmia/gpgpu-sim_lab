@@ -460,9 +460,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if (mf_pending){
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
+                      /*
                        if(mf->get_type() == INVALIDATION_RESPONSE){
                        printf("Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, cache_index));
                        }
+                       */
                       m_L2_icnt_queue->push(mf_pending);
                       if(mf_pending->isatomic() == true){
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
@@ -495,7 +497,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       }
                      else{
                          assert(mf->get_type() != INVALIDATION_RESPONSE);
-                         printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
+                         //printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index);
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
@@ -504,7 +506,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   
                                 mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
-                                printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
+                                //printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
                                 unsigned cluster_id = invalidation_reciever/2;
                                 mem_fetch *mf_flush = new mem_fetch( access, 
                                                NULL,
