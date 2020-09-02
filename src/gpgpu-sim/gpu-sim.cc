@@ -1616,6 +1616,9 @@ void gpgpu_sim::cycle()
              gpu_stall_dramfull++;
           } else {
               mem_fetch* mf = (mem_fetch*) icnt_pop( m_shader_config->mem2device(i) );
+              if(mf->get_type() == INVALIDATION_RESPONSE && mf->get_addr() == mf->get_addr() == 0xc0248d80){
+               printf("GPU SIM Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
+               }
               m_memory_sub_partition[i]->push( mf, gpu_sim_cycle + gpu_tot_sim_cycle );
               if(mf)
             	  partiton_reqs_in_parallel_per_cycle++;
