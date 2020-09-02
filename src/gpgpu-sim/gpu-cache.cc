@@ -515,6 +515,9 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
         if ( m_config.m_alloc_policy == ON_MISS ) {
             if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
+                if(m_lines[idx]->m_tag == 0xc024d80){
+                    printf("Evicting block at address in question with core_id %d", m_core_id);
+                }
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
@@ -1886,9 +1889,7 @@ l1_cache::evict(   mem_fetch *mf,
      if(mshr_hit == 0 and status == MISS){
         printf("mshr_hit and status are %d and %d respectively for adddress %x for core %d\n", mshr_hit, status, mf->get_addr(), mf->get_sid());
         }
-    if ( !mshr_hit && status == HIT ) { // DO WE HAVE TO INCLUDE SECTOR MISS?  
-
-         		
+    if ( !mshr_hit && status == HIT ) { // DO WE HAVE TO INCLUDE SECTOR MISS?           		
     if(miss_queue_full(0)) {
 		m_stats.inc_fail_stats(mf->get_access_type(), MISS_QUEUE_FULL);
 		return RESERVATION_FAIL; // cannot handle request this cycle
