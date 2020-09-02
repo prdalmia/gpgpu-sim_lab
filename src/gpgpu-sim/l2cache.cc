@@ -409,9 +409,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
                 
-                if(mf->get_type() == INVALIDATION_RESPONSE && mf->get_addr() == 0xc0248d80){
-                printf("INVIR %d for address %x\n", mf->get_sid(), mf->get_addr());
-                }
                 
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
