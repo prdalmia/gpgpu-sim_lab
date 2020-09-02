@@ -1883,6 +1883,9 @@ l1_cache::evict(   mem_fetch *mf,
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
      
+     if(mshr_hit == 0 and status == MISS){
+        printf("mshr_hit and status are %d and %d respectively for adddress %x for core %d\n", mshr_hit, status, mf->get_addr(), mf->get_sid());
+        }
     if ( !mshr_hit && status == HIT ) { // DO WE HAVE TO INCLUDE SECTOR MISS?  
 
          		
