@@ -2299,7 +2299,7 @@ void ldst_unit::writeback()
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
                     if(mf->isevictionrequest()){
                         if(mf->get_sid() == 79 && mf->get_addr() == 0xc0248d80){
-               printf(" writebackInvalidation Response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
+               printf(" writeback Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
                }
                         m_L1D->evict(mf, gpu_sim_cycle+gpu_tot_sim_cycle);
                     }
