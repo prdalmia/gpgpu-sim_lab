@@ -1899,8 +1899,8 @@ l1_cache::evict(   mem_fetch *mf,
     mf->set_type(INVALIDATION_RESPONSE);
 	send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
      if(mf->get_sid() == 79 && mf->get_addr() == 0xc0248d80){
-               printf("Shader Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
-               }
+        printf("Shader Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
+    }
 
 	// Invalidate block
 	block->set_status(INVALID, mf->get_access_sector_mask());
