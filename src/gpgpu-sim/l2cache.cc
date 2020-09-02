@@ -410,7 +410,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
                 
                 if(mf->get_type() == INVALIDATION_RESPONSE && mf->get_addr() == 0xc0248d80){
-                printf("INVIR %d for address %x and %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic() );
+                printf("INVIR %d for address %x\n", mf->get_sid(), mf->get_addr());
                 }
                 
                 //CAN WE GET A SECTOR MISS ?
