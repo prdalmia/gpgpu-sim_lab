@@ -464,7 +464,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       
-                       if(mf->get_addr() == 0xc0248d80){
+                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
                        printf("Sending response to core %d as Invalidation response recieved from core %d\n", mf_pending->get_sid(), mf->get_sid());
                        }
                        
