@@ -215,6 +215,9 @@ struct line_cache_block: public cache_block_t  {
 	    }
 		virtual void set_status(enum cache_block_state status, mem_access_sector_mask_t sector_mask)
 	    {
+            if(m_status[sidx] == OWNED && status == INVALID){
+            printf("Changing status from Owned to Invalid\n");
+        }
 	    	m_status = status;
 	    }
 		virtual unsigned long long get_last_access_time()
@@ -387,9 +390,6 @@ struct sector_cache_block : public cache_block_t {
     virtual void set_status(enum cache_block_state status, mem_access_sector_mask_t sector_mask)
 	{
 		unsigned sidx = get_sector_index(sector_mask);
-        if(m_status[sidx] == OWNED && status == INVALID){
-            printf("Changing status from Owned to Invalid\n");
-        }
 		m_status[sidx] = status;
 	}
 
