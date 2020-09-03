@@ -316,7 +316,7 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
         unsigned index = set_index*m_config.m_assoc+way;
         cache_block_t *line = m_lines[index];
         if (line->m_tag == tag) {
-    if(mf->get_sid() == 52 && ((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80)){
+    if(mf->get_sid() == 52 && line->m_tag == 0xc0248d80)){
         {
             printf("The line status is %d", line->get_status(mask));
         }
