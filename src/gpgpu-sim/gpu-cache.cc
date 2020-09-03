@@ -390,7 +390,11 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
 				 return SECTOR_MISS;
 		}
     }
-
+    if(mf->get_sid() == 52 && ((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80)){
+        {
+            printf("The line status is %d", m_lines[idx]->get_status(mask));
+        }
+    }
     return MISS;
 }
 
