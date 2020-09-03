@@ -433,6 +433,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             delete mf;
                         } else {
                             mf->set_reply();
+                             if(mf->get_addr() == 0xc0248d80){
+                       printf("Sending HIT response to core %d\n", mf->get_sid());
+                       }
                             mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                             m_L2_icnt_queue->push(mf);
                         }
@@ -459,7 +462,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       
                        if(mf->get_addr() == 0xc0248d80){
-                       printf("Sending response to core %d as Invalidation response recieved from core %d", mf_pending->get_sid(), mf->get_sid());
+                       printf("Sending response to core %d as Invalidation response recieved from core %d\n", mf_pending->get_sid(), mf->get_sid());
                        }
                        
                       m_L2_icnt_queue->push(mf_pending);
@@ -470,6 +473,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           m_L2cache->remove_from_ownership_champion_queue(cache_index);
+                          if(mf->get_addr() == 0xc0248d80){
+                       printf("Dafuq\n");
+                       }
                       }
                       if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
