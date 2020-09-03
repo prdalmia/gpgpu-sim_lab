@@ -763,12 +763,12 @@ mem_fetch *mshr_table::next_access(){
     assert( !m_data[block_addr].m_list.empty() );
     mem_fetch *result = m_data[block_addr].m_list.front();
     m_data[block_addr].m_list.pop_front();
+     if(result->get_addr() == 0xc0248d80){
+            printf(" mshr Invalidation Response recieved from core %d for address %x\n", result->get_sid(), result->get_addr());
+            }
     if ( m_data[block_addr].m_list.empty() ) {
         // release entry
         if(m_data[block_addr].m_has_atomic && m_data[block_addr].pending_flushing_request == true){
-        if(result->get_addr() == 0xc0248d80){
-            printf(" mshr Invalidation Response recieved from core %d for address %x\n", result->get_sid(), result->get_addr());
-            }
         result->set_eviction_request();
         }
         m_data.erase(block_addr);
@@ -1910,6 +1910,9 @@ l1_cache::evict(   mem_fetch *mf,
     }
     else if ( mshr_hit){
        m_mshrs.add_pending_flush(mshr_addr, mf);
+        if(mf->get_addr() == 0xc0248d80){
+        printf("Setting pending flush from core %d for address %x\n", mf->get_sid(), mf->get_addr());
+    }
        delete mf;
     }   
     return status;
