@@ -357,6 +357,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
            mem_fetch *mf = m_L2cache->next_access();
            if(mf->get_access_type() != L2_WR_ALLOC_R){ // Don't pass write allocate read request back to upper level cache
 				mf->set_reply();
+                if(mf->get_addr() == 0xc0248d80){
+                       printf("Bhosad core %d\n", mf->get_sid());
+                       }
 				mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
 				m_L2_icnt_queue->push(mf);
            }else{
