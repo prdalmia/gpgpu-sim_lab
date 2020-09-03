@@ -465,7 +465,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       
                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
-                       printf("Sending response to core %d as Invalidation response recieved from core %d\n", mf_pending->get_sid(), mf->get_sid());
+                       printf("Invalidation response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
                        
                       m_L2_icnt_queue->push(mf_pending);
@@ -476,9 +476,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           m_L2cache->remove_from_ownership_champion_queue(cache_index);
-                          if(mf->get_addr() == 0xc0248d80){
-                       printf("Dafuq\n");
-                       }
                       }
                       if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -503,7 +500,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       }
                      else{
                          assert(mf->get_type() != INVALIDATION_RESPONSE);
-                         if(mf->get_addr() == 0xc0248d80){
+                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
                          }
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
@@ -514,9 +511,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   
                                 mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
-                                //if(mf->get_addr() == 0xc0248d80){
-                                //printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
-                                //}
+                                if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
+                                 printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
+                                }
                                 unsigned cluster_id = invalidation_reciever/2;
                                 mem_fetch *mf_flush = new mem_fetch( access, 
                                                NULL,
