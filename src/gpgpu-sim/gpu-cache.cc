@@ -763,9 +763,6 @@ mem_fetch *mshr_table::next_access(){
     assert( !m_data[block_addr].m_list.empty() );
     mem_fetch *result = m_data[block_addr].m_list.front();
     m_data[block_addr].m_list.pop_front();
-     if(result->get_addr() == 0xc0248d80){
-            printf(" mshr Invalidation Response recieved from core %d for address %x\n", result->get_sid(), result->get_addr());
-            }
     if ( m_data[block_addr].m_list.empty() ) {
         // release entry
         if(m_data[block_addr].m_has_atomic && m_data[block_addr].pending_flushing_request == true){
