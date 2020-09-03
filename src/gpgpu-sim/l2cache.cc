@@ -505,9 +505,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   
                                 mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
-                                if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
-                                 printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
-                                }
+                                //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
+                                 //printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
+                                //}
                                 unsigned cluster_id = invalidation_reciever/2;
                                 mem_fetch *mf_flush = new mem_fetch( access, 
                                                NULL,
