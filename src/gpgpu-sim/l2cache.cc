@@ -458,9 +458,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       
-                       //if(mf->get_addr() == 0xc0248d80){
-                       //printf("Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, cache_index));
-                       //}
+                       if(mf->get_addr() == 0xc0248d80){
+                       printf("Sending response to core %d as Invalidation response recieved from core %d", mf_pending->get_sid(), mf->get_sid());
+                       }
                        
                       m_L2_icnt_queue->push(mf_pending);
                       if(mf_pending->isatomic() == true){
