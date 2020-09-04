@@ -1734,6 +1734,9 @@ data_cache::rd_miss_base( new_addr_type addr,
     if( do_miss ){
         // If evicted block is modified and not a write-through
         // (already modified lower level)
+        if((evicted.m_block_addr & (new_addr_type)(~127)) == 0xc0248d80){
+            printf("Evicting my block from core %d\n", mf->get_sid());
+        }
         if(wb && (m_config.m_write_policy != WRITE_THROUGH) ){ 
             mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
                 m_wrbk_type,evicted.m_modified_size,true);
