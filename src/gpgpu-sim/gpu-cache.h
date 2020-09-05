@@ -215,9 +215,9 @@ struct line_cache_block: public cache_block_t  {
 	    }
 		virtual void set_status(enum cache_block_state status, mem_access_sector_mask_t sector_mask)
 	    {
-           // if(m_status == OWNED && status == INVALID){
-            //printf("Changing status from Owned to Invalid\n");
-        //}
+           if((m_block_addr & (new_addr_type)(~127) == 0xc0248d80) && m_owner == 52 && status == INVALID && m_status == OWNED){
+            printf("Changing status from Owned to Invalid\n");
+        }
 	    	m_status = status;
 	    }
 		virtual unsigned long long get_last_access_time()

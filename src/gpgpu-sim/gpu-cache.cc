@@ -1271,6 +1271,7 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
         cache_block_t* block = m_tag_array->get_block(e->second.m_cache_index);
         if(mf->isfillL1D() == true){
         block->set_status(OWNED, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        block->m_owner = mf->get_sid();
         }
         else{
         block->set_status(VALID, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
