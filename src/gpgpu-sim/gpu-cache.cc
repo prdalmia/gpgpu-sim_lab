@@ -1366,8 +1366,9 @@ cache_request_status data_cache::wr_hit_wb(new_addr_type addr, unsigned cache_in
 	new_addr_type block_addr = m_config.block_addr(addr);
 	m_tag_array->access(block_addr,time,cache_index,mf); // update LRU state
 	cache_block_t* block = m_tag_array->get_block(cache_index);
+    if(block->get_status(mf->get_access_sector_mask()) != OWNED){
 	block->set_status(MODIFIED, mf->get_access_sector_mask());
-
+    }
 	return HIT;
 }
 
