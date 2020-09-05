@@ -1921,7 +1921,7 @@ l1_cache::evict(   mem_fetch *mf,
     }
     */
 	// Invalidate block
-    if(cache_index == 990 && mf->get_sid() == 52){
+    if(cache_index == 990 && mf->get_sid() == 52 && (mf->get_addr() & (new_addr_type)(~127) == 0xc0248d80)){
            printf("Evicting apni line from l1 ka evict\n");
             }
 	block->set_status(INVALID, mf->get_access_sector_mask());
