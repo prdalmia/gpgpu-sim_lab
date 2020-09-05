@@ -317,7 +317,7 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
         cache_block_t *line = m_lines[index];
         if (line->m_tag == tag) {
     /*
-    if(mf->get_sid() == 52 && line->m_tag == 0xc00037a0)){
+    if(mf->get_sid() == 52 && line->m_tag == 0xc0003780)){
         {
             printf("The line status is %d", line->get_status(mask));
         }
@@ -610,7 +610,7 @@ std::vector<new_addr_type> tag_array::invalidate()
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
     if(!m_lines[i]->is_owned_line()){    
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
-    		if((m_lines[j]->m_block_addr & (new_addr_type)(~127) == 0xc00037a0) && m_core_id == 52){
+    		if((m_lines[j]->m_block_addr & (new_addr_type)(~127) == 0xc0003780) && m_core_id == 52){
            printf("Evicting apni line\n");
             }
             m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
@@ -1743,7 +1743,7 @@ data_cache::rd_miss_base( new_addr_type addr,
     if( do_miss ){
         // If evicted block is modified and not a write-through
         // (already modified lower level)
-        if((evicted.m_block_addr & (new_addr_type)(~127)) == 0xc00037a0){
+        if((evicted.m_block_addr & (new_addr_type)(~127)) == 0xc0003780){
             printf("Evicting my block from core %d\n", mf->get_sid());
         }
         if(wb && (m_config.m_write_policy != WRITE_THROUGH) ){ 
@@ -1918,12 +1918,12 @@ l1_cache::evict(   mem_fetch *mf,
     mf->set_type(INVALIDATION_RESPONSE);
 	send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
      /*
-     if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00037a0){
+     if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0003780){
         printf("Evict Invalidation Response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
     }
     */
 	// Invalidate block
-    if(cache_index == 990 && mf->get_sid() == 52 && (mf->get_addr() & (new_addr_type)(~127) == 0xc00037a0)){
+    if(cache_index == 990 && mf->get_sid() == 52 && (mf->get_addr() & (new_addr_type)(~127) == 0xc0003780)){
            printf("Evicting apni line from l1 ka evict\n");
             }
 	block->set_status(INVALID, mf->get_access_sector_mask());
