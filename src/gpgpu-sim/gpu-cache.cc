@@ -611,7 +611,7 @@ std::vector<new_addr_type> tag_array::invalidate()
     if(!m_lines[i]->is_owned_line()){    
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
     		if((m_lines[j]->m_block_addr & (new_addr_type)(~127) == 0xc0248d80) && m_core_id == 52){
-           printf("Evicting apni line\n")
+           printf("Evicting apni line\n");
             }
             m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
         }    
@@ -1400,8 +1400,8 @@ cache_request_status data_cache::wr_hit_we(new_addr_type addr, unsigned cache_in
 	send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
 
 	// Invalidate block
-    if(cache_index == 990 && m_core_id == 52){
-           printf("Evicting apni line from wr_hit_we\n")
+    if(cache_index == 990 && mf->get_sid() == 52){
+           printf("Evicting apni line from wr_hit_we\n");
             }
 	block->set_status(INVALID, mf->get_access_sector_mask());
 
