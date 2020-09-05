@@ -418,7 +418,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     m_L2cache->process_probe(mf ,index);
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
-                                // printf("Owner is core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
+                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0003780){
+                         printf("Owner is core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
+                         }
+                                
                                  m_L2cache->add_ownership_champion(mf, index);
                                  
                             }
@@ -494,9 +497,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       }
                      else{
                          assert(mf->get_type() != INVALIDATION_RESPONSE);
-                         //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0003780){
+                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0003780){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
-                        // }
+                         }
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index);
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
