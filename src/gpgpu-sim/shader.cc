@@ -2398,7 +2398,7 @@ void ldst_unit::cycle()
                    if(mf->get_type() == INVALIDATION){
                        //check if MSHR for that address is empty and then write back the block to L2
                        /*
-                       if(mf->get_sid() == 79 && mf->get_addr() == 0xc0248d80){
+                       if(mf->get_sid() == 79 && mf->get_addr() == 0xc00037a0){
                            printf("Recieved Invalidation for core ID and address in question\n");
                        }
                        */
@@ -2410,7 +2410,7 @@ void ldst_unit::cycle()
                        mf->set_fill_L1D();
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                        /*
-                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
+                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00037a0){
                        printf(" Fill for core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
                        */

@@ -458,7 +458,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       
-                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
+                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00037a0){
                        printf("Invalidation response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
                        
@@ -494,7 +494,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       }
                      else{
                          assert(mf->get_type() != INVALIDATION_RESPONSE);
-                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
+                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00037a0){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
                          }
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
@@ -505,7 +505,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   
                                 mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
-                                //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0248d80){
+                                //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00037a0){
                                  //printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
                                 //}
                                 unsigned cluster_id = invalidation_reciever/2;
