@@ -1430,7 +1430,7 @@ protected:
     // to the functions below each grouping
     /******* Write-hit configs *******/
     enum cache_request_status
-        (data_cache::m_wr_hit)( new_addr_type addr,
+        (data_cache::*m_wr_hit)( new_addr_type addr,
                                  unsigned cache_index,
                                  mem_fetch *mf,
                                  unsigned time,
