@@ -1868,10 +1868,8 @@ bool ldst_unit::pending_requests(){
 }
 void ldst_unit::invalidate(){
     
-    /*
-    if(flush_l1 == false){
-	// Flush L1D cache
-     std::vector<new_addr_type> flush_queue = m_L1D->invalidate_l1();
+
+     std::vector<new_addr_type> flush_queue = m_L1D->invalidate();
     
     for (unsigned i=0; i < flush_queue.size(); i++){
              mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
@@ -1882,16 +1880,9 @@ void ldst_unit::invalidate(){
                                    m_sid, 
                                    (m_sid/2),
                                    m_memory_config );
-           mf->set_type(INVALIDATION_RESPONSE);
-           m_icnt->push(mf);  
-           
+           mf->set_type(WRITE_REQUEST);
+           m_icnt->push(mf);            
         }  	   
-        }
-        
-        flush_l1 = true;
-*/
-
-m_L1D->invalidate();
 }
 
 simd_function_unit::simd_function_unit( const shader_core_config *config )

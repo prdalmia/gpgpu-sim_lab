@@ -596,28 +596,23 @@ std::vector<new_addr_type> tag_array::invalidate()
 	if(!is_used)
 		return flush_queue;
 
-    for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    if(!m_lines[i]->is_owned_line()){    
-        assert((m_lines[i]->is_modified_line() == false) && "Invalidating a Modfied line");
+    for (unsigned i=0; i < m_config.get_num_lines(); i++){
+    if(!m_lines[i]->is_owned_line()){
+        if(m_lines[i]->is_modified_line()){
+        flush_queue.push_back(m_lines[i]->m_block_addr);
+        }
+        else{
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
             m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
-        }    
-    }
- 
-/*
-    for (unsigned i=0; i < m_config.get_num_lines(); i++){
-         if(m_lines[i]->is_owned_line()) {
-                flush_queue.push_back(m_lines[i]->m_block_addr);
+        } 
         }
-	           for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
-    		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
-               }
-           
-} 
-*/  
+        }   
+    }
+
     is_used = false;
     return flush_queue;
 }
+
 
 float tag_array::windowed_miss_rate( ) const
 {

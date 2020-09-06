@@ -1174,8 +1174,8 @@ public:
     mem_fetch *next_access(){return m_mshrs.next_access();}
     // flash invalidate all entries in cache
     void flush(){m_tag_array->flush();}
-    void invalidate(){ m_tag_array->invalidate();}
-    std::vector<new_addr_type>invalidate_l1(){return  m_tag_array->invalidate();}
+    std::vector<new_addr_type> invalidate(){ m_tag_array->invalidate();}
+    //std::vector<new_addr_type>invalidate_l1(){return  m_tag_array->invalidate();}
     void print(FILE *fp, unsigned &accesses, unsigned &misses) const;
     void display_state( FILE *fp ) const;
 
