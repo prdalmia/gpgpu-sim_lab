@@ -515,9 +515,6 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
         if ( m_config.m_alloc_policy == ON_MISS ) {
             if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
-                if(m_lines[idx]->is_owned_line()){
-                    printf("Evicting block at address in question with core_id %d", m_core_id);
-                }
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
@@ -576,22 +573,20 @@ void tag_array::flush()
 {
 		if(!is_used)
 		return;
-/*
-    for (unsigned i=0; i < m_config.get_num_lines(); i++)
-    if(!m_lines[i]->is_owned_line()){    
-    	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++)
-    		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
-    }
- */
-    for (unsigned i=0; i < m_config.get_num_lines(); i++){
-          if(m_lines[i]->is_owned_line()) {
+        for (unsigned i=0; i < m_config.get_num_lines(); i++){
+          if(m_lines[i]->is_modified_line()) {
                 flush_queue.push_back(m_lines[i]->m_block_addr);
         }
+        else{
+            if(!m_lines[i]->is_owned_line())
+               {
 	           for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
-    		m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
+    		   m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
                }
-          
-}   
+    }
+    }
+    }
+           
     is_used = false;
     return;
 }
@@ -603,6 +598,7 @@ std::vector<new_addr_type> tag_array::invalidate()
 
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
     if(!m_lines[i]->is_owned_line()){    
+        assert((m_lines[i]->is_modified_line() == false) && "Invalidating a Modfied line");
     	for(unsigned j=0; j < SECTOR_CHUNCK_SIZE; j++){
             m_lines[i]->set_status(INVALID, mem_access_sector_mask_t().set(j)) ;
         }    
@@ -1891,12 +1887,8 @@ l1_cache::evict(   mem_fetch *mf,
     bool mshr_hit = m_mshrs.probe(mshr_addr);
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
-     
-     if(mshr_hit == 0 and status == MISS){
-        printf("mshr_hit and status are %d and %d respectively for adddress %x for core %d\n", mshr_hit, status, mf->get_addr(), mf->get_sid());
-        }
-        assert(!(mshr_hit == 0 && status == MISS));
-    if ( !mshr_hit && status == HIT ) { // DO WE HAVE TO INCLUDE SECTOR MISS?           		
+    assert(!(mshr_hit == 0 && status == MISS));
+    if ( !mshr_hit && status == HIT ) {            		
     if(miss_queue_full(0)) {
 		m_stats.inc_fail_stats(mf->get_access_type(), MISS_QUEUE_FULL);
 		return RESERVATION_FAIL; // cannot handle request this cycle
