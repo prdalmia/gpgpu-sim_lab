@@ -215,9 +215,6 @@ struct line_cache_block: public cache_block_t  {
 	    }
 		virtual void set_status(enum cache_block_state status, mem_access_sector_mask_t sector_mask)
 	    {
-           if((m_block_addr & (new_addr_type)(~127) == 0xc0248d80) && m_owner == 52 && status == INVALID && m_status == OWNED){
-            printf("Changing status from Owned to Invalid\n");
-        }
 	    	m_status = status;
 	    }
 		virtual unsigned long long get_last_access_time()
@@ -1433,7 +1430,7 @@ protected:
     // to the functions below each grouping
     /******* Write-hit configs *******/
     enum cache_request_status
-        (data_cache::*m_wr_hit)( new_addr_type addr,
+        (data_cache::m_wr_hit)( new_addr_type addr,
                                  unsigned cache_index,
                                  mem_fetch *mf,
                                  unsigned time,
