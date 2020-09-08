@@ -470,8 +470,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0974800){
                        printf("Invalidation response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
-                       
-                      m_L2_icnt_queue->push(mf_pending);
+                     if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
+                      m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
+                      }
+                      
                       if(mf_pending->isatomic() == true){
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
                       }
@@ -480,10 +482,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           m_L2cache->remove_from_ownership_champion_queue(cache_index);
                       }
-                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
-                      m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
-                      }
+
                       m_L2cache->remove_from_ownership_queue(cache_index);
+                      m_L2_icnt_queue->push(mf_pending);
+                  
                       //pop request from waiting for ownership queue
                      }
                       else{
