@@ -1883,6 +1883,9 @@ l1_cache::evict(   mem_fetch *mf,
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
     assert(!(mshr_hit == 0 && status == MISS));
+    if ( !mshr_hit && status == MISS ){
+        printf( "address is %x\n", mf->get_addr());
+    }
     if ( !mshr_hit && status == HIT ) {            		
     if(miss_queue_full(0)) {
 		m_stats.inc_fail_stats(mf->get_access_type(), MISS_QUEUE_FULL);
