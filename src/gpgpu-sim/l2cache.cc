@@ -408,7 +408,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
-                
+                       
                 
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
@@ -416,6 +416,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(status == MISS || status == HIT){     
                     unsigned int index;
                     m_L2cache->process_probe(mf ,index);
+                    if(mf->get_addr() == 0xc0974800){
+                         printf("Request aayi from core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
+                         }
+                         
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
                                  
