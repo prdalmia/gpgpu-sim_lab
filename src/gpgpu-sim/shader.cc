@@ -1870,9 +1870,9 @@ void ldst_unit::invalidate(){
     
 
      std::vector<new_addr_type> flush_queue = m_L1D->invalidate();
-    /*
+    
     for (unsigned i=0; i < flush_queue.size(); i++){
-        if(flush_queue[i]){
+        if(false){
              mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
         mem_fetch *mf = new mem_fetch( access, 
                                    NULL,
@@ -1885,7 +1885,7 @@ void ldst_unit::invalidate(){
            m_icnt->push(mf);  
         }          
         }  
-     */   	   
+       	   
 }
 
 simd_function_unit::simd_function_unit( const shader_core_config *config )
