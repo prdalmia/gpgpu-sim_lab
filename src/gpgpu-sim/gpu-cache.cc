@@ -1950,7 +1950,9 @@ l2_cache::set_owner(mem_fetch *mf,
            }
            else{
                bool testbool = false;
+               printf("the address where this happened is %x\n", mf->get_addr());
                 assert(("Setting owner for an INVALID LINE", testbool));
+                
            } 
         }  
 }
