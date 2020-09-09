@@ -468,11 +468,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if (mf_pending){
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-                      /*
+                      
                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0903480){
                        printf("Invalidation response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
-                       */
+                       
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
                       }
@@ -513,11 +513,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                  throw std::runtime_error("You are at a bad place man");
                              }
 
-                         /*
+                         
                          if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0903480){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
                          }
-                         */
+                         
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index);
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
@@ -538,7 +538,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                                cluster_id,
                                                mf->get_mem_config() );
                                 mf_flush->set_type(INVALIDATION);
-                                m_L2_icnt_queue->push(mf_flush);
+
+                            if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0903480){
+                         printf("Invalidation sent to core %d for address %x\n", invalidation_reciever ,m_L2cache->get_line_address(mf, cache_index));
+                         }                               
+                          m_L2_icnt_queue->push(mf_flush);
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
                                 m_L2cache->remove_from_ownership_champion_queue(cache_index);
