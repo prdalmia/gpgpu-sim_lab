@@ -504,7 +504,12 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                    }
                       }
                      else{
-                         assert(mf->get_type() != INVALIDATION_RESPONSE);
+                            if (mf->get_type() == INVALIDATION_RESPONSE)
+                             {
+                                 printf("The invalidation response for address %x should not be in this section\n",mf->get_addr());
+                                 throw std::runtime_error("You are at a bad place man");
+                             }
+
                          
                          if((mf->get_addr() & (new_addr_type)(~127)) == 0xc05d3400){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
