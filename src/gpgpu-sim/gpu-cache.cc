@@ -1886,7 +1886,7 @@ l1_cache::evict(   mem_fetch *mf,
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
      if ( !mshr_hit && status == MISS ){
-        printf( "address is %x\n", mf->get_addr());
+        printf( "address is %x and core id is %d\n", mf->get_addr(), mf->get_sid());
     }
     assert(!(mshr_hit == 0 && status == MISS));
    
