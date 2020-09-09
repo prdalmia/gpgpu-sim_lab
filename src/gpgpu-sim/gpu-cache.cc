@@ -1943,7 +1943,7 @@ l2_cache::set_owner(mem_fetch *mf,
      new_addr_type tag = m_config.block_addr(mf->get_addr());
      cache_block_t* block = m_tag_array->get_block(cache_index);
     if (block->m_tag == tag) {
-           if ( block->get_status(mask) == VALID || block->get_status(mask) == OWNED || block->get_status(mask) == MODIFIED || block->get_status(mask) == REMOTE_OWNERSHIP) {
+           if ( block->get_status(mask) == VALID || block->get_status(mask) == RESERVED || block->get_status(mask) == OWNED || block->get_status(mask) == MODIFIED || block->get_status(mask) == REMOTE_OWNERSHIP) {
             	block->m_owner = owner_id;
                 if(owner_id == (unsigned)-1 ){
                   block->set_status(MODIFIED, mask);
