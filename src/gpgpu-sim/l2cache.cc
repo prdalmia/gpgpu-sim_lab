@@ -416,14 +416,14 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(status == MISS || status == HIT){     
                     unsigned int index;
                     m_L2cache->process_probe(mf ,index);
-                    if(mf->get_addr() == 0xc05d3400){
+                    if(mf->get_addr() == 0xc0986e80){
                          printf("Request aayi from core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
                          }
                          
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
                                  
-                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc05d3400){
+                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0986e80){
                          printf("Owner is core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
                          }
                          
@@ -467,7 +467,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       
-                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc05d3400){
+                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0986e80){
                        printf("Invalidation response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
@@ -511,7 +511,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                              }
 
                          
-                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc05d3400){
+                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0986e80){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
                          }
                          
@@ -523,7 +523,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   
                                 mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
-                                //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc05d3400){
+                                //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0986e80){
                                  //printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
                                 //}
                                 unsigned cluster_id = invalidation_reciever/2;
