@@ -177,9 +177,9 @@ struct line_cache_block: public cache_block_t  {
 	    {
 	    	//if(!m_ignore_on_fill_status)
 	    	//	assert( m_status == RESERVED );
-
+            if(m_status != REMOTE_OWNED){
 	    	m_status = m_set_modified_on_fill? MODIFIED : VALID;
-
+            }
 	        m_fill_time=time;
 	    }
 		virtual bool is_invalid_line()
