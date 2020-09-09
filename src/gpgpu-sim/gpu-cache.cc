@@ -591,7 +591,7 @@ void tag_array::flush()
     return;
 }
 
-std::vector<new_addr_type> tag_array::invalidate()
+std::vector<new_addr_type>& tag_array::invalidate()
 {
 	if(!is_used)
 		return flush_queue;
@@ -599,6 +599,7 @@ std::vector<new_addr_type> tag_array::invalidate()
     for (unsigned i=0; i < m_config.get_num_lines(); i++){
     if(!m_lines[i]->is_owned_line()){
         if(m_lines[i]->is_modified_line()){
+        
         flush_queue.push_back(m_lines[i]->m_block_addr);
         }
         else{

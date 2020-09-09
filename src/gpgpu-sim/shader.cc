@@ -1869,11 +1869,11 @@ bool ldst_unit::pending_requests(){
 void ldst_unit::invalidate(){
     
 
-     std::vector<new_addr_type> flush_queue = m_L1D->invalidate();
+     std::vector <new_addr_type> &flush_queue = m_L1D->invalidate();
     
     for (unsigned i=0; i < flush_queue.size(); i++){
              mem_access_t access( GLOBAL_ACC_R, flush_queue[i], WRITE_PACKET_SIZE, 1 );
-        mem_fetch *mf = new mem_fetch( access, 
+             mem_fetch *mf = new mem_fetch( access, 
                                    NULL,
                                    WRITE_PACKET_SIZE, 
                                    -1, 
@@ -1883,6 +1883,7 @@ void ldst_unit::invalidate(){
            mf->set_type(WRITE_REQUEST);
            m_icnt->push(mf);          
         }  
+        flush_queue.clear();
        	   
 }
 
