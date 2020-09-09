@@ -1257,7 +1257,9 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
         block->m_owner = mf->get_sid();
         }
         else{
+        if(block->get_status(mf->get_access_sector_mask()) != REMOTE_OWNED){   
         block->set_status(VALID, mf->get_access_sector_mask()); // mark line as dirty for atomic operation
+        }
         }
     }
     m_extra_mf_fields.erase(mf);
