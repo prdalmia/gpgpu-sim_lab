@@ -423,14 +423,13 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       */   
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
-                                 
+                        /*         
                                  if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0903480){
                         
                          printf("Owner is core %d for address %x and memory partition ID is %d\n", mf->get_sid(), m_L2cache->get_line_address(mf, index), get_id());
                          }
-                         
-                                
-                                 m_L2cache->add_ownership_champion(mf, index);
+                         */
+                                 m_L2cache->add_ownership_champion(mf, index, get_id());
                                  
                             }
                 MEM_SUBPART_DPRINTF("Probing L2 cache Address=%llx, status=%u\n", mf->get_addr(), status); 
@@ -483,7 +482,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       else{
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
-                          m_L2cache->remove_from_ownership_champion_queue(cache_index);
+                          m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
                       }
 
                       m_L2cache->remove_from_ownership_queue(cache_index);
@@ -493,7 +492,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      }
                       else{
                           assert(m_L2cache->get_ownership_champion(mf, cache_index) == mf->get_sid());
-                          m_L2cache->remove_from_ownership_champion_queue(cache_index);
+                          m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
                           m_L2cache->set_owner( mf, cache_index, (unsigned)-1); //CHANGE TO LINE ADDRESS
                   // while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.c_sz-1))].empty())
                   // {
@@ -519,7 +518,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          }
                          */
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
-                         m_L2cache->add_ownership_champion(mf, cache_index);
+                         m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
                          //need to add this to the ownership champion queue
                          unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
@@ -546,7 +545,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           m_L2_icnt_queue->push(mf_flush);
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
-                                m_L2cache->remove_from_ownership_champion_queue(cache_index);
+                                m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
                           m_icnt_L2_queue->pop();
                        
 

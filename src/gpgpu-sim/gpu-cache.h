@@ -1618,9 +1618,9 @@ public:
     virtual  void  add_waiting_for_ownership(mem_fetch *mf, unsigned cache_index);
     
     virtual  void remove_from_ownership_queue(unsigned cache_index);
-    virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index);
+    virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index, unsigned id);
     virtual  unsigned get_ownership_champion( mem_fetch* mf, unsigned cache_index);
-    virtual  void remove_from_ownership_champion_queue(unsigned cache_index);
+    virtual  void remove_from_ownership_champion_queue(unsigned cache_index, unsigned id);
     virtual  new_addr_type get_line_address(mem_fetch* mf, unsigned cache_index);
     virtual  void  change_line_status(mem_fetch *mf, unsigned cache_index);
     virtual  void allocate(mem_fetch* mf, unsigned cache_index, unsigned time);
