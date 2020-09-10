@@ -2002,9 +2002,9 @@ void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 
 void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index)
 {
-    if(cache_index == 89){
-        printf("adding core %d to ownership champion for address %x\n", mf->get_sid(), mf->get_addr()); 
-    }
+  //  if(cache_index == 89){
+    //    printf("adding core %d to ownership champion for address %x\n", mf->get_sid(), mf->get_addr()); 
+    //}
     cache_block_t* block = m_tag_array->get_block(cache_index);
     block->ownership_champion.push_back(mf->get_sid());
 }
@@ -2024,9 +2024,9 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index)
 {
      
  cache_block_t* block = m_tag_array->get_block(cache_index);
-     if(cache_index == 89){
-        printf("removing core %d to ownership champion for address %x\n", block->ownership_champion.front(), block->m_tag); 
-    }
+     //if(cache_index == 89){
+       // printf("removing core %d to ownership champion for address %x\n", block->ownership_champion.front(), block->m_tag); 
+   // }
     block->ownership_champion.pop_front();
    
     
