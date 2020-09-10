@@ -423,12 +423,12 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       */   
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
-                        /*         
+                                 
                                  if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0903480){
                         
-                         printf("Owner is core %d for address %x\n", mf->get_sid(), m_L2cache->get_line_address(mf, index));
+                         printf("Owner is core %d for address %x and memory partition ID is %d\n", mf->get_sid(), m_L2cache->get_line_address(mf, index), get_id());
                          }
-                         */
+                         
                                 
                                  m_L2cache->add_ownership_champion(mf, index);
                                  
