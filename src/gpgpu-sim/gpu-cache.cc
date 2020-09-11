@@ -1334,6 +1334,7 @@ void baseline_cache::send_read_request(new_addr_type addr, new_addr_type block_a
     	 m_stats.inc_fail_stats(mf->get_access_type(), MSHR_ENRTY_FAIL);
     else
     	assert(0);
+
 }
 /// Sends write request to lower level memory (write or writeback)
 void data_cache::send_write_request(mem_fetch *mf, cache_event request, unsigned time, std::list<cache_event> &events){
@@ -1862,6 +1863,9 @@ data_cache::access( new_addr_type addr,
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid() == 31){
                        printf(" l1 access for core %d for address %x with cache_index %d\n", mf->get_sid(), mf->get_addr(), cache_index);
             }
+     if(mf->get_sid() == 31 && cache_index == 239){
+        "Request coming in for core 31 and index 239 with address %d", mf->get_addr();
+        }   
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
