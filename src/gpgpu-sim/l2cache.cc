@@ -504,7 +504,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          if((mf->get_addr() & (new_addr_type)(~127)) == 0xc094fd00){
                          printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
                          }
-                     */                    
+                      */                  
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
@@ -527,7 +527,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                                mf->get_mem_config() );
                                 mf_flush->set_type(INVALIDATION);
                        
-                            if(((m_L2cache->get_line_address(mf, cache_index) & (new_addr_type)(~127)) == 0xc094fd00) && invalidation_reciever == 23){
+                            if(invalidation_reciever_address == 0xc09ae800 && invalidation_reciever == 31){
                          printf("Invalidation sent to core %d for address %x where the incoming address is %x and cache_index is %d and memory partition id is %d\n", invalidation_reciever , invalidation_reciever_address, mf->get_addr(), cache_index, get_id());
                          }                               
                         
