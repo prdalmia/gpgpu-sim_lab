@@ -411,7 +411,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     unsigned int index;
                     m_L2cache->process_probe(mf ,index);
                     
-                    if(index == 89 && mf->isatomic()  == false && get_id() == 8){
+                    if(index == 89 && mf->isatomic()  == false && get_id() == 8 && mf->get_type() != INVALIDATION_RESPONSE){
                          printf("Ae lo ji address %x from core %d\n", mf->get_addr(), mf->get_sid());
                          }
                         
