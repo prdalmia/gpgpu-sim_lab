@@ -1801,15 +1801,15 @@ data_cache::process_tag_probe( bool wr,
                                       mf, time, events, probe_status );
         }else if(probe_status == REMOTE_OWNED){
              ;
-         }         
+         }
+          else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
+            access_status = REMOTE_OWNED;
+        }         
         else if ( (probe_status != RESERVATION_FAIL) || (probe_status == RESERVATION_FAIL && m_config.m_write_alloc_policy == NO_WRITE_ALLOCATE) ) {
             access_status = (this->*m_wr_miss)( addr,
                                        cache_index,
                                        mf, time, events, probe_status );                           
         }
-        else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
-            return REMOTE_OWNED;
-        } 
         else {
         	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
         	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
@@ -1823,14 +1823,14 @@ data_cache::process_tag_probe( bool wr,
         }else if(probe_status == REMOTE_OWNED){
              ;
          } 
+         else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
+            access_status = REMOTE_OWNED;
+        } 
         else if ( probe_status != RESERVATION_FAIL ) {
             access_status = (this->*m_rd_miss)( addr,
                                        cache_index,
                                        mf, time, events, probe_status );
-        }
-         else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
-            return REMOTE_OWNED;
-        } 
+        }    
         else {
         	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
         	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
