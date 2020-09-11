@@ -1893,7 +1893,7 @@ l1_cache::evict(   mem_fetch *mf,
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
     if ((mf->get_addr() & (new_addr_type)(~127) == 0xc09ae800) && mf->get_sid() == 31){
-        printf("cache_index for crash is %d\n", cache_index)
+        printf("cache_index for crash is %d\n", cache_index);
     }
 
      if ( !mshr_hit && status == MISS ){
