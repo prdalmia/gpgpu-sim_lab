@@ -2403,11 +2403,11 @@ void ldst_unit::cycle()
                    if (m_L1D->fill_port_free()) {
                        mf->set_fill_L1D();
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
-                       /*
-                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0903480){
+                       
+                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0933480){
                        printf(" Fill for core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
-                       */
+                       
                        m_response_fifo.pop_front();
                    }
                    }
