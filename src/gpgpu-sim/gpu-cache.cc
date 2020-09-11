@@ -1859,6 +1859,9 @@ data_cache::access( new_addr_type addr,
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe( block_addr, cache_index, mf, true);
+        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid() == 31){
+                       printf(" l1 access for core %d for address %x with cache_index %d\n", mf->get_sid(), mf->get_addr(), cache_index);
+            }
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
@@ -1878,6 +1881,9 @@ l1_cache::access( new_addr_type addr,
                   unsigned time,
                   std::list<cache_event> &events )
 {
+    
+                        
+                       
     return data_cache::access( addr, mf, time, events );
 }
 

@@ -455,11 +455,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if (mf_pending){
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-                   /*
+                   
                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
-                    */
+                    
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
                       }
@@ -500,11 +500,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                  throw std::runtime_error("You are at a bad place man");
                              }
 
-                     /*
+                     
                          if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800){
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id());
                          }
-                       */                 
+                                        
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
