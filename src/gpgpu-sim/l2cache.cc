@@ -510,8 +510,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
                          //need to add this to the ownership champion queue
                          unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
+                         unsigned invalidation_reciever_address = m_L2cache->get_ownership_champion_address(cache_index);
                   
-                                mem_access_t access( mf->get_access_type(), m_L2cache->get_line_address(mf, cache_index), mf->get_ctrl_size(), false);
+                                mem_access_t access( mf->get_access_type(),  invalidation_reciever_address, mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
                                 //if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0933480){
                                  //printf("Invalidation Sent to core %d for address %x\n", invalidation_reciever,m_L2cache->get_line_address(mf, cache_index));
@@ -527,7 +528,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                 mf_flush->set_type(INVALIDATION);
                        
                             if(((m_L2cache->get_line_address(mf, cache_index) & (new_addr_type)(~127)) == 0xc094fd00) && invalidation_reciever == 23){
-                         printf("Invalidation sent to core %d for address %x where the incoming address is %x and cache_index is %d and memory partition id is %d\n", invalidation_reciever , m_L2cache->get_line_address(mf, cache_index), mf->get_addr(), cache_index, get_id());
+                         printf("Invalidation sent to core %d for address %x where the incoming address is %x and cache_index is %d and memory partition id is %d\n", invalidation_reciever , invalidation_reciever_address, mf->get_addr(), cache_index, get_id());
                          }                               
                         
                           m_L2_icnt_queue->push(mf_flush);

@@ -146,7 +146,7 @@ struct cache_block_t {
     new_addr_type    m_block_addr;
     unsigned         m_owner;
     std::deque<mem_fetch *>waiting_for_ownership;
-    std::deque<unsigned> ownership_champion;
+    std::deque<std::pair<unsigned, new_addr_type>> ownership_champion;
 
 };
 
@@ -1620,6 +1620,7 @@ public:
     virtual  void remove_from_ownership_queue(unsigned cache_index);
     virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index, unsigned id);
     virtual  unsigned get_ownership_champion( mem_fetch* mf, unsigned cache_index);
+    virtual  new_addr_type get_ownership_champion_address( unsigned cache_index);
     virtual  void remove_from_ownership_champion_queue(unsigned cache_index, unsigned id);
     virtual  new_addr_type get_line_address(mem_fetch* mf, unsigned cache_index);
     virtual  void  change_line_status(mem_fetch *mf, unsigned cache_index);
