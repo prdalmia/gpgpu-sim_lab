@@ -2404,7 +2404,7 @@ void ldst_unit::cycle()
                        mf->set_fill_L1D();
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                        
-                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid()){
+                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid() == 31){
                        printf(" Fill for core %d for address %x\n", mf->get_sid(), mf->get_addr());
                        }
                        
