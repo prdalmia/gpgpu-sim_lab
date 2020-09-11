@@ -2391,11 +2391,11 @@ void ldst_unit::cycle()
                } else {
                    if(mf->get_type() == INVALIDATION){
                        //check if MSHR for that address is empty and then write back the block to L2
-                       /*
-                       if(mf->get_sid() == 79 && mf->get_addr() == 0xc0003780){
+                       
+                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid() == 31){
                            printf("Recieved Invalidation for core ID and address in question\n");
                        }
-                       */
+                       
                        m_L1D->evict(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                         m_response_fifo.pop_front();
                    }
