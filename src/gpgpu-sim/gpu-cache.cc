@@ -1864,7 +1864,7 @@ data_cache::access( new_addr_type addr,
                        printf(" l1 access for core %d for address %x with cache_index %d\n", mf->get_sid(), mf->get_addr(), cache_index);
             }
      if(mf->get_sid() == 31 && cache_index == 239){
-       printf("Request coming in for core 31 and index 239 with address %d\n"), mf->get_addr();
+       printf("Request coming in for core 31 and index 239 with address %x with probe_status %d\n", mf->get_addr(), probe_status);
         }   
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
