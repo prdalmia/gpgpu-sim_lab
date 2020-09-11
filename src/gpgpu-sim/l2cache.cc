@@ -408,19 +408,13 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
-                    unsigned int index;
-                    m_L2cache->process_probe(mf ,index);
                     
-                    if(index == 89 && mf->isatomic()  == false && get_id() == 8 && mf->get_type() != INVALIDATION_RESPONSE){
-                         printf("Ae lo ji address %x from core %d\n", mf->get_addr(), mf->get_sid());
-                         }
-                        
-                
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
-                if(status == MISS || status == HIT){     
-                  
+                if(status == MISS || status == HIT){   
+                    unsigned int index;
+                    m_L2cache->process_probe(mf ,index); 
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
                         /*         
