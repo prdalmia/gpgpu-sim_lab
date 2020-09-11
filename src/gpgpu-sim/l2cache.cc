@@ -457,7 +457,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                    
                        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800){
-                       printf("Invalidation response recieved from core %d for address %x\n", mf->get_sid(), mf->get_addr());
+                       printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
                      
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
@@ -502,7 +502,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
 
                      
                          if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800){
-                         printf("Request from core %d for address %x\n", mf->get_sid() ,m_L2cache->get_line_address(mf, cache_index));
+                         printf("Request from core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id());
                          }
                                         
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
