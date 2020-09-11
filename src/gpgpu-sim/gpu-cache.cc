@@ -1806,7 +1806,11 @@ data_cache::process_tag_probe( bool wr,
             access_status = (this->*m_wr_miss)( addr,
                                        cache_index,
                                        mf, time, events, probe_status );                           
-        }else {
+        }
+        else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
+            return REMOTE_OWNED;
+        } 
+        else {
         	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
         	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
         }
@@ -1823,7 +1827,11 @@ data_cache::process_tag_probe( bool wr,
             access_status = (this->*m_rd_miss)( addr,
                                        cache_index,
                                        mf, time, events, probe_status );
-        }else {
+        }
+         else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
+            return REMOTE_OWNED;
+        } 
+        else {
         	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
         	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
         }
@@ -1851,11 +1859,6 @@ data_cache::access( new_addr_type addr,
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe( block_addr, cache_index, mf, true);
-    if(mf->isatomic() == true){
-    if(probe_status == MISS && m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNED){
-        printf("So we are going to change the owner of a remote owned line with on request from core %d and address %x\n", mf->get_sid(), mf->get_addr());
-    }
-       }
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
