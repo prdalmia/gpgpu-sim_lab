@@ -2025,7 +2025,7 @@ void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsig
 {
   
   if(cache_index == 493 && id == 16){
-     printf("adding core %d to ownership champion for address %x\n", mf->get_sid(), mf->get_addr()); 
+     printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
   
     cache_block_t* block = m_tag_array->get_block(cache_index);
