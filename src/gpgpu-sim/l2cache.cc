@@ -473,6 +473,8 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
                       }
                       else{
+                          printf("Non atomic request recieved for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf_pending->get_sid() , mf_pending->get_addr(), cache_index, get_id(), mf_pending->isatomic());
+                         }
                           throw std::runtime_error("This case should never occur\n");
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
