@@ -39,7 +39,8 @@ enum mf_type {
    WRITE_ACK,
    GET_OWN,
    INVALIDATION,
-   INVALIDATION_RESPONSE 
+   INVALIDATION_RESPONSE,
+   EVICTION 
 };
 
 #define MF_TUP_BEGIN(X) enum X {
