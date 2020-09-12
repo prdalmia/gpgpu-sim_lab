@@ -2065,7 +2065,7 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
      
  cache_block_t* block = m_tag_array->get_block(cache_index);
      
-     if(cache_index == 741 && id == 14){
+     if(cache_index == 741 && id == 15){
         printf("removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }
    
