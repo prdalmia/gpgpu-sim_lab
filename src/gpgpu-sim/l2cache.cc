@@ -526,11 +526,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                                cluster_id,
                                                mf->get_mem_config() );
                                 mf_flush->set_type(INVALIDATION);
-                       /*
+                       
                             if(invalidation_reciever_address == 0xc09ae800 && invalidation_reciever == 31){
                          printf("Invalidation sent to core %d for address %x where the incoming address is %x and cache_index is %d and memory partition id is %d\n", invalidation_reciever , invalidation_reciever_address, mf->get_addr(), cache_index, get_id());
                          }                               
-                        */
+                        
                           m_L2_icnt_queue->push(mf_flush);
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
