@@ -501,7 +501,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      else{
                             if (mf->get_type() == INVALIDATION_RESPONSE)
                              {
-                                 printf("The invalidation response for address %x should not be in this section\n",mf->get_addr());
+                                 printf("The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d\n",mf->get_addr(), cache_index, mf->get_sid(), get_id());
                                  throw std::runtime_error("You are at a bad place man");
                              }
 
