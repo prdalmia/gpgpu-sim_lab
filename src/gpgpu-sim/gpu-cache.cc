@@ -1863,12 +1863,14 @@ data_cache::access( new_addr_type addr,
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe( block_addr, cache_index, mf, true);
+        /*
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid() == 31){
                        printf(" l1 access for core %d for address %x with cache_index %d\n", mf->get_sid(), mf->get_addr(), cache_index);
             }
      if(mf->get_sid() == 31 && cache_index == 239){
        printf("Request coming in for core 31 and index 239 with address %x with probe_status %d\n", mf->get_addr(), probe_status);
-        }   
+        } 
+        */  
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
@@ -2023,11 +2025,11 @@ void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 
 void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsigned id)
 {
-  
+  /*
   if(cache_index == 493 && id == 16){
      printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
-  
+  */
     cache_block_t* block = m_tag_array->get_block(cache_index);
     block->ownership_champion.push_back(std::make_pair(mf->get_sid(), mf->get_addr()));
 }
@@ -2062,11 +2064,11 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
 {
      
  cache_block_t* block = m_tag_array->get_block(cache_index);
-     
+     /*
      if(cache_index == 493 && id == 16){
         printf("removing core %d from ownership champion for address %x\n", block->ownership_champion.front().first, block->m_tag); 
    }
-   
+   */
     block->ownership_champion.pop_front();
    
     
