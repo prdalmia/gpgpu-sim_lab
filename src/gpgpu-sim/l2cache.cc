@@ -465,7 +465,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                   
-                       if((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00){
+                       if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00) || ((mf->get_addr() & (new_addr_type)(~127)) == 0xc083ef00)){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
                     
@@ -514,7 +514,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                              }
 
                      
-                         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00){
+                         if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00) || ((mf->get_addr() & (new_addr_type)(~127)) == 0xc083ef00)){
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
                          }
                                        
@@ -523,7 +523,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          // assert(!(ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].empty()));
                          //need to add this to the ownership champion queue
                          unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
-                         unsigned invalidation_reciever_address = m_L2cache->get_ownership_champion_address(cache_index);
+                         new_addr_type invalidation_reciever_address = m_L2cache->get_ownership_champion_address(cache_index);
                   
                                 mem_access_t access( mf->get_access_type(),  invalidation_reciever_address, mf->get_ctrl_size(), false);
                                // you also have to do the stuff which would have happenend if there was a replacement
