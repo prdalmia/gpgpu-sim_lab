@@ -1978,7 +1978,7 @@ void l2_cache::remove_ownership_pending_index( mem_fetch *mf, unsigned id)
     
    new_addr_type addr = mf->get_addr() & (new_addr_type)(~127);
 
-   assert(requests_in_ownership_queue[addr].second == id);
+   //assert(requests_in_ownership_queue[addr].second == id);
    requests_in_ownership_queue.erase(addr);
 
 }
