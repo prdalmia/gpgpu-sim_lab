@@ -456,7 +456,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   if( probe_status == MISS && status == REMOTE_OWNED){
                       unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
                       if (cache_pending_index != unsigned(-1)){
-                          printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
+                          printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
                           cache_index = cache_pending_index;
                       }
                   }
@@ -533,7 +533,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     */
                          if((m_L2cache->get_line_address(mf, cache_index) != (mf->get_addr() & ~(new_addr_type)(127))) && m_L2cache->get_ownership_pending_index(mf, get_id()) == (unsigned)-1){
                            m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
-                            printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d", mf->get_addr(), cache_index, mf->isatomic(), get_id());   
+                            printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, mf->isatomic(), get_id());   
                          }
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index, get_id());
