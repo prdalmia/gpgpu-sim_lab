@@ -1600,12 +1600,15 @@ public:
 
     virtual ~l2_cache() {}
 
+    std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;  
     virtual enum cache_request_status
         access( new_addr_type addr,
                 mem_fetch *mf,
                 unsigned time,
                 std::list<cache_event> &events );
-                 
+   virtual  unsigned get_ownership_pending_index( mem_fetch *mf, unsigned id);
+   virtual  void add_ownership_pending_index( mem_fetch *mf, unsigned cache_index,  unsigned id);             
+   virtual  void remove_ownership_pending_index( mem_fetch *mf, unsigned id);
    virtual  unsigned get_owner(mem_fetch *mf,
                         unsigned cache_index);
                  
