@@ -1394,9 +1394,6 @@ cache_request_status data_cache::wr_hit_we(new_addr_type addr, unsigned cache_in
 	send_write_request(mf, cache_event(WRITE_REQUEST_SENT), time, events);
 
 	// Invalidate block
-    if(cache_index == 990 && mf->get_sid() == 52){
-           printf("Evicting apni line from wr_hit_we\n");
-            }
 	block->set_status(INVALID, mf->get_access_sector_mask());
 
 	return HIT;

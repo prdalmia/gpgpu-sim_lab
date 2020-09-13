@@ -408,7 +408,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
-                    
+                if(mf->get_type() == EVICTION){
+                    if (status == REMOTE_OWNED){
+                    printf("The status for this evicted line is %d\n", status);
+                    }
+                }
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
@@ -474,8 +478,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       }
                       else{
                           if(mf_pending->get_type() == EVICTION){
-                              printf("Uh oh we have a problem here for address %d", mf_pending->get_addr());
+                              printf("Uh oh we have a problem here for address %d\n", mf_pending->get_addr());
                           }
+                          printf("What a i doing here %d from core %d for address %x\n", mf_pending->get_type(), mf_pending->get_sid(), mf_pending->get_addr());
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
