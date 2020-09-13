@@ -2291,9 +2291,9 @@ void ldst_unit::writeback()
                 if(m_next_wb.isatomic()){
                     mf->do_atomic();
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
-                    if(mf->isevictionrequest()){
-                        m_L1D->evict(mf, gpu_sim_cycle+gpu_tot_sim_cycle);
                     }
+                if(mf->isevictionrequest()){
+                    m_L1D->evict(mf, gpu_sim_cycle+gpu_tot_sim_cycle);
                 }
                 if (mf->isevictionrequest() != true){
                 delete mf;

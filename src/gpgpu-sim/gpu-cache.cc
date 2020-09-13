@@ -517,10 +517,7 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
                 if(m_lines[idx]->is_owned_line()){
-                    printf("Going to evict the block with address %x\n", m_lines[idx]->m_block_addr);
-                }
-                else{
-                     printf("Going to evict a modified line with address %x\n", m_lines[idx]->m_block_addr);
+                    printf("Going to evict an owned line with address %x\n", m_lines[idx]->m_block_addr);
                 }
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
@@ -2008,7 +2005,7 @@ l2_cache::set_owner(mem_fetch *mf,
     if (block->m_tag == tag) {
            if ( block->get_status(mask) == VALID || block->get_status(mask) == RESERVED || block->get_status(mask) == OWNED || block->get_status(mask) == MODIFIED || block->get_status(mask) == REMOTE_OWNERSHIP) {
             	block->m_owner = owner_id;
-                if(owner_id == (unsigned)-1 ){
+                if(owner_id == (unsigned)-1  && block->waiting_for_ownership.empty()){
                   block->set_status(MODIFIED, mask);
                 }
                 else{
