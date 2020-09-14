@@ -1970,6 +1970,7 @@ unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
    i = requests_in_ownership_queue.find(addr);
    if(i == requests_in_ownership_queue.end()){
        requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1) )
+       printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, mf->isatomic(), id);       
    }
     else{
         i->second.second ++;
@@ -1986,6 +1987,7 @@ void l2_cache::remove_ownership_pending_index( mem_fetch *mf, unsigned id)
     requests_in_ownership_queue[addr].second--;
     if(requests_in_ownership_queue[addr].second == 0){
         requests_in_ownership_queue.erase(addr);
+         printf("Removing cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, mf->isatomic(), id);  
     }
 
 }
