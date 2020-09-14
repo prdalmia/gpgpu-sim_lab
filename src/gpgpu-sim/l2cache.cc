@@ -531,10 +531,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
                          }
                     
-                         if((m_L2cache->get_line_address(mf, cache_index) != (mf->get_addr() & ~(new_addr_type)(127))) && m_L2cache->get_ownership_pending_index(mf, get_id()) == (unsigned)-1){
                            m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
-                            printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, mf->isatomic(), get_id());   
-                         }
+                            printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, mf->isatomic(), get_id());       
+                       
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index, get_id());
 
