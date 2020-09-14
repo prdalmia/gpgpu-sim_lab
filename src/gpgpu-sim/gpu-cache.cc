@@ -2060,11 +2060,11 @@ void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 
 void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsigned id)
 {
-  /*
-  if(cache_index == 741 && id == 15){
-     printf("741 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
+  
+  if(cache_index == 665 && id == 31){
+     printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
-
+/*
 if(cache_index == 743 && id == 15){
      printf("743 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
@@ -2104,11 +2104,11 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
 {
      
  cache_block_t* block = m_tag_array->get_block(cache_index);
-     /*
-     if(cache_index == 741 && id == 15){
-        printf("741 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
+     
+     if(cache_index == 665 && id == 31){
+        printf("removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }
-
+  /*
     if(cache_index == 743 && id == 15){
         printf("743 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }

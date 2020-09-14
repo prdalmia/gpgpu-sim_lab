@@ -421,11 +421,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     m_L2cache->process_probe(mf ,index); 
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
-                          /*
-                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00){
+                          
+                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0929780){
                          printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), index, get_id());
                          }
-                            */    
+                               
                                  m_L2cache->add_ownership_champion(mf, index, get_id());
                                  
                             }
@@ -456,7 +456,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                   if( probe_status == MISS && status == REMOTE_OWNED){
                       unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
                       if (cache_pending_index != unsigned(-1)){
-                          printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
+                    //      printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
                           cache_index = cache_pending_index;
                       }
                   }
@@ -471,11 +471,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if (mf_pending){
                       mf_pending->set_reply();
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-                  /*
-                       if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00) || ((mf->get_addr() & (new_addr_type)(~127)) == 0xc083ef00)){
+                  
+                       if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0929780)){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
-                   */ 
+                    
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2cache->remove_ownership_pending_index(mf_pending, get_id()); 
@@ -526,11 +526,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                  throw std::runtime_error("You are at a bad place man");
                              }
 
-                     /*
-                         if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc08fef00) || ((mf->get_addr() & (new_addr_type)(~127)) == 0xc083ef00)){
+                     
+                         if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0929780)){
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
                          }
-                    */
+                    
                          if((m_L2cache->get_line_address(mf, cache_index) != (mf->get_addr() & ~(new_addr_type)(127))) && m_L2cache->get_ownership_pending_index(mf, get_id()) == (unsigned)-1){
                            m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                             printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, mf->isatomic(), get_id());   
@@ -558,11 +558,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                                cluster_id,
                                                mf->get_mem_config() );
                                 mf_flush->set_type(INVALIDATION);
-                       /*
-                            if(invalidation_reciever_address & (new_addr_type)(~127) == 0xc08fef00){
+                    
+                            if(invalidation_reciever_address & (new_addr_type)(~127) == 0xc0929780){
                          printf("Invalidation sent to core %d for address %x where the incoming address is %x and cache_index is %d and memory partition id is %d\n", invalidation_reciever , invalidation_reciever_address, mf->get_addr(), cache_index, get_id());
                          }                               
-                        */
+                        
                           m_L2_icnt_queue->push(mf_flush);
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
