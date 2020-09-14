@@ -1957,7 +1957,7 @@ unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
        return (unsigned)-1;
    }
     else{
-        assert(i->second.second == id);
+       // assert(i->second.second == id);
         return i->second.first;
     }
    }
