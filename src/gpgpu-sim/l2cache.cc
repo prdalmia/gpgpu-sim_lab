@@ -471,13 +471,14 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      
                      if (mf_pending){
                       mf_pending->set_reply();
+                       if(mf_pending->get_type() == INVALIDATION_RESPONSE){
+                       printf("2 Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
+                       }
                       assert(mf_pending->get_type() != INVALIDATION_RESPONSE);
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2cache->remove_ownership_pending_index(mf_pending, get_id()); 
                   
-                       if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc08ccb00)){
-                       printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
-                       }
+                      
                     
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
@@ -522,11 +523,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                    }
                       }
                      else{
-                            if (mf->get_type() == INVALIDATION_RESPONSE)
-                             {
-                                 printf("The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d\n",mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic());
-                                 throw std::runtime_error("You are at a bad place man");
-                             }
+                            
 
                      
                          if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc08ccb00)){
@@ -535,7 +532,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     
                            m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                             
-                       
+                         if (mf->get_type() == INVALIDATION_RESPONSE)
+                             {
+                                 printf(" 1 The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d\n",mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic());
+                                 throw std::runtime_error("You are at a bad place man");
+                             }
                          m_L2cache->add_waiting_for_ownership(mf, cache_index);
                          m_L2cache->add_ownership_champion(mf, cache_index, get_id());
 
