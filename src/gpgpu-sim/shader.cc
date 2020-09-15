@@ -4060,7 +4060,7 @@ void simt_core_cluster::icnt_cycle()
             return;
         assert(mf->get_tpc() == m_cluster_id);
         if(mf->get_type() != READ_REPLY && mf->get_type() != WRITE_ACK && mf->get_type() != INVALIDATION ){
-            printf("Assertion error happened for address %x\n", mf->get_addr());
+            printf("Assertion error happened for address %x for core %d where mf type is %d\n", mf->get_addr(), mf->get_sid(), mf->get_type());
         }
         assert(mf->get_type() == READ_REPLY || mf->get_type() == WRITE_ACK || mf->get_type() == INVALIDATION );
 

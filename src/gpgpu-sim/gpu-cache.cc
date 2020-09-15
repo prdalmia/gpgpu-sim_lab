@@ -2079,16 +2079,16 @@ void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 
 void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsigned id)
 {
-    /*
+    
   
-  if(cache_index == 317 && id == 32){
+  if(cache_index == 695 && id == 39){
      printf("317 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
 
- if(cache_index == 330 && id == 32){
+ if(cache_index == 677 && id == 39){
      printf("330 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
-
+/*
   if(cache_index == 333 && id == 32){
      printf("333 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
@@ -2128,16 +2128,16 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
 {
      
  cache_block_t* block = m_tag_array->get_block(cache_index);
-    /* 
-     if(cache_index == 317 && id == 32){
+    
+     if(cache_index == 695 && id == 39){
         printf(" 317 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }
   
-    if(cache_index == 330 && id == 32){
+    if(cache_index == 677 && id == 39){
         printf(" 330 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }
   
-
+/*
     if(cache_index == 333 && id == 32){
         printf("333 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }
