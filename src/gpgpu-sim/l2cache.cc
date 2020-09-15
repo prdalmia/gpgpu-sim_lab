@@ -422,7 +422,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, index, mf->get_sid());
                           
-                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09130a0){
+                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0913080){
                          printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), index, get_id());
                          }
                                
@@ -473,7 +473,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2cache->remove_ownership_pending_index(mf_pending, get_id()); 
                   
-                       if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc09130a0)){
+                       if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0913080)){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
                     
@@ -527,7 +527,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                              }
 
                      
-                         if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc09130a0)){
+                         if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0913080)){
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
                          }
                     
@@ -558,7 +558,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                                mf->get_mem_config() );
                                 mf_flush->set_type(INVALIDATION);
                     
-                            if(invalidation_reciever_address & (new_addr_type)(~127) == 0xc09130a0){
+                            if(invalidation_reciever_address & (new_addr_type)(~127) == 0xc0913080){
                          printf("Invalidation sent to core %d for address %x where the incoming address is %x and cache_index is %d and memory partition id is %d\n", invalidation_reciever , invalidation_reciever_address, mf->get_addr(), cache_index, get_id());
                          }                               
                         
