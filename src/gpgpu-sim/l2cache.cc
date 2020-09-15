@@ -495,7 +495,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           mem_fetch* temp = m_L2cache->get_waiting_for_ownership(mf, cache_index);
                           if(temp == NULL){  
-                          m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
+                          m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id(), 2);
                           }
                       }
 
@@ -506,7 +506,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      }
                       else{
                           assert(m_L2cache->get_ownership_champion(mf, cache_index) == mf->get_sid());
-                          m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
+                          m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id(), 3);
                           m_L2cache->set_owner( mf, cache_index, (unsigned)-1); //CHANGE TO LINE ADDRESS
                   // while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.c_sz-1))].empty())
                   // {
@@ -565,7 +565,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           m_L2_icnt_queue->push(mf_flush);
                                 mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                                 // L2 cache accepted request
-                                m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id());
+                                m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id(), 1);
                           m_icnt_L2_queue->pop();
                        
 
