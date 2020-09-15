@@ -1989,7 +1989,7 @@ void l2_cache::remove_ownership_pending_index( mem_fetch *mf, unsigned id)
     if(requests_in_ownership_queue[addr].second == 0){
         
         if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0913080)){
-         printf("Removing cache_index for address %x as %d and is atomic %d where ID is %d\n", mf->get_addr(), requests_in_ownership_queue[addr].first, mf->isatomic(), id);  
+         printf("Removing cache_index for address %x as %d and is atomic %d where ID is %d and core ID is %d\n", mf->get_addr(), requests_in_ownership_queue[addr].first, mf->isatomic(), id, mf->get_sid());  
         }
         requests_in_ownership_queue.erase(addr);
     }
@@ -2081,6 +2081,10 @@ void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsig
      printf("317 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
 
+ if(cache_index == 330 && id == 32){
+     printf("330 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
+    }
+
   if(cache_index == 333 && id == 32){
      printf("333 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
@@ -2125,6 +2129,11 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
         printf(" 317 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }
   
+    if(cache_index == 330 && id == 32){
+        printf(" 330 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
+   }
+  
+
     if(cache_index == 333 && id == 32){
         printf("333 removing core %d from ownership champion for address %x where line address is %x\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag); 
    }

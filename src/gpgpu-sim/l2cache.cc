@@ -413,20 +413,28 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     printf("EVICTION headed for a remote owned evicted line is %d\n", status);
                     }
                 }
+                     
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
                 if(status == MISS || status == HIT){   
-                    unsigned int index;
-                    m_L2cache->process_probe(mf ,index); 
-                if(mf->isatomic() && (m_L2cache->get_owner(mf, index) == (unsigned)-1)){
-                                 m_L2cache->set_owner( mf, index, mf->get_sid());
+                    unsigned int cache_index;
+                    m_L2cache->process_probe(mf ,cache_index); 
+                     unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
+                      if (cache_pending_index != unsigned(-1)){
+                    //      printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
+                          cache_index = cache_pending_index;
+                          status = REMOTE_OWNED;
+                      }
+                if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1) && status != REMOTE_OWNED){
+                                 m_L2cache->set_owner( mf, cache_index, mf->get_sid());
                           
                                  if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0913080){
                          printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), index, get_id());
                          }
                                
-                                 m_L2cache->add_ownership_champion(mf, index, get_id());
+                                 m_L2cache->add_ownership_champion(mf, cache_index, get_id());
+                                 m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                                  
                             }
                 MEM_SUBPART_DPRINTF("Probing L2 cache Address=%llx, status=%u\n", mf->get_addr(), status); 
@@ -453,14 +461,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 else if (status == REMOTE_OWNED)  {
                     unsigned int cache_index;
                   enum cache_request_status probe_status =  m_L2cache->process_probe(mf , cache_index);
-                  if( probe_status == MISS && status == REMOTE_OWNED){
-                      unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
-                      if (cache_pending_index != unsigned(-1)){
-                    //      printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
-                          cache_index = cache_pending_index;
-                      }
-                  }
-
                  if(((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) || ((m_L2cache->get_owner (mf, cache_index) == unsigned(-1)) && mf->get_type() == INVALIDATION_RESPONSE)) && (m_L2cache->get_line_address(mf, cache_index) == (mf->get_addr()  & ~(new_addr_type)(127)))){ //need to change this logic
                           //L2 cache will check if somebody is waiting for ownership at that address
                          // if yes make that next request the current owner and send the block to the new owner
