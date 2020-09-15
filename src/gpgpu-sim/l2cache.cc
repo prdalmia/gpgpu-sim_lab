@@ -448,6 +448,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             delete mf;
                         } else {
                             mf->set_reply();
+                            assert(mf->get_type() != INVALIDATION_RESPONSE);
                             mf->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                             m_L2_icnt_queue->push(mf);
                         }
@@ -470,6 +471,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      
                      if (mf_pending){
                       mf_pending->set_reply();
+                      assert(mf_pending->get_type() != INVALIDATION_RESPONSE);
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2cache->remove_ownership_pending_index(mf_pending, get_id()); 
                   
