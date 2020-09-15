@@ -430,7 +430,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                                  m_L2cache->set_owner( mf, cache_index, mf->get_sid());
                           
                                  if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0913080){
-                         printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), index, get_id());
+                         printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id());
                          }
                                
                                  m_L2cache->add_ownership_champion(mf, cache_index, get_id());
