@@ -491,9 +491,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       
                       if(mf_pending->isatomic() == true){
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
+                      m_L2cache->remove_from_ownership_queue(cache_index);
                       }
                       else{
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
+                          m_L2cache->remove_from_ownership_queue(cache_index);
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           mem_fetch* temp = m_L2cache->get_waiting_for_ownership(mf, cache_index);
                           if(temp == NULL){  
@@ -501,7 +503,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           }
                       }
 
-                      m_L2cache->remove_from_ownership_queue(cache_index);
+                      
                       m_L2_icnt_queue->push(mf_pending);
                   
                       //pop request from waiting for ownership queue
