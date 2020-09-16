@@ -461,7 +461,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 }
                 
                 else if (status == REMOTE_OWNED)  {
-                 if(((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) || ((m_L2cache->get_owner (mf, cache_index) == unsigned(-1)) && mf->get_type() == INVALIDATION_RESPONSE)) && (m_L2cache->get_line_address(mf, cache_index) == (mf->get_addr()  & ~(new_addr_type)(127)))){ //need to change this logic
+                 if((mf->get_type() == INVALIDATION_RESPONSE) || ((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) && (m_L2cache->get_line_address(mf, cache_index) == (mf->get_addr()  & ~(new_addr_type)(127))))){ //need to change this logic
                           //L2 cache will check if somebody is waiting for ownership at that address
                          // if yes make that next request the current owner and send the block to the new owner
                      // This needs to be replaced by index?
@@ -470,7 +470,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
-                       if((mf->get_type() != INVALIDATION_RESPONSE) && get_id() == 39){
+                       if((mf->get_type() != INVALIDATION_RESPONSE)){
                        printf(" NOT Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d with mf type %d\n", mf->get_sid(), mf->get_addr(), cache_index, get_id(), mf->get_type());
                        }
 
@@ -510,6 +510,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           assert(m_L2cache->get_ownership_champion(mf, cache_index) == mf->get_sid());
                           m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id(), 3);
                           m_L2cache->set_owner( mf, cache_index, (unsigned)-1); //CHANGE TO LINE ADDRESS
+                          m_L2cache->remove_ownership_pending_index(mf, get_id()); 
                       }
                        m_icnt_L2_queue->pop();
                        if(mf->get_type() == INVALIDATION_RESPONSE){
