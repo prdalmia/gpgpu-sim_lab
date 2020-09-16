@@ -234,7 +234,7 @@ dram_req_t::dram_req_t( class mem_fetch *mf, unsigned banks, unsigned dram_bnk_i
 
 void dram_t::push( class mem_fetch *data ) 
 {
-   assert(id == data->get_tlx_addr().chip); // Ensure request is in correct memory partition
+   //assert(id == data->get_tlx_addr().chip); // Ensure request is in correct memory partition
 
    dram_req_t *mrq = new dram_req_t(data,m_config->nbk,m_config->dram_bnk_indexing_policy);
 
