@@ -1996,7 +1996,7 @@ void l2_cache::remove_ownership_pending_index( mem_fetch *mf, unsigned id)
     assert(requests_in_ownership_queue.count(addr)>0);
     requests_in_ownership_queue[addr].second--;
      if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
-       printf(" Decrementing Adding cache_index for address %x and value is %d  and id is %d and core ID is and is atomic %d\n", mf->get_addr(), requests_in_ownership_queue[addr].second, id, mf->get_sid(), mf->isatomic() );       
+       printf(" Decrementing Adding cache_index for address %x and value is %d  and id is %d and core ID is %d and is atomic %d\n", mf->get_addr(), requests_in_ownership_queue[addr].second, id, mf->get_sid(), mf->isatomic() );       
         }
     if(requests_in_ownership_queue[addr].second == 0){
         
