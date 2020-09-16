@@ -211,7 +211,7 @@ void memory_partition_unit::dram_cycle()
     if (mf_return) {
         unsigned dest_global_spid = mf_return->get_sub_partition_id(); 
         int dest_spid = global_sub_partition_id_to_local_id(dest_global_spid); 
-        assert(m_sub_partition[dest_spid]->get_id() == dest_global_spid); 
+       // assert(m_sub_partition[dest_spid]->get_id() == dest_global_spid); 
         if (!m_sub_partition[dest_spid]->dram_L2_queue_full()) {
             if( mf_return->get_access_type() == L1_WRBK_ACC ) {
                 m_sub_partition[dest_spid]->set_done(mf_return); 
