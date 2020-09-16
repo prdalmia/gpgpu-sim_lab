@@ -470,6 +470,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
+                       if((mf->get_type() != INVALIDATION_RESPONSE) && get_id() == 39){
+                       printf(" NOT Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d with mf type %d\n", mf->get_sid(), mf->get_addr(), cache_index, get_id(), mf->get_type());
+                       }
+
                      if (mf_pending){
                       mf_pending->set_reply();
                        if(mf_pending->get_type() == INVALIDATION_RESPONSE){
