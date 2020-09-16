@@ -467,7 +467,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      // This needs to be replaced by index?
                      
                       mem_fetch * mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
-                     if(mf->get_type() == INVALIDATION_RESPONSE){
+                     if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
                      if (mf_pending){
