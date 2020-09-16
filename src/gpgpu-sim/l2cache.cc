@@ -408,6 +408,15 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events);
+                unsigned int cache_index;
+                    m_L2cache->process_probe(mf ,cache_index); 
+                     unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
+                      if (cache_pending_index != unsigned(-1)){
+                    //      printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
+                          cache_index = cache_pending_index;
+                          status = REMOTE_OWNED;
+                      }
+                
                 if(mf->get_type() == EVICTION){
                     if (status == REMOTE_OWNED){
                     printf("EVICTION headed for a remote owned evicted line is %d\n", status);
@@ -418,15 +427,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
                 if(status == MISS || status == HIT){   
-                    unsigned int cache_index;
-                    m_L2cache->process_probe(mf ,cache_index); 
-                     unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
-                      if (cache_pending_index != unsigned(-1)){
-                    //      printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
-                          cache_index = cache_pending_index;
-                          status = REMOTE_OWNED;
-                      }
-                if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1) && status != REMOTE_OWNED){
+                if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, cache_index, mf->get_sid());
                           
                                  if((mf->get_addr() & (new_addr_type)(~127)) == 0xc08ccb00){
@@ -460,8 +461,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 }
                 
                 else if (status == REMOTE_OWNED)  {
-                    unsigned int cache_index;
-                  enum cache_request_status probe_status =  m_L2cache->process_probe(mf , cache_index);
                  if(((mf->get_sid() == m_L2cache->get_owner (mf, cache_index)) || ((m_L2cache->get_owner (mf, cache_index) == unsigned(-1)) && mf->get_type() == INVALIDATION_RESPONSE)) && (m_L2cache->get_line_address(mf, cache_index) == (mf->get_addr()  & ~(new_addr_type)(127)))){ //need to change this logic
                           //L2 cache will check if somebody is waiting for ownership at that address
                          // if yes make that next request the current owner and send the block to the new owner
@@ -488,12 +487,6 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       m_L2cache->set_owner( mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
                       }
                       else{
-                          /*
-                          if(mf_pending->get_type() == EVICTION){
-                              printf("Uh oh we have a problem here for address %d\n", mf_pending->get_addr());
-                          }
-                          */
-                      //    printf("What a i doing here %d from core %d for address %x\n", mf_pending->get_type(), mf_pending->get_sid(), mf_pending->get_addr());
                           m_L2cache->set_owner( mf_pending, cache_index, unsigned(-1));
                           // Here I can choose to completely empty out waiting for ownership and ownership champion queues
                           mem_fetch* temp = m_L2cache->get_waiting_for_ownership(mf, cache_index);
@@ -511,13 +504,8 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                           assert(m_L2cache->get_ownership_champion(mf, cache_index) == mf->get_sid());
                           m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id(), 3);
                           m_L2cache->set_owner( mf, cache_index, (unsigned)-1); //CHANGE TO LINE ADDRESS
-                  // while( !ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.c_sz-1))].empty())
-                  // {
-                  //     ownership_champion[(mf->get_addr() & ~(new_addr_type)(m_config->m_L2_config.m_line_sz-1))].pop();
-                  // }
-
                       }
-                      m_icnt_L2_queue->pop();
+                       m_icnt_L2_queue->pop();
                        if(mf->get_type() == INVALIDATION_RESPONSE){
                        m_request_tracker.erase(mf);
                    }
