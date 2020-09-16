@@ -848,7 +848,7 @@ public:
 	void add_pending_line(mem_fetch *mf);
 	void remove_pending_line(mem_fetch *mf);
     std::vector< new_addr_type> flush_queue;
-    std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;
+    
 
 protected:
     // This constructor is intended for use only from derived classes that wish to
@@ -1598,7 +1598,7 @@ public:
             int core_id, int type_id, mem_fetch_interface *memport,
             mem_fetch_allocator *mfcreator, enum mem_fetch_status status )
             : data_cache(name,config,core_id,type_id,memport,mfcreator,status, L2_WR_ALLOC_R, L2_WRBK_ACC){}
-
+    static std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;
     virtual ~l2_cache() {}  
     virtual enum cache_request_status
         access( new_addr_type addr,
