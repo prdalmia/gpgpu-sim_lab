@@ -269,7 +269,7 @@ void memory_partition_unit::set_done( mem_fetch *mf )
 {
     unsigned global_spid = mf->get_sub_partition_id(); 
     int spid = global_sub_partition_id_to_local_id(global_spid); 
-    assert(m_sub_partition[spid]->get_id() == global_spid); 
+  //  assert(m_sub_partition[spid]->get_id() == global_spid); 
     if (mf->get_access_type() == L1_WRBK_ACC || mf->get_access_type() == L2_WRBK_ACC) {
         m_arbitration_metadata.return_credit(spid); 
         MEMPART_DPRINTF("mem_fetch request %p return from dram to sub partition %d\n", mf, spid); 
