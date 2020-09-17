@@ -489,6 +489,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
+                      m_L2cache->remove_ownership_pending_index(mf, get_id());
                       }
                       
                       if(mf_pending->isatomic() == true){
