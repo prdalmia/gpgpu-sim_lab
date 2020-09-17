@@ -431,11 +431,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(status == MISS || status == HIT){   
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, cache_index, mf->get_sid());
-                          
+                          /*
                                  if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
                          printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id());
                          }
-                              
+                            */  
                                  m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                                  m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                                  
@@ -469,18 +469,17 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      // This needs to be replaced by index?
                      
                       mem_fetch * mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
+                    /*
                      if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80) || (get_id() == 39 && ((mf->get_addr() & (new_addr_type)(~127)) != (mf_pending->get_addr() & (new_addr_type)(~127))))){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
+                    */   
                        if((mf->get_type() != INVALIDATION_RESPONSE)){
                        printf(" NOT Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d with mf type %d\n", mf->get_sid(), mf->get_addr(), cache_index, get_id(), mf->get_type());
                        }
-
+                    
                      if (mf_pending){
                       mf_pending->set_reply();
-                       if(mf_pending->get_type() == INVALIDATION_RESPONSE){
-                       printf("2 Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf_pending->get_sid(), mf_pending->get_addr(), cache_index, get_id());
-                       }
                       assert(mf_pending->get_type() != INVALIDATION_RESPONSE);
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
                       m_L2cache->remove_ownership_pending_index(mf, get_id()); 
@@ -525,11 +524,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                      else{
                             
 
-                     
+                     /*
                          if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80)){
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
                          }
-                    
+                    */
                            m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                             
                          if (mf->get_type() == INVALIDATION_RESPONSE)
