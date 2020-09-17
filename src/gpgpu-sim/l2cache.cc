@@ -483,13 +483,13 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                        }
                       assert(mf_pending->get_type() != INVALIDATION_RESPONSE);
                       mf_pending->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE,gpu_sim_cycle+gpu_tot_sim_cycle);
-                      m_L2cache->remove_ownership_pending_index(mf_pending, get_id()); 
+                      m_L2cache->remove_ownership_pending_index(mf, get_id()); 
                   
                       
                     
                      if(m_L2cache->get_line_address(mf, cache_index) != (mf_pending->get_addr() & ~(new_addr_type)(127))){
                       m_L2cache->allocate(mf_pending, cache_index, gpu_sim_cycle+gpu_tot_sim_cycle);
-                      m_L2cache->remove_ownership_pending_index(mf, get_id());
+                      //m_L2cache->remove_ownership_pending_index(mf, get_id());
                       }
                       
                       if(mf_pending->isatomic() == true){
