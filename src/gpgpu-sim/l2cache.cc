@@ -412,9 +412,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     m_L2cache->process_probe(mf ,cache_index); 
                      unsigned cache_pending_index = m_L2cache->get_ownership_pending_index(mf, get_id());
                       if (cache_pending_index != unsigned(-1)){
+                         /*
                           if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
                         printf("Changing cache_index for address %x from %d to %d and is atomic %d where ID is %d\n", mf->get_addr(), cache_index, cache_pending_index, mf->isatomic(), get_id());
                           }
+                          */
                           cache_index = cache_pending_index;
                           status = REMOTE_OWNED;
                       }
@@ -431,11 +433,12 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(status == MISS || status == HIT){   
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, cache_index, mf->get_sid());
-                          /*
-                                 if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
+                          
+                                // if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
+                        if(mf->get_sid() == 75){
                          printf("Owner is  core %d for address %x going to cache_index %d and memory partition %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id());
                          }
-                            */  
+                              
                                  m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                                  m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                                  
@@ -471,9 +474,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                       mem_fetch * mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
                     /*
                      if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80) || (get_id() == 39 && ((mf->get_addr() & (new_addr_type)(~127)) != (mf_pending->get_addr() & (new_addr_type)(~127))))){
+                      */
+                     if(mf->get_sid() == 75){
                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
                        }
-                    */   
+                       
                        if((mf->get_type() != INVALIDATION_RESPONSE)){
                        printf(" NOT Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d with mf type %d\n", mf->get_sid(), mf->get_addr(), cache_index, get_id(), mf->get_type());
                        }
@@ -526,9 +531,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
 
                      /*
                          if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80)){
+                      */
+                         if(mf->get_sid() == 75){
                          printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
                          }
-                    */
+                    
                            m_L2cache->add_ownership_pending_index(mf, cache_index, get_id());
                             
                          if (mf->get_type() == INVALIDATION_RESPONSE)
