@@ -1983,8 +1983,8 @@ unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
         /*
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
        printf(" Incrementing Adding cache_index for address %x where value is %d and Id is %d\n", mf->get_addr(), i->second.second, id );       
-        */
         }
+        */
     }
    }
 
