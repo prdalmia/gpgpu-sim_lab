@@ -1162,6 +1162,8 @@ void baseline_cache::bandwidth_management::use_data_port(mem_fetch *mf, enum cac
         } break; 
     case REMOTE_OWNED:
     break;
+    case REMOTE_RESERVED:
+    break;
     case HIT_RESERVED:
     
     
