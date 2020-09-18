@@ -1388,7 +1388,8 @@ public:
    virtual enum cache_request_status access_L2( new_addr_type addr,
                                              mem_fetch *mf,
                                             unsigned time,
-                                             std::list<cache_event> &events );
+                                             std::list<cache_event> &events,
+                                             unsigned &cache_index );
 protected:
     data_cache( const char *name,
                 cache_config &config,
@@ -1619,7 +1620,8 @@ public:
         access( new_addr_type addr,
                 mem_fetch *mf,
                 unsigned time,
-                std::list<cache_event> &events );
+                std::list<cache_event> &events,
+                unsigned &cache_index );
    virtual  unsigned get_owner(mem_fetch *mf,
                         unsigned cache_index);
                  

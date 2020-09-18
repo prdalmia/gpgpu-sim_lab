@@ -1955,13 +1955,14 @@ enum cache_request_status
 data_cache::access_L2( new_addr_type addr,
                     mem_fetch *mf,
                     unsigned time,
-                    std::list<cache_event> &events )
+                    std::list<cache_event> &events,
+                    unsigned &cache_index
+                     )
 {
 
     assert( mf->get_data_size() <= m_config.get_atom_sz());
     bool wr = mf->get_is_write();
     new_addr_type block_addr = m_config.block_addr(addr);
-    unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe_L2( block_addr, cache_index, mf, true);  
     enum cache_request_status access_status
@@ -2031,9 +2032,10 @@ enum cache_request_status
 l2_cache::access( new_addr_type addr,
                   mem_fetch *mf,
                   unsigned time,
-                  std::list<cache_event> &events )
+                  std::list<cache_event> &events,
+                  unsigned& cache_index )
 {
-    return data_cache::access_L2( addr, mf, time, events );
+    return data_cache::access_L2( addr, mf, time, events, cache_index );
     
 }
 
