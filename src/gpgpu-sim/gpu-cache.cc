@@ -2141,9 +2141,7 @@ l2_cache::process_probe(   mem_fetch *mf,
                 unsigned &cache_index )
 {
     new_addr_type block_addr = m_config.block_addr(mf->get_addr());
-    
-   
-    enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
+    enum cache_request_status status = m_tag_array->probe_L2(block_addr,cache_index,mf);
     return status;
 }
 
