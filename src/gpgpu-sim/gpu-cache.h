@@ -831,7 +831,7 @@ public:
     void evict( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
     unsigned get_owner( new_addr_type addr, unsigned &idx,  mem_fetch* mf = NULL ) const;
     void set_owner( new_addr_type addr, unsigned &idx , mem_fetch* mf = NULL, unsigned owner_id = 0 ) ;
-    unsigned get_ownership_pending_index( mem_fetch *mf);
+    unsigned get_ownership_pending_index( mem_fetch *mf) const;
     void add_ownership_pending_index( mem_fetch *mf, unsigned cache_index);             
     void remove_ownership_pending_index( mem_fetch *mf);
     void fill( new_addr_type addr, unsigned time, mem_fetch* mf );

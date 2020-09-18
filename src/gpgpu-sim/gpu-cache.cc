@@ -2036,7 +2036,7 @@ l2_cache::access( new_addr_type addr,
 
 std::map<new_addr_type, std::pair<unsigned, unsigned>> tag_array::requests_in_ownership_queue;
 
-unsigned tag_array::get_ownership_pending_index( mem_fetch *mf)
+unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
 {
     
    new_addr_type addr = mf->get_addr() & (new_addr_type)(~127);
