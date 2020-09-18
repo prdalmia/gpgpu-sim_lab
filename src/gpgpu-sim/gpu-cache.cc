@@ -39,7 +39,8 @@ const char * cache_request_status_str(enum cache_request_status status)
       "MISS",
       "RESERVATION_FAIL",
 	  "SECTOR_MISS",
-      "REMOTE_OWNED"
+      "REMOTE_OWNED",
+      "REMOTE_RESERVED"
    }; 
 
    assert(sizeof(static_cache_request_status_str) / sizeof(const char*) == NUM_CACHE_REQUEST_STATUS); 
