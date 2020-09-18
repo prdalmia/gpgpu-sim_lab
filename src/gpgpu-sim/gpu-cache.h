@@ -56,6 +56,7 @@ enum cache_request_status {
     RESERVATION_FAIL, 
 	SECTOR_MISS,
     REMOTE_OWNED,
+    REMOTE_RESERVED,
     NUM_CACHE_REQUEST_STATUS
     };
 
@@ -820,15 +821,19 @@ public:
     tag_array(cache_config &config, int core_id, int type_id );
     ~tag_array();
 
-    enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
+    static std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;
+   enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
+   enum cache_request_status probe_L2( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
-    enum cache_request_status probe_l2( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
+    enum cache_request_status probe_L2( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
     enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, mem_fetch* mf );
     enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
     void evict( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, evicted_block_info &evicted, mem_fetch* mf );
     unsigned get_owner( new_addr_type addr, unsigned &idx,  mem_fetch* mf = NULL ) const;
     void set_owner( new_addr_type addr, unsigned &idx , mem_fetch* mf = NULL, unsigned owner_id = 0 ) ;
-
+    unsigned get_ownership_pending_index( mem_fetch *mf);
+    void add_ownership_pending_index( mem_fetch *mf, unsigned cache_index);             
+    void remove_ownership_pending_index( mem_fetch *mf);
     void fill( new_addr_type addr, unsigned time, mem_fetch* mf );
     void fill( unsigned idx, unsigned time, mem_fetch* mf );
     void fill( new_addr_type addr, unsigned time, mem_access_sector_mask_t mask );
@@ -1380,10 +1385,10 @@ public:
                                               mem_fetch *mf,
                                               unsigned time,
                                               std::list<cache_event> &events );
-   //virtual enum cache_request_status l2access( new_addr_type addr,
-   //                                          mem_fetch *mf,
-   //                                          unsigned time,
-   //                                          std::list<cache_event> &events );
+   virtual enum cache_request_status access_L2( new_addr_type addr,
+                                             mem_fetch *mf,
+                                            unsigned time,
+                                             std::list<cache_event> &events );
 protected:
     data_cache( const char *name,
                 cache_config &config,
@@ -1416,6 +1421,17 @@ protected:
                            mem_fetch* mf,
                            unsigned time,
                            std::list<cache_event>& events );
+
+    enum cache_request_status
+        process_tag_probe_L2( bool wr,
+                           enum cache_request_status status,
+                           new_addr_type addr,
+                           unsigned cache_index,
+                           mem_fetch* mf,
+                           unsigned time,
+                           std::list<cache_event>& events );                       
+
+                           
 
 protected:
     mem_fetch_allocator *m_memfetch_creator;
@@ -1598,16 +1614,12 @@ public:
             int core_id, int type_id, mem_fetch_interface *memport,
             mem_fetch_allocator *mfcreator, enum mem_fetch_status status )
             : data_cache(name,config,core_id,type_id,memport,mfcreator,status, L2_WR_ALLOC_R, L2_WRBK_ACC){}
-    static std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;
     virtual ~l2_cache() {}  
     virtual enum cache_request_status
         access( new_addr_type addr,
                 mem_fetch *mf,
                 unsigned time,
                 std::list<cache_event> &events );
-   virtual  unsigned get_ownership_pending_index( mem_fetch *mf, unsigned id);
-   virtual  void add_ownership_pending_index( mem_fetch *mf, unsigned cache_index,  unsigned id);             
-   virtual  void remove_ownership_pending_index( mem_fetch *mf, unsigned id);
    virtual  unsigned get_owner(mem_fetch *mf,
                         unsigned cache_index);
                  
@@ -1618,6 +1630,7 @@ public:
                 unsigned &cache_index );           
     virtual  mem_fetch * get_waiting_for_ownership( mem_fetch* mf, unsigned cache_index);
     virtual  void  add_waiting_for_ownership(mem_fetch *mf, unsigned cache_index);
+    virtual void remove_ownership_pending_index( mem_fetch *mf){ m_tag_array->remove_ownership_pending_index(mf);}
     
     virtual  void remove_from_ownership_queue(unsigned cache_index);
     virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index, unsigned id);

@@ -249,6 +249,11 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx, m
     return probe(addr, idx, mask, probe_mode, mf);
 }
 
+enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode) const {
+    mem_access_sector_mask_t mask = mf->get_access_sector_mask();
+    return probe_L2(addr, idx, mask, probe_mode, mf);
+}
+
 unsigned tag_array::get_owner( new_addr_type addr, unsigned &idx, mem_fetch* mf) const {
    unsigned set_index = m_config.set_index(addr);
     new_addr_type tag = m_config.tag(addr);
@@ -394,17 +399,22 @@ enum cache_request_status tag_array:: probe( new_addr_type addr, unsigned &idx, 
     return MISS;
 }
 
-enum cache_request_status tag_array:: probe_l2( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode, mem_fetch* mf) const {
+enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode, mem_fetch* mf) const {
     //assert( m_config.m_write_policy == READ_ONLY );
     
     unsigned set_index = m_config.set_index(addr);
     new_addr_type tag = m_config.tag(addr);
-
     unsigned invalid_line = (unsigned)-1;
     unsigned valid_line = (unsigned)-1;
     unsigned long long valid_timestamp = (unsigned)-1;
 
     bool all_reserved = true;
+    unsigned cache_pending_index = get_ownership_pending_index(mf);
+    if (cache_pending_index != unsigned(-1)){
+                        
+        idx = cache_pending_index;
+        return REMOTE_RESERVED;
+      }
 
     // check for hit or pending hit
     for (unsigned way=0; way<m_config.m_assoc; way++) {
@@ -463,6 +473,8 @@ enum cache_request_status tag_array:: probe_l2( new_addr_type addr, unsigned &id
             }
         }
     }
+
+    
     if ( all_reserved ) {
         assert( m_config.m_alloc_policy == ON_MISS ); 
         return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
@@ -473,7 +485,7 @@ enum cache_request_status tag_array:: probe_l2( new_addr_type addr, unsigned &id
     } else if ( valid_line != (unsigned)-1) {
         idx = valid_line;
     } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
-
+ 
 
     if(probe_mode && m_config.is_streaming()){
 		line_table::const_iterator i = pending_lines.find(m_config.block_addr(addr));
@@ -484,9 +496,12 @@ enum cache_request_status tag_array:: probe_l2( new_addr_type addr, unsigned &id
 		}
     }
 
+    if(m_lines[idx]->get_status(mask) == REMOTE_OWNERSHIP){
+		return REMOTE_RESERVED;
+    }
+ 
     return MISS;
 }
-
 
 enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, unsigned &idx, mem_fetch* mf)
 {
@@ -1807,10 +1822,7 @@ data_cache::process_tag_probe( bool wr,
                                       mf, time, events, probe_status );
         }else if(probe_status == REMOTE_OWNED){
              ;
-         }
-          else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
-            access_status = REMOTE_OWNED;
-        }         
+         }       
         else if ( (probe_status != RESERVATION_FAIL) || (probe_status == RESERVATION_FAIL && m_config.m_write_alloc_policy == NO_WRITE_ALLOCATE) ) {
             access_status = (this->*m_wr_miss)( addr,
                                        cache_index,
@@ -1828,10 +1840,7 @@ data_cache::process_tag_probe( bool wr,
                                       mf, time, events, probe_status );
         }else if(probe_status == REMOTE_OWNED){
              ;
-         } 
-         else if (probe_status == MISS && (m_tag_array->get_block(cache_index)->get_status(mf->get_access_sector_mask()) == REMOTE_OWNERSHIP)){
-            access_status = REMOTE_OWNED;
-        } 
+         }
         else if ( probe_status != RESERVATION_FAIL ) {
             access_status = (this->*m_rd_miss)( addr,
                                        cache_index,
@@ -1847,6 +1856,71 @@ data_cache::process_tag_probe( bool wr,
     return access_status;
 }
 
+
+//! A general function that takes the result of a tag_array probe
+//  and performs the correspding functions based on the cache configuration
+//  The access fucntion calls this function
+enum cache_request_status
+data_cache::process_tag_probe_L2( bool wr,
+                               enum cache_request_status probe_status,
+                               new_addr_type addr,
+                               unsigned cache_index,
+                               mem_fetch* mf,
+                               unsigned time,
+                               std::list<cache_event>& events )
+{
+    // Each function pointer ( m_[rd/wr]_[hit/miss] ) is set in the
+    // data_cache constructor to reflect the corresponding cache configuration
+    // options. Function pointers were used to avoid many long conditional
+    // branches resulting from many cache configuration options.
+    cache_request_status access_status = probe_status;
+    if(wr){ // Write
+        if(probe_status == HIT){
+            access_status = (this->*m_wr_hit)( addr,
+                                      cache_index,
+                                      mf, time, events, probe_status );
+        }else if(probe_status == REMOTE_OWNED){
+             ;
+         }
+        else if (probe_status == REMOTE_RESERVED) {
+                  m_tag_array->add_ownership_pending_index(mf, cache_index);
+                  mf->set_remote_reserved_request();
+        }       
+        else if ( (probe_status != RESERVATION_FAIL) || (probe_status == RESERVATION_FAIL && m_config.m_write_alloc_policy == NO_WRITE_ALLOCATE) ) {
+            access_status = (this->*m_wr_miss)( addr,
+                                       cache_index,
+                                       mf, time, events, probe_status );                           
+        }
+        else {
+        	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
+        	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
+        }
+    }
+        else{ // Read
+        if(probe_status == HIT){
+            access_status = (this->*m_rd_hit)( addr,
+                                      cache_index,
+                                      mf, time, events, probe_status );
+        }else if(probe_status == REMOTE_OWNED){
+             ;
+         }
+        else if (probe_status == REMOTE_RESERVED) {
+                  m_tag_array->add_ownership_pending_index(mf, cache_index);
+        }       
+        else if ( probe_status != RESERVATION_FAIL ) {
+            access_status = (this->*m_rd_miss)( addr,
+                                       cache_index,
+                                       mf, time, events, probe_status );
+        }    
+        else {
+        	//the only reason for reservation fail here is LINE_ALLOC_FAIL (i.e all lines are reserved)
+        	m_stats.inc_fail_stats(mf->get_access_type(), LINE_ALLOC_FAIL);
+        }
+    }
+
+    m_bandwidth_management.use_data_port(mf, access_status, events); 
+    return access_status;
+}
 // Both the L1 and L2 currently use the same access function.
 // Differentiation between the two caches is done through configuration
 // of caching policies.
@@ -1864,15 +1938,7 @@ data_cache::access( new_addr_type addr,
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
-        = m_tag_array->probe( block_addr, cache_index, mf, true);
-        /*
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc09ae800 && mf->get_sid() == 31){
-                       printf(" l1 access for core %d for address %x with cache_index %d\n", mf->get_sid(), mf->get_addr(), cache_index);
-            }
-     if(mf->get_sid() == 31 && cache_index == 239){
-       printf("Request coming in for core 31 and index 239 with address %x with probe_status %d\n", mf->get_addr(), probe_status);
-        } 
-        */  
+        = m_tag_array->probe( block_addr, cache_index, mf, true);  
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
@@ -1882,6 +1948,27 @@ data_cache::access( new_addr_type addr,
     return access_status;
 }
 
+enum cache_request_status
+data_cache::access_L2( new_addr_type addr,
+                    mem_fetch *mf,
+                    unsigned time,
+                    std::list<cache_event> &events )
+{
+
+    assert( mf->get_data_size() <= m_config.get_atom_sz());
+    bool wr = mf->get_is_write();
+    new_addr_type block_addr = m_config.block_addr(addr);
+    unsigned cache_index = (unsigned)-1;
+    enum cache_request_status probe_status
+        = m_tag_array->probe_L2( block_addr, cache_index, mf, true);  
+    enum cache_request_status access_status
+        = process_tag_probe_L2( wr, probe_status, addr, cache_index, mf, time, events );
+    m_stats.inc_stats(mf->get_access_type(),
+        m_stats.select_stats_status(probe_status, access_status));
+    m_stats.inc_stats_pw(mf->get_access_type(),
+        m_stats.select_stats_status(probe_status, access_status));
+    return access_status;
+}
 /// This is meant to model the first level data cache in Fermi.
 /// It is write-evict (global) or write-back (local) at the
 /// granularity of individual blocks (Set by GPGPU-Sim configuration file)
@@ -1943,13 +2030,13 @@ l2_cache::access( new_addr_type addr,
                   unsigned time,
                   std::list<cache_event> &events )
 {
-    return data_cache::access( addr, mf, time, events );
+    return data_cache::access_L2( addr, mf, time, events );
     
 }
 
-std::map<new_addr_type, std::pair<unsigned, unsigned>> l2_cache::requests_in_ownership_queue;
+std::map<new_addr_type, std::pair<unsigned, unsigned>> tag_array::requests_in_ownership_queue;
 
-unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
+unsigned tag_array::get_ownership_pending_index( mem_fetch *mf)
 {
     
    new_addr_type addr = mf->get_addr() & (new_addr_type)(~127);
@@ -1964,7 +2051,7 @@ unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
     }
    }
 
-   void l2_cache::add_ownership_pending_index( mem_fetch *mf, unsigned cache_index, unsigned id)
+   void tag_array::add_ownership_pending_index( mem_fetch *mf, unsigned cache_index)
 {
     
     new_addr_type addr = mf->get_addr() & (new_addr_type)(~127);
@@ -1974,7 +2061,7 @@ unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
        requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
        /*
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
-       printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d and location is  %x\n", mf->get_addr(), cache_index, mf->isatomic(), id, &requests_in_ownership_queue);       
+       printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d and location is  %x\n", mf->get_addr(), cache_index, mf->isatomic(), id, &m_tag_array->requests_in_ownership_queue);       
         }
         */
            }
@@ -1989,26 +2076,16 @@ unsigned l2_cache::get_ownership_pending_index( mem_fetch *mf, unsigned id)
    }
 
 
-void l2_cache::remove_ownership_pending_index( mem_fetch *mf, unsigned id)
+void tag_array::remove_ownership_pending_index( mem_fetch *mf)
 {
     
     new_addr_type addr = mf->get_addr() & (new_addr_type)(~127);
     if(requests_in_ownership_queue.count(addr) <= 0){
-         printf("Cant remove cache_index for address %x and is atomic %d where ID is %d and core ID is %d and location is %x \n", mf->get_addr(),  mf->isatomic(), id, mf->get_sid(), &requests_in_ownership_queue);  
+         printf("Cant remove cache_index for address %x where core ID is %d and location is %x \n", mf->get_addr(), mf->get_sid(), &requests_in_ownership_queue);  
         }
     assert(requests_in_ownership_queue.count(addr)>0);
-    requests_in_ownership_queue[addr].second--;
-    /*
-     if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
-       printf(" Decrementing Adding cache_index for address %x and value is %d  and id is %d and core ID is %d and is atomic %d\n", mf->get_addr(), requests_in_ownership_queue[addr].second, id, mf->get_sid(), mf->isatomic() );       
-        }
-     */   
+    requests_in_ownership_queue[addr].second--; 
     if(requests_in_ownership_queue[addr].second == 0){
-      /*  
-        if(addr == 0xc0955d80){
-         printf("Removing cache_index for address %x as %d and is atomic %d where ID is %d and core ID is %d\n", mf->get_addr(), requests_in_ownership_queue[addr].first, mf->isatomic(), id, mf->get_sid());  
-        }
-      */  
         requests_in_ownership_queue.erase(addr);
     }
 
