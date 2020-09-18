@@ -2035,6 +2035,9 @@ l2_cache::access( new_addr_type addr,
                   std::list<cache_event> &events,
                   unsigned& cache_index )
 {
+    if(mf->isatomic() && mf->get_sid() == 75){
+        printf(" THe l2 cache is getting a request for address %x\n", mf->get_addr());
+    }
     return data_cache::access_L2( addr, mf, time, events, cache_index );
     
 }
