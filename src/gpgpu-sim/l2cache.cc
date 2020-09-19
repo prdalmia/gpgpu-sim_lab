@@ -416,7 +416,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, cache_index, mf->get_sid());
                                  m_L2cache->add_ownership_champion(mf, cache_index, get_id());
-                                 
+                              if(mf->get_sid() == 75){
+                        printf(" Owner Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
+                        }   
                         }
                 MEM_SUBPART_DPRINTF("Probing L2 cache Address=%llx, status=%u\n", mf->get_addr(), status); 
                 }
