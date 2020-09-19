@@ -2048,8 +2048,8 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
 {
     
    new_addr_type addr = mf->get_addr() & (new_addr_type)(~127);
-   std::map<new_addr_type, std::pair<unsigned, unsigned>>::iterator i;
-   i = requests_in_ownership_queue.find(addr);
+   std::map<new_addr_type, std::pair<unsigned, unsigned>>::const_iterator i;
+    i = requests_in_ownership_queue.find(addr);
    if(i == requests_in_ownership_queue.end()){
        return (unsigned)-1;
    }
