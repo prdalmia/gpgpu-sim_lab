@@ -2143,7 +2143,9 @@ l2_cache::set_owner(mem_fetch *mf,
                 }
                 else{
                 block->set_status(REMOTE_OWNERSHIP, mask);
-                 printf("owner id is %d and status is MODIFIED \n", owner_id); 
+                if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
+                    printf("owner id is %d and status is REMOTE_OWNERSHIP and %d \n", owner_id, block->waiting_for_ownership.empty() );       
+                 }
                 }
                 
            }
