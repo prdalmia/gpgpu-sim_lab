@@ -459,7 +459,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         }
                         assert(mf->isremotereservedrequest() == false);
                         mem_fetch *mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
-                        if( (mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00 ){
+                        if( (mf_pending->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00 ){
                         printf("Invalidation response from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
 

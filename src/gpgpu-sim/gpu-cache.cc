@@ -1914,6 +1914,7 @@ data_cache::process_tag_probe_L2( bool wr,
          }
         else if (probe_status == REMOTE_RESERVED) {
                   m_tag_array->add_ownership_pending_index(mf, cache_index);
+                  mf->set_remote_reserved_request();
         }       
         else if ( probe_status != RESERVATION_FAIL ) {
             access_status = (this->*m_rd_miss)( addr,
@@ -2100,6 +2101,9 @@ void tag_array::remove_ownership_pending_index( mem_fetch *mf)
         }
     assert(requests_in_ownership_queue.count(addr)>0);
     requests_in_ownership_queue[addr].second--; 
+    if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
+       printf("Decrementing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
+        }
     if(requests_in_ownership_queue[addr].second == 0){
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
        printf("Removing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
