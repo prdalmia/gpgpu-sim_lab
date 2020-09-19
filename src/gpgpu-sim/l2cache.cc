@@ -452,7 +452,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         {
                             printf("EVICTION headed for a remote owned evicted line is %d\n", status);
                         }
+                        assert(mf->isremotereservedrequest() == false);
                         mem_fetch *mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
+                        
                         // printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
 
                         if (mf_pending)
