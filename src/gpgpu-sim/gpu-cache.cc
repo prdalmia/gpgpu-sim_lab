@@ -2228,7 +2228,7 @@ new_addr_type l2_cache::get_ownership_champion_address( unsigned cache_index)
 void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsigned id, unsigned where )
 {
      
-
+cache_block_t* block = m_tag_array->get_block(cache_index);
     /*
      if(cache_index == 695 && id == 39){
         printf(" 317 removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where); 
@@ -2243,7 +2243,7 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
         printf("removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where ); 
    }
    
-  cache_block_t* block = m_tag_array->get_block(cache_index);
+  
     block->ownership_champion.pop_front();
     
     
