@@ -2134,14 +2134,16 @@ l2_cache::set_owner(mem_fetch *mf,
     if (block->m_tag == tag) {
            if ( block->get_status(mask) == VALID || block->get_status(mask) == RESERVED || block->get_status(mask) == OWNED || block->get_status(mask) == MODIFIED || block->get_status(mask) == REMOTE_OWNERSHIP) {
             	block->m_owner = owner_id;
-                if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
-               printf("owner id is %d and status is %d \n", owner_id, block->get_status(mask));       
-        }
+               
                 if(owner_id == (unsigned)-1  && block->waiting_for_ownership.empty()){
                   block->set_status(MODIFIED, mask);
+                   if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
+                    printf("owner id is %d and status is MODIFIED and %d \n", owner_id, block->waiting_for_ownership.empty() );       
+                 }
                 }
                 else{
                 block->set_status(REMOTE_OWNERSHIP, mask);
+                 printf("owner id is %d and status is MODIFIED \n", owner_id); 
                 }
                 
            }
