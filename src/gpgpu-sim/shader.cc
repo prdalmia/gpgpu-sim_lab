@@ -4143,7 +4143,8 @@ void simt_core_cluster::get_L1D_sub_stats(struct cache_sub_stats &css) const{
 }
 void simt_core_cluster::get_ldst() const{
    
-        m_core[75]->get_ldst();
+        m_core[0]->get_ldst();
+        m_core[1]->get_ldst();
 }
 
 void simt_core_cluster::get_L1C_sub_stats(struct cache_sub_stats &css) const{

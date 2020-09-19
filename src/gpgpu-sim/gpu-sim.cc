@@ -971,8 +971,10 @@ void gpgpu_sim::deadlock_check()
                  printf("GPGPU-Sim uArch: DEADLOCK  shader cores no longer committing instructions [core(# threads)]:\n" );
                  printf("GPGPU-Sim uArch: DEADLOCK  ");
                  m_cluster[i]->print_not_completed(stdout);
+                 m_cluster[i]->get_ldst();
              } else if (num_cores < 8 ) {
                  m_cluster[i]->print_not_completed(stdout);
+                 m_cluster[i]->get_ldst();
              } else if (num_cores >= 8 ) {
                  printf(" + others ... ");
              }
@@ -990,7 +992,7 @@ void gpgpu_sim::deadlock_check()
          icnt_display_state( stdout );
       }
       printf("\nRe-run the simulator in gdb and use debug routines in .gdbinit to debug this\n");
-      m_cluster[1]->get_ldst();
+      
       fflush(stdout);
       abort();
    }
