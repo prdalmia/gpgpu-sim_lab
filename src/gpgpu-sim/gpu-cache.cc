@@ -2076,7 +2076,7 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
        requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
        
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
-       printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &m_tag_array->requests_in_ownership_queue);       
+       printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &requests_in_ownership_queue);       
         }
         
            }
