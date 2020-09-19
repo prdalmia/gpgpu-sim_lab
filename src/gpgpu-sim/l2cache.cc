@@ -408,8 +408,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 std::list<cache_event> events;
                 //stop replacement till there are pending requests to the same address
                 unsigned int cache_index = (unsigned)-1;
-                enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events, cache_index);
-                     
+                enum cache_request_status status = m_L2cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle+m_memcpy_cycle_offset,events, cache_index);    
                 //CAN WE GET A SECTOR MISS ?
                 bool write_sent = was_write_sent(events);
                 bool read_sent = was_read_sent(events);
@@ -454,8 +453,10 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         }
                         assert(mf->isremotereservedrequest() == false);
                         mem_fetch *mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
+                        if(mf->get_sid() == 75){
+                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
+                        }
                         
-                        // printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
 
                         if (mf_pending)
                         {
@@ -499,8 +500,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
 
                     else
                     {
-                        //printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
-
+                        if(mf->get_sid() == 75){
+                        printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
+                        }
                         if (mf->get_type() == INVALIDATION_RESPONSE)
                         {
                             printf(" 1 The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d\n", mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic());
@@ -529,6 +531,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 }
                 else if (status == REMOTE_RESERVED)
                 {
+                    if(mf->get_sid() == 75){
+                        printf(" Reserved Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
+                        }
                     if (mf->get_type() == INVALIDATION_RESPONSE)
                     {
                         printf(" 1 The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d\n", mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic());

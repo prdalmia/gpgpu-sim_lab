@@ -821,7 +821,7 @@ public:
     tag_array(cache_config &config, int core_id, int type_id );
     ~tag_array();
 
-    std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;
+    static std::map<new_addr_type, std::pair<unsigned, unsigned>> requests_in_ownership_queue;
    enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
    enum cache_request_status probe_L2( new_addr_type addr, unsigned &idx, mem_fetch* mf, bool probe_mode=false ) const;
     enum cache_request_status probe( new_addr_type addr, unsigned &idx, mem_access_sector_mask_t mask, bool probe_mode=false, mem_fetch* mf = NULL ) const;
