@@ -412,7 +412,9 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     bool all_reserved = true;
     unsigned cache_pending_index = get_ownership_pending_index(mf);
     if (cache_pending_index != unsigned(-1)){
-                        
+         if( ((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00) && mf->get_sid() == 72 ){
+                        printf(" I am going to set this as a remote_reserved request top\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
+                        }               
         idx = cache_pending_index;
         return REMOTE_RESERVED;
       }
@@ -498,6 +500,9 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     }
 
     if(m_lines[idx]->get_status(mask) == REMOTE_OWNERSHIP){
+        if( ((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00) && mf->get_sid() == 72 ){
+                        printf(" I am going to set this as a remote_reserved request bottom\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
+                        }     
 		return REMOTE_RESERVED;
     }
  
@@ -2069,19 +2074,19 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
    i = requests_in_ownership_queue.find(addr);
    if(i == requests_in_ownership_queue.end()){
        requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
-       /*
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
-       printf("Adding cache_index for address %x as %d and is atomic %d where ID is %d and location is  %x\n", mf->get_addr(), cache_index, mf->isatomic(), id, &m_tag_array->requests_in_ownership_queue);       
+       
+        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
+       printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &m_tag_array->requests_in_ownership_queue);       
         }
-        */
+        
            }
     else{
         i->second.second ++;
-        /*
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0955d80){
-       printf(" Incrementing Adding cache_index for address %x where value is %d and Id is %d\n", mf->get_addr(), i->second.second, id );       
+        
+        if((mf->get_addr() & (new_addr_type)(~127)) ==0xc00bcc00){
+       printf(" Incrementing Adding cache_index for address %x where value is %d\n", addr, i->second.second);       
         }
-        */
+        
     }
    }
 
@@ -2096,6 +2101,9 @@ void tag_array::remove_ownership_pending_index( mem_fetch *mf)
     assert(requests_in_ownership_queue.count(addr)>0);
     requests_in_ownership_queue[addr].second--; 
     if(requests_in_ownership_queue[addr].second == 0){
+        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
+       printf("Removing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
+        }
         requests_in_ownership_queue.erase(addr);
     }
 
@@ -2126,6 +2134,9 @@ l2_cache::set_owner(mem_fetch *mf,
     if (block->m_tag == tag) {
            if ( block->get_status(mask) == VALID || block->get_status(mask) == RESERVED || block->get_status(mask) == OWNED || block->get_status(mask) == MODIFIED || block->get_status(mask) == REMOTE_OWNERSHIP) {
             	block->m_owner = owner_id;
+                if((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00){
+               printf("owner id is %d and status is %d \n", owner_id, block->get_status(mask));       
+        }
                 if(owner_id == (unsigned)-1  && block->waiting_for_ownership.empty()){
                   block->set_status(MODIFIED, mask);
                 }
