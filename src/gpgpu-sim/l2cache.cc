@@ -453,11 +453,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         }
                         assert(mf->isremotereservedrequest() == false);
                         mem_fetch *mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
-                        if(mf->get_sid() == 75){
-                        printf("Invalidation response recieved from core %d for address %x going to cache_index %d and memory partition %d \n", mf->get_sid(), mf->get_addr(), cache_index, get_id());
-                        }
                         
-
                         if (mf_pending)
                         {
                             mf_pending->set_reply();
@@ -501,7 +497,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     else
                     {
                         if(mf->get_sid() == 75){
-                        printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
+                        printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
                         if (mf->get_type() == INVALIDATION_RESPONSE)
                         {
@@ -532,7 +528,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 else if (status == REMOTE_RESERVED)
                 {
                     if(mf->get_sid() == 75){
-                        printf(" Reserved Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic());
+                        printf(" Reserved Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
                     if (mf->get_type() == INVALIDATION_RESPONSE)
                     {
