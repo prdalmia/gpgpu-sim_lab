@@ -413,7 +413,7 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     if (cache_pending_index != unsigned(-1)){             
         idx = cache_pending_index;
         if(mf->get_type() == INVALIDATION_RESPONSE){
-            printf("Something is not working for address %x from core %d\n", mf->get_addr(), mf->get_sid());
+            printf("TOP Something is not working for address %x from core %d\n", mf->get_addr(), mf->get_sid());
         }
         return REMOTE_RESERVED;
       }
@@ -498,7 +498,10 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
 		}
     }
 
-    if(m_lines[idx]->get_status(mask) == REMOTE_OWNERSHIP){    
+    if(m_lines[idx]->get_status(mask) == REMOTE_OWNERSHIP){
+        if(mf->get_type() == INVALIDATION_RESPONSE){
+            printf("BOTTOM Something is not working for address %x from core %d\n", mf->get_addr(), mf->get_sid());
+        }    
 		return REMOTE_RESERVED;
     }
  
@@ -1889,6 +1892,7 @@ data_cache::process_tag_probe_L2( bool wr,
         else if (probe_status == REMOTE_RESERVED) {
                   m_tag_array->add_ownership_pending_index(mf, cache_index);
                   mf->set_remote_reserved_request();
+                  assert(mf->get_type() != INVALIDATION_RESPONSE);
         }       
         else if ( (probe_status != RESERVATION_FAIL) || (probe_status == RESERVATION_FAIL && m_config.m_write_alloc_policy == NO_WRITE_ALLOCATE) ) {
             access_status = (this->*m_wr_miss)( addr,
@@ -1911,6 +1915,7 @@ data_cache::process_tag_probe_L2( bool wr,
         else if (probe_status == REMOTE_RESERVED) {
                   m_tag_array->add_ownership_pending_index(mf, cache_index);
                   mf->set_remote_reserved_request();
+                  assert(mf->get_type() != INVALIDATION_RESPONSE);
         }       
         else if ( probe_status != RESERVATION_FAIL ) {
             access_status = (this->*m_rd_miss)( addr,

@@ -2396,6 +2396,9 @@ void ldst_unit::cycle()
                            printf("Recieved Invalidation for core ID and address in question\n");
                        }
                        */
+                      if(mf->isremotereservedrequest() && mf->get_type() == INVALIDATION){
+                             printf("What the fuck is going on\n");
+                      }
                        m_L1D->evict(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                         m_response_fifo.pop_front();
                    }
