@@ -561,6 +561,9 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                     m_L2_icnt_queue->push(mf_flush);
                     mf_flush->set_status(IN_PARTITION_L2_TO_ICNT_QUEUE, gpu_sim_cycle + gpu_tot_sim_cycle);
                     // L2 cache accepted request
+                    if( (mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00 ){
+                        printf(" Reserved Request Invalidation sent to core %d for address %x where invalidation address is %x type is %d\n", invalidation_reciever ,mf->get_addr(), invalidation_reciever_address, mf->get_type());
+                        }
                     m_L2cache->remove_from_ownership_champion_queue(cache_index, get_id(), 1);
                     m_icnt_L2_queue->pop();
                 }
