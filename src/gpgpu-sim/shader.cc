@@ -2293,6 +2293,7 @@ void ldst_unit::writeback()
                     m_core->decrement_atomic_count(mf->get_wid(),mf->get_access_warp_mask().count());
                     }
                 if(mf->isevictionrequest()){
+                    mf->set_remote_reserved_request(false);
                     m_L1D->evict(mf, gpu_sim_cycle+gpu_tot_sim_cycle);
                 }
                 if (mf->isevictionrequest() != true){

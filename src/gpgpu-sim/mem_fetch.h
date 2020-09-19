@@ -107,7 +107,7 @@ public:
 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
    void set_eviction_request(  ) { send_eviction_request = true; }
-   void set_remote_reserved_request(  ) { remote_reserved_request = true; }
+   void set_remote_reserved_request( bool val  ) { remote_reserved_request = val; }
    void set_fill_L1D(  ) { fill_for_L1D = true; }
    void set_icnt_receive_time( unsigned t ) { m_icnt_receive_time=t; }
    unsigned get_timestamp() const { return m_timestamp; }
