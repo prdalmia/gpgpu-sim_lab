@@ -413,7 +413,7 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     unsigned cache_pending_index = get_ownership_pending_index(mf);
     if (cache_pending_index != unsigned(-1)){
          if( ((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00) && mf->get_sid() == 72 ){
-                        printf(" I am going to set this as a remote_reserved request top\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
+                        printf(" I am going to set this as a remote_reserved request top\n");
                         }               
         idx = cache_pending_index;
         return REMOTE_RESERVED;
@@ -501,7 +501,7 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
 
     if(m_lines[idx]->get_status(mask) == REMOTE_OWNERSHIP){
         if( ((mf->get_addr() & (new_addr_type)(~127)) == 0xc00bcc00) && mf->get_sid() == 72 ){
-                        printf(" I am going to set this as a remote_reserved request bottom\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
+                        printf(" I am going to set this as a remote_reserved request bottom\n");
                         }     
 		return REMOTE_RESERVED;
     }
