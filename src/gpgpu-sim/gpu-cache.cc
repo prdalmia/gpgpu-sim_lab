@@ -2262,7 +2262,7 @@ cache_block_t* block = m_tag_array->get_block(cache_index);
     
      if(cache_index == 645 && id == 1){
         printf("removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where); 
-   
+     }
   /*
     if(cache_index == 677 && id == 39){
         printf(" 330 removing core %d from ownership champion for address %x where line address is %x\n and %d", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where); 
