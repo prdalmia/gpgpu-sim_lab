@@ -535,6 +535,9 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
             if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line());
+            if((m_lines[idx]->m_block_addr== 0xc01d8800) && mf->get_sid() == 1 && m_lines[idx]->is_owned_line() ){
+                     printf(" Eviction for core %d for address %x, result is %d and %d\n", mf->get_sid(), mf->get_addr());
+        } 
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
         }
