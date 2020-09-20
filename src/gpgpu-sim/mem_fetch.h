@@ -103,11 +103,11 @@ public:
    bool isatomic() const;
    bool isfillL1D() { return fill_for_L1D;}
    bool isevictionrequest() const {return send_eviction_request;}
-   bool isremotereservedrequest() const {return remote_reserved_request;}
+   bool  isanownedeviction() const {return owned_eviction;}
 
    void set_return_timestamp( unsigned t ) { m_timestamp2=t; }
    void set_eviction_request(  ) { send_eviction_request = true; }
-   void set_remote_reserved_request( bool val  ) { remote_reserved_request = val; }
+   void set_owned_eviction( bool val  ) { owned_eviction = val; }
    void set_fill_L1D(  ) { fill_for_L1D = true; }
    void set_icnt_receive_time( unsigned t ) { m_icnt_receive_time=t; }
    unsigned get_timestamp() const { return m_timestamp; }
@@ -137,7 +137,7 @@ private:
    unsigned m_tpc;
    unsigned m_wid;
    bool send_eviction_request;
-   bool remote_reserved_request;
+   bool owned_eviction;
    bool fill_for_L1D;
    // where is this request now?
    enum mem_fetch_status m_status;

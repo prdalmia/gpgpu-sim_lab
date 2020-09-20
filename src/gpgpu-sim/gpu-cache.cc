@@ -534,7 +534,7 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
         if ( m_config.m_alloc_policy == ON_MISS ) {
             if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
-                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size());
+                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line());
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
         }
@@ -1495,6 +1495,9 @@ data_cache::wr_miss_wa_naive( new_addr_type addr,
             mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
                 m_wrbk_type,evicted.m_modified_size,true);
                 wb->set_type(EVICTION);
+                if(evicted.is_owned == true){
+                    wb->set_owned_eviction(true);
+                }
             send_write_request(wb, cache_event(WRITE_BACK_REQUEST_SENT, evicted), time, events);
         }
         return MISS;
@@ -1540,6 +1543,9 @@ data_cache::wr_miss_wa_fetch_on_write( new_addr_type addr,
 				   mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
 					   m_wrbk_type,evicted.m_modified_size,true);
                        wb->set_type(EVICTION);
+                        if(evicted.is_owned == true){
+                    wb->set_owned_eviction(true);
+                }
 				   send_write_request(wb, cache_event(WRITE_BACK_REQUEST_SENT, evicted), time, events);
 			   }
 			   return MISS;
@@ -1616,6 +1622,9 @@ data_cache::wr_miss_wa_fetch_on_write( new_addr_type addr,
 					mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
 						m_wrbk_type,evicted.m_modified_size,true);
                         wb->set_type(EVICTION);
+                         if(evicted.is_owned == true){
+                    wb->set_owned_eviction(true);
+                }
 					send_write_request(wb, cache_event(WRITE_BACK_REQUEST_SENT, evicted), time, events);
 			}
 				return MISS;
@@ -1670,6 +1679,9 @@ data_cache::wr_miss_wa_lazy_fetch_on_read( new_addr_type addr,
 				   mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
 					   m_wrbk_type,evicted.m_modified_size,true);
                        wb->set_type(EVICTION);
+                        if(evicted.is_owned == true){
+                    wb->set_owned_eviction(true);
+                }
 				   send_write_request(wb, cache_event(WRITE_BACK_REQUEST_SENT, evicted), time, events);
 			   }
 			   return MISS;
@@ -1755,6 +1767,9 @@ data_cache::rd_miss_base( new_addr_type addr,
             mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
                 m_wrbk_type,evicted.m_modified_size,true);
                 wb->set_type(EVICTION);
+                 if(evicted.is_owned == true){
+                    wb->set_owned_eviction(true);
+                }
         send_write_request(wb, WRITE_BACK_REQUEST_SENT, time, events);
     }
         return MISS;
@@ -2073,7 +2088,7 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
    if(i == requests_in_ownership_queue.end()){
        requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
     
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0396200){
+        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0928800){
        printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &requests_in_ownership_queue);       
         }
         
@@ -2083,7 +2098,7 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
     else{
         i->second.second ++;
         
-        if((mf->get_addr() & (new_addr_type)(~127)) ==0xc0396200){
+        if((mf->get_addr() & (new_addr_type)(~127)) ==0xc0928800){
        printf(" Incrementing Adding cache_index for address %x where value is %d\n", addr, i->second.second);       
         }
         
@@ -2102,11 +2117,11 @@ void tag_array::remove_ownership_pending_index( mem_fetch *mf)
     assert(requests_in_ownership_queue.count(addr)>0);
     requests_in_ownership_queue[addr].second--; 
     
-    if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0396200){
+    if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0928800){
        printf("Decrementing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
         }  
     if(requests_in_ownership_queue[addr].second == 0){
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0396200){
+        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc0928800){
        printf("Removing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
         }
         
@@ -2194,10 +2209,11 @@ void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 
 void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsigned id)
 {
-    
+    /*
     if(cache_index == 114 && id == 4){
      printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
+    */
 
 /*
  if(cache_index == 677 && id == 39){
@@ -2254,12 +2270,12 @@ cache_block_t* block = m_tag_array->get_block(cache_index);
   
 */
 
-
+/*
      if(cache_index == 114 && id == 4){
         printf("removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where ); 
   
    }
-  
+  */
   
     block->ownership_champion.pop_front();
     

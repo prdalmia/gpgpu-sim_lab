@@ -80,15 +80,18 @@ struct evicted_block_info {
 	new_addr_type m_block_addr;
 	unsigned m_modified_size;
     unsigned owner_id;
+    bool is_owned;
 	evicted_block_info() {
 		m_block_addr = 0;
 		m_modified_size = 0;
         owner_id = unsigned(-1);
+        is_owned = false;
 	}
-	void set_info(new_addr_type block_addr, unsigned modified_size, unsigned owner = unsigned(-1)){
+	void set_info(new_addr_type block_addr, unsigned modified_size, unsigned owner = unsigned(-1), bool is_owned_status = false){
 		m_block_addr = block_addr;
 		m_modified_size = modified_size;
         owner_id = owner;
+        is_owned = is_owned_status;
 	}
 };
 
