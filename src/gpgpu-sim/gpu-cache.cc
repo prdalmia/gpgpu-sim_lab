@@ -2023,6 +2023,10 @@ l1_cache::evict(   mem_fetch *mf,
         printf( "address is %x and core id is %d and cache_index is %d\n", mf->get_addr(), mf->get_sid(), cache_index);
     }
     assert(!(mshr_hit == 0 && status == MISS));
+
+    if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc01d8800) && mf->get_sid() == 1 ){
+                     printf(" Invalidation for core %d for address %x, result is %d and %d\n", mf->get_sid(), mf->get_addr(), mshr_hit, status);
+        } 
    
     if ( !mshr_hit && status == HIT ) {            		
     if(miss_queue_full(0)) {

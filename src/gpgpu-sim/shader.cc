@@ -2390,6 +2390,9 @@ void ldst_unit::cycle()
                    }
                } else {
                    if(mf->get_type() == INVALIDATION){
+                        if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc01d8800) && mf->get_sid() == 1 ){
+                     printf(" Invalidation for core %d for address %x\n", mf->get_sid(), mf->get_addr());
+                     } 
                        m_L1D->evict(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                         m_response_fifo.pop_front();
                    }
@@ -2402,9 +2405,9 @@ void ldst_unit::cycle()
                        mf->set_fill_L1D();
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                     
-                     //   if(mf->get_sid() == 75){
-                     //  printf(" Fill for core %d for address %x\n", mf->get_sid(), mf->get_addr());
-                     //  } 
+                     if(((mf->get_addr() & (new_addr_type)(~127)) == 0xc01d8800) && mf->get_sid() == 1 ){
+                     printf(" Fill for core %d for address %x\n", mf->get_sid(), mf->get_addr());
+                     } 
                        m_response_fifo.pop_front();
                    }
                    }
