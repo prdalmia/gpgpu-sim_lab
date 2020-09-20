@@ -1898,8 +1898,8 @@ data_cache::process_tag_probe_L2( bool wr,
              ;
          }
         else if (probe_status == REMOTE_RESERVED) {
-                  m_tag_array->add_ownership_pending_index(mf, cache_index);
-                  mf->set_remote_reserved_request(true);
+                //  m_tag_array->add_ownership_pending_index(mf, cache_index);
+                 // mf->set_remote_reserved_request(true);
                   assert(mf->get_type() != INVALIDATION_RESPONSE);
         }       
         else if ( (probe_status != RESERVATION_FAIL) || (probe_status == RESERVATION_FAIL && m_config.m_write_alloc_policy == NO_WRITE_ALLOCATE) ) {
@@ -1921,8 +1921,8 @@ data_cache::process_tag_probe_L2( bool wr,
              ;
          }
         else if (probe_status == REMOTE_RESERVED) {
-                  m_tag_array->add_ownership_pending_index(mf, cache_index);
-                  mf->set_remote_reserved_request(true);
+                  //m_tag_array->add_ownership_pending_index(mf, cache_index);
+                  //mf->set_remote_reserved_request(true);
                   assert(mf->get_type() != INVALIDATION_RESPONSE);
         }       
         else if ( probe_status != RESERVATION_FAIL ) {

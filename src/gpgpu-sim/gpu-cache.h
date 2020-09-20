@@ -1633,6 +1633,8 @@ public:
     virtual  mem_fetch * get_waiting_for_ownership( mem_fetch* mf, unsigned cache_index);
     virtual  void  add_waiting_for_ownership(mem_fetch *mf, unsigned cache_index);
     virtual void remove_ownership_pending_index( mem_fetch *mf){ m_tag_array->remove_ownership_pending_index(mf);}
+    virtual void add_ownership_pending_index( mem_fetch *mf, unsigned cache_index){ m_tag_array->add_ownership_pending_index(mf, cache_index);}
+
     
     virtual  void remove_from_ownership_queue(unsigned cache_index);
     virtual  void  add_ownership_champion(mem_fetch *mf, unsigned cache_index, unsigned id);

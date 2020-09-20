@@ -481,9 +481,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
 
                             m_L2cache->remove_from_ownership_queue(cache_index);
                             m_L2_icnt_queue->push(mf_pending);
-                            if( mf_pending->isremotereservedrequest()){
-                                m_L2cache->remove_ownership_pending_index(mf_pending);
-                            }
+                            m_L2cache->remove_ownership_pending_index(mf_pending);
                             if(mf_pending->isatomic() == true){
                                 m_L2cache->set_owner(mf_pending, cache_index, mf_pending->get_sid()); //CHANGE TO LINE ADDRESS
                             }
@@ -530,6 +528,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             printf(" 1 The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d\n", mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic());
                             throw std::runtime_error("You are at a bad place man");
                         }
+                        m_L2cache->add_ownership_pending_index(mf, cache_index);
                         m_L2cache->add_waiting_for_ownership(mf, cache_index);
                         m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                         unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
@@ -564,6 +563,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         printf(" 1 The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d\n", mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic());
                         throw std::runtime_error("You are at a bad place man");
                     }
+                    m_L2cache->add_ownership_pending_index(mf, cache_index);
                     m_L2cache->add_waiting_for_ownership(mf, cache_index);
                     m_L2cache->add_ownership_champion(mf, cache_index, get_id());
                     unsigned invalidation_reciever = m_L2cache->get_ownership_champion(mf, cache_index);
