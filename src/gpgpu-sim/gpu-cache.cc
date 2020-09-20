@@ -780,12 +780,9 @@ mem_fetch *mshr_table::next_access(){
     m_data[block_addr].m_list.pop_front();
     if ( m_data[block_addr].m_list.empty() ) {
         // release entry
-        if(m_data[block_addr].m_has_atomic && m_data[block_addr].pending_flushing_request == true){
+        if(m_data[block_addr].pending_flushing_request == true){
         result->set_eviction_request();
         }
-        if(((result->get_addr() & (new_addr_type)(~127)) == 0xc01d8800) && result->get_sid() == 1 ){
-                     printf(" THe state for address in question is %d and %d\n", m_data[block_addr].m_has_atomic, m_data[block_addr].pending_flushing_request);
-                     } 
         m_data.erase(block_addr);
         m_current_response.pop_front();
     }
