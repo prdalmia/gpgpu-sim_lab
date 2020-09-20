@@ -410,9 +410,15 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     unsigned long long valid_timestamp = (unsigned)-1;
     bool all_reserved = true;
     unsigned cache_pending_index = get_ownership_pending_index(mf);
+    if(mf->get_sid() == 78 && ((mf->get_addr() & (new_addr_type)(~127)) == 0xc0904200)){
+        printf("The tag at this address is %x and at 63 id %x whereas tag is %x\n", m_lines[64]->m_tag, m_lines[63]->m_tag, tag);
+    }
     if (cache_pending_index != unsigned(-1)){             
         if(m_lines[cache_pending_index]->m_tag != tag) {
         idx = cache_pending_index;
+        if(mf->get_sid() == 78 && ((mf->get_addr() & (new_addr_type)(~127)) == 0xc0904200)){
+        printf("Setting remote reserved top\n");
+        }
         return REMOTE_RESERVED;
         }
       }
@@ -500,7 +506,10 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     if(m_lines[idx]->get_status(mask) == REMOTE_OWNERSHIP){
         if(mf->get_type() == INVALIDATION_RESPONSE){
             printf("BOTTOM Something is not working for address %x from core %d\n", mf->get_addr(), mf->get_sid());
-        }    
+        } 
+        if(mf->get_sid() == 78 && ((mf->get_addr() & (new_addr_type)(~127)) == 0xc0904200)){
+        printf("Setting remote reserved bottom\n");
+        }   
 		return REMOTE_RESERVED;
     }
  
@@ -2199,7 +2208,7 @@ void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsig
 {
     
   
-  if(cache_index == 63 && id == 36){
+  if(cache_index == 64 && id == 36){
      printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
     }
 
@@ -2259,7 +2268,7 @@ cache_block_t* block = m_tag_array->get_block(cache_index);
 */
 
 
-     if(cache_index == 63 && id == 36){
+     if(cache_index == 64 && id == 36){
         printf("removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where ); 
    }
    
