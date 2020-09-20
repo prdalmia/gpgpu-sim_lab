@@ -411,11 +411,10 @@ enum cache_request_status tag_array::probe_L2( new_addr_type addr, unsigned &idx
     bool all_reserved = true;
     unsigned cache_pending_index = get_ownership_pending_index(mf);
     if (cache_pending_index != unsigned(-1)){             
+        if(m_lines[cache_pending_index]->m_tag != tag) {
         idx = cache_pending_index;
-        if(mf->get_type() == INVALIDATION_RESPONSE){
-            printf("TOP Something is not working for address %x from core %d\n", mf->get_addr(), mf->get_sid());
-        }
         return REMOTE_RESERVED;
+        }
       }
 
     // check for hit or pending hit
