@@ -2845,7 +2845,7 @@ void shader_core_ctx::display_simt_state(FILE *fout, int mask ) const
 
 void ldst_unit::print(FILE *fout) const
 {
-  ///  m_L1D->display_state(fout);
+  //  m_L1D->display_state(fout);
     
  //   fprintf(fout,"LD/ST unit  = ");
  //   m_dispatch_reg->print(fout);
@@ -2863,33 +2863,33 @@ void ldst_unit::print(FILE *fout) const
  //       }
  //       fprintf(fout,"\n");
  //   }
- //   fprintf(fout,"LD/ST wb    = ");
- //   m_next_wb.print(fout);
- //   fprintf(fout, "Last LD/ST writeback @ %llu + %llu (gpu_sim_cycle+gpu_tot_sim_cycle)\n",
- //                 m_last_inst_gpu_sim_cycle, m_last_inst_gpu_tot_sim_cycle );
- //   fprintf(fout,"Pending register writes:\n");
- //   std::map<unsigned/*warp_id*/, std::map<unsigned/*regnum*/,unsigned/*count*/> >::const_iterator w;
- //   for( w=m_pending_writes.begin(); w!=m_pending_writes.end(); w++ ) {
- //       unsigned warp_id = w->first;
- //       const std::map<unsigned/*regnum*/,unsigned/*count*/> &warp_info = w->second;
- //       if( warp_info.empty() ) 
- //           continue;
- //       fprintf(fout,"  w%2u : ", warp_id );
- //       std::map<unsigned/*regnum*/,unsigned/*count*/>::const_iterator r;
- //       for( r=warp_info.begin(); r!=warp_info.end(); ++r ) {
- //           fprintf(fout,"  %u(%u)", r->first, r->second );
- //       }
- //       fprintf(fout,"\n");
- //   }
- //   m_L1C->display_state(fout);
- //   m_L1T->display_state(fout);
- //   if( !m_config->m_L1D_config.disabled() )
-    	m_L1D->display_state(fout);
-        fprintf(fout,"LD/ST response FIFO (occupancy = %zu):\n", m_response_fifo.size() );
-       for( std::list<mem_fetch*>::const_iterator i=m_response_fifo.begin(); i != m_response_fifo.end(); i++ ) {
-        const mem_fetch *mf = *i;
-        mf->print(fout);
+  fprintf(fout,"LD/ST wb    = ");
+   m_next_wb.print(fout);
+    fprintf(fout, "Last LD/ST writeback @ %llu + %llu (gpu_sim_cycle+gpu_tot_sim_cycle)\n",
+                 m_last_inst_gpu_sim_cycle, m_last_inst_gpu_tot_sim_cycle );
+    fprintf(fout,"Pending register writes:\n");
+    std::map<unsigned/*warp_id*/, std::map<unsigned/*regnum*/,unsigned/*count*/> >::const_iterator w;
+    for( w=m_pending_writes.begin(); w!=m_pending_writes.end(); w++ ) {
+        unsigned warp_id = w->first;
+        const std::map<unsigned/*regnum*/,unsigned/*count*/> &warp_info = w->second;
+        if( warp_info.empty() ) 
+            continue;
+        fprintf(fout,"  w%2u : ", warp_id );
+        std::map<unsigned/*regnum*/,unsigned/*count*/>::const_iterator r;
+        for( r=warp_info.begin(); r!=warp_info.end(); ++r ) {
+            fprintf(fout,"  %u(%u)", r->first, r->second );
+        }
+        fprintf(fout,"\n");
     }
+   // m_L1C->display_state(fout);
+   // m_L1T->display_state(fout);
+   // if( !m_config->m_L1D_config.disabled() )
+   // 	m_L1D->display_state(fout);
+   //     fprintf(fout,"LD/ST response FIFO (occupancy = %zu):\n", m_response_fifo.size() );
+   //    for( std::list<mem_fetch*>::const_iterator i=m_response_fifo.begin(); i != m_response_fifo.end(); i++ ) {
+   //     const mem_fetch *mf = *i;
+   //     mf->print(fout);
+  //}
     
 }
 
