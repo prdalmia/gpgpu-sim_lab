@@ -990,9 +990,9 @@ void gpgpu_sim::deadlock_check()
          icnt_display_state( stdout );
       }
       printf("\nRe-run the simulator in gdb and use debug routines in .gdbinit to debug this\n");
-      m_cluster[0]->get_ldst();
-      m_cluster[1]->get_ldst();
-      m_cluster[2]->get_ldst();
+      m_cluster[20]->get_ldst();
+      m_cluster[21]->get_ldst();
+      m_cluster[22]->get_ldst();
       fflush(stdout);
       abort();
    }
