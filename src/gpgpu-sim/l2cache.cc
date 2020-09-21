@@ -502,7 +502,7 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                             m_L2cache->set_owner(mf, cache_index, (unsigned)-1);
                         }
                         m_icnt_L2_queue->pop();
-                        if (mf->get_type() == INVALIDATION_RESPONSE)
+                        if (mf->get_type() == INVALIDATION_RESPONSE || mf->get_type() == EVICTION)
                         {
                             m_request_tracker.erase(mf);
                         }
