@@ -746,6 +746,11 @@ unsigned memory_sub_partition::invalidateL2()
 
 bool memory_sub_partition::busy() const 
 {
+    if(m_request_tracker.empty() == false){
+        for (const mem_fetch* acc : m_request_tracker){
+            printf("The address for the request is %d and the request type is %d", acc->get_addr(), acc->get_type());
+        }
+    }
     return !m_request_tracker.empty();
 }
 
