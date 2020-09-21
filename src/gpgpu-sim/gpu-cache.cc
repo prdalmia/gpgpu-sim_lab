@@ -535,9 +535,6 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
             if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line());
-            if((m_lines[idx]->m_block_addr== 0xc01d8800) && mf->get_sid() == 1 && m_lines[idx]->is_owned_line() ){
-                     printf(" Eviction for core %d for address %x, result is %d and %d\n", mf->get_sid(), mf->get_addr());
-        } 
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
         }
@@ -2093,23 +2090,10 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
    std::map<new_addr_type, std::pair<unsigned, unsigned>>::iterator i;
    i = requests_in_ownership_queue.find(addr);
    if(i == requests_in_ownership_queue.end()){
-       requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
-    
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc01d8800){
-       printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &requests_in_ownership_queue);       
-        }
-        
-        
-               
-           }
+       requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));                
+    }
     else{
-        i->second.second ++;
-        
-        if((mf->get_addr() & (new_addr_type)(~127)) ==0xc01d8800){
-       printf(" Incrementing Adding cache_index for address %x where value is %d\n", addr, i->second.second);       
-        }
-        
-        
+        i->second.second ++;  
     }
    }
 
@@ -2122,16 +2106,8 @@ void tag_array::remove_ownership_pending_index( mem_fetch *mf)
          printf("Cant remove cache_index for address %x where core ID is %d and location is %x \n", mf->get_addr(), mf->get_sid(), &requests_in_ownership_queue);  
         }
     assert(requests_in_ownership_queue.count(addr)>0);
-    requests_in_ownership_queue[addr].second--; 
-    
-    if((mf->get_addr() & (new_addr_type)(~127)) == 0xc01d8800){
-       printf("Decrementing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
-        }  
+    requests_in_ownership_queue[addr].second--;    
     if(requests_in_ownership_queue[addr].second == 0){
-        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc01d8800){
-       printf("Removing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       
-        }
-        
         requests_in_ownership_queue.erase(addr);
     }
 
@@ -2216,21 +2192,6 @@ void l2_cache::remove_from_ownership_queue(unsigned cache_index)
 
 void l2_cache::add_ownership_champion(mem_fetch* mf, unsigned cache_index, unsigned id)
 {
-    
-    if(cache_index == 645 && id == 1){
-     printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
-    }
-    
-
-/*
- if(cache_index == 677 && id == 39){
-     printf("330 adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
-    }
-
-  if(cache_index == 618 && id == 11){
-     printf("adding core %d to ownership champion for address %x and its %d\n", mf->get_sid(), mf->get_addr(), mf->isatomic()); 
-    }
-*/
   
     cache_block_t* block = m_tag_array->get_block(cache_index);
     block->ownership_champion.push_back(std::make_pair(mf->get_sid(), mf->get_addr()));
@@ -2266,29 +2227,7 @@ void l2_cache::remove_from_ownership_champion_queue(unsigned cache_index, unsign
 {
      
 cache_block_t* block = m_tag_array->get_block(cache_index);
-    
-     if(cache_index == 645 && id == 1){
-        printf("removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where); 
-     }
-  /*
-    if(cache_index == 677 && id == 39){
-        printf(" 330 removing core %d from ownership champion for address %x where line address is %x\n and %d", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where); 
-   }
-  
-*/
-
-/*
-     if(cache_index == 114 && id == 4){
-        printf("removing core %d from ownership champion for address %x where line address is %x and %d\n", block->ownership_champion.front().first, block->ownership_champion.front().second, block->m_tag, where ); 
-  
-   }
-  */
-  
     block->ownership_champion.pop_front();
-    
-    
-  
-    
 }
 
 new_addr_type l2_cache::get_line_address(mem_fetch* mf, unsigned cache_index)
