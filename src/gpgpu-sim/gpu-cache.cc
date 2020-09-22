@@ -545,7 +545,7 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
              if (idx == 94 && mf->get_sid() == 73)
                 {
-                  printf("Allocate for address %x at cache_index %d\n", addr, idx);
+                  printf("Allocate for address %x at cache_index %d wtf the index should be 94\n", addr, idx);
                 }
         }
         break;
@@ -1969,7 +1969,11 @@ data_cache::access( new_addr_type addr,
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
-        = m_tag_array->probe( block_addr, cache_index, mf, true);  
+        = m_tag_array->probe( block_addr, cache_index, mf, true);
+         if (((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200) && mf->get_sid() == 73)
+                {
+                  printf("address %x at cache_index accessed %d and probe_status ios %d\n", mf->get_addr(), cache_index, probe_status);
+                }  
     enum cache_request_status access_status
         = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
