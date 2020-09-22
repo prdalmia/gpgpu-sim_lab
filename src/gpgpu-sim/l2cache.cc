@@ -748,7 +748,7 @@ bool memory_sub_partition::busy() const
 {
     if(m_request_tracker.empty() == false){
         for (const mem_fetch* acc : m_request_tracker){
-            printf("The address for the request is %d and the request type is %d where id is %d\n", acc->get_addr(), acc->get_type(), get_id());
+            printf("The address for the request is %x and the request type is %d where id is %d\n", acc->get_addr(), acc->get_type(), get_id());
         }
     }
     return !m_request_tracker.empty();

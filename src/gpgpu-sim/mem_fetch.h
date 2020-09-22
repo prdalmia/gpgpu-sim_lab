@@ -67,11 +67,15 @@ public:
    void set_status( enum mem_fetch_status status, unsigned long long cycle );
    void set_reply() 
    { 
+       if(m_access.get_type() == L1_WRBK_ACC || m_access.get_type() == L2_WRBK_ACC ){
+           printf("The address for which this is happening is %x and memf feth_type is %d\n", get_addr(), get_type());
+
+       }
        assert( m_access.get_type() != L1_WRBK_ACC && m_access.get_type() != L2_WRBK_ACC );
        if( m_type==READ_REQUEST ) {
            assert( !get_is_write() );
            m_type = READ_REPLY;
-       } else if( m_type == WRITE_REQUEST ) {
+       } else if( m_type == WRITE_REQUEST || m_type == EVICTION ) {
            assert( get_is_write() );
            m_type = WRITE_ACK;
        }
