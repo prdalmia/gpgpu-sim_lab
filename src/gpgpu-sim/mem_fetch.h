@@ -68,7 +68,7 @@ public:
    void set_reply() 
    { 
        if(m_access.get_type() == L1_WRBK_ACC || m_access.get_type() == L2_WRBK_ACC ){
-           printf("The address for which this is happening is %x and memf feth_type is %d and is %d\n", get_addr(), get_type());
+           printf("The address for which this is happening is %x and memf feth_type is %d and is %d\n", get_addr(), get_type(), m_access.get_type() );
 
        }
        assert( m_access.get_type() != L1_WRBK_ACC && m_access.get_type() != L2_WRBK_ACC );
