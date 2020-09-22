@@ -2086,10 +2086,17 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
    std::map<new_addr_type, std::pair<unsigned, unsigned>>::iterator i;
    i = requests_in_ownership_queue.find(addr);
    if(i == requests_in_ownership_queue.end()){
-       requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));                
-    }
+       requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
+          if((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200){	
+       printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &requests_in_ownership_queue);                 
+   }
+   }
     else{
         i->second.second ++;  
+        if((mf->get_addr() & (new_addr_type)(~127)) ==0xc015a200){	
+       printf(" Incrementing Adding cache_index for address %x where value is %d\n", addr, i->second.second);       	
+        }	
+
     }
    }
 
@@ -2102,8 +2109,14 @@ void tag_array::remove_ownership_pending_index( mem_fetch *mf)
          printf("Cant remove cache_index for address %x where core ID is %d and location is %x \n", mf->get_addr(), mf->get_sid(), &requests_in_ownership_queue);  
         }
     assert(requests_in_ownership_queue.count(addr)>0);
-    requests_in_ownership_queue[addr].second--;    
+    requests_in_ownership_queue[addr].second--;  
+    if((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200){	
+       printf("Decrementing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       	
+        }    
     if(requests_in_ownership_queue[addr].second == 0){
+        if((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200){	
+       printf("Removing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       	
+        }  
         requests_in_ownership_queue.erase(addr);
     }
 
