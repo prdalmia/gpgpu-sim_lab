@@ -219,9 +219,9 @@ struct line_cache_block: public cache_block_t  {
 	    }
 		virtual void set_status(enum cache_block_state status, mem_access_sector_mask_t sector_mask)
 	    {
-             if (((m_block_addr & (new_addr_type)(~127)) == 0xc015a200) && m_owner == 73 && m_status == OWNED)
+             if (m_owner == 73 && m_status == OWNED)
                 {
-                  printf("Setting status for address %x at 73 as %d \n", m_block_addr, status);
+                  printf("Setting status for address %x at 73 as %d\n", m_block_addr, status);
                 }
 	    	m_status = status;
 	    }

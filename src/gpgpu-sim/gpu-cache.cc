@@ -543,9 +543,9 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
                 }
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
-             if (((addr & (new_addr_type)(~127)) == 0xc015a200) && mf->get_sid() == 73)
+             if (idx == 94 && mf->get_sid() == 73)
                 {
-                  printf("Allocate for address %x at cache_index %d\n", mf->get_addr(), idx);
+                  printf("Allocate for address %x at cache_index %d\n", addr, idx);
                 }
         }
         break;
