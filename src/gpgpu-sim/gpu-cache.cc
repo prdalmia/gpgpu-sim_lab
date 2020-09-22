@@ -534,9 +534,19 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
         if ( m_config.m_alloc_policy == ON_MISS ) {
             if( m_lines[idx]->is_modified_line() || m_lines[idx]->is_owned_line()) {
                 wb = true;
-                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line());
+                evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line()
+                );
+
+                 if (((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200) && mf->get_sid() == 73)
+                {
+                  printf("EVICTION for address %x at cache_index %d\n", mf->get_addr(), idx);
+                }
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
+             if (((addr & (new_addr_type)(~127)) == 0xc015a200) && mf->get_sid() == 73)
+                {
+                  printf("Allocate for address %x at cache_index %d\n", mf->get_addr(), idx);
+                }
         }
         break;
     case SECTOR_MISS:
