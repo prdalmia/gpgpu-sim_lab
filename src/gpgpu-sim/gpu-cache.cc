@@ -2032,11 +2032,12 @@ l1_cache::evict(   mem_fetch *mf,
     bool mshr_hit = m_mshrs.probe(mshr_addr);
     std::list<cache_event> events;
     enum cache_request_status status = m_tag_array->probe(block_addr,cache_index,mf);
-
+/*
      if ( !mshr_hit && status == MISS ){
         printf( "address is %x and core id is %d and cache_index is %d\n", mf->get_addr(), mf->get_sid(), cache_index);
     }
-    assert(!(mshr_hit == 0 && status == MISS)); 
+ */   
+    //assert(!(mshr_hit == 0 && status == MISS)); 
    
     if ( !mshr_hit && status == HIT ) {            		
     if(miss_queue_full(0)) {
