@@ -71,9 +71,9 @@ public:
            printf("The address for which this is happening is %x and memf feth_type is %d and is %d\n", get_addr(), get_type(), m_access.get_type() );
 
        }
-       assert( m_access.get_type() != L1_WRBK_ACC && m_access.get_type() != L2_WRBK_ACC );
+       assert( m_access.get_type() != L1_WRBK_ACC && m_access.get_type() != L2_WRBK_ACC && m_type != EVICTION );
        if( m_type==READ_REQUEST ) {
-           assert( !get_is_write() );
+           assert( !get_is_write());
            m_type = READ_REPLY;
        } else if( m_type == WRITE_REQUEST || m_type == EVICTION ) {
            assert( get_is_write() );
