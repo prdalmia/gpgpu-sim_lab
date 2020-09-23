@@ -419,10 +419,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 if(mf->isatomic() && (m_L2cache->get_owner(mf, cache_index) == (unsigned)-1)){
                                  m_L2cache->set_owner( mf, cache_index, mf->get_sid());
                                  m_L2cache->add_ownership_champion(mf, cache_index, get_id());
-                                 
+                                 /*
                                  if( (mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200 ){
                        printf("Owner Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
+                        */
                         
                                
                         }
@@ -457,11 +458,13 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                         {
                           printf("EVICTION response from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
+                        
+                       /*
                           if (((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200) && mf->get_type() == INVALIDATION_RESPONSE)
                         {
                           printf("Invalidation response from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
-                       
+                       */
                        
                         mem_fetch *mf_pending = m_L2cache->get_waiting_for_ownership(mf, cache_index);
                        
@@ -510,11 +513,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
 
                     else
                     {
-                      
+                     /* 
                       if( (mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200 ){
                        printf("Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                         }
-                        
+                       */ 
                         if (mf->get_type() == INVALIDATION_RESPONSE || mf->isanownedeviction())
                         {
                             printf(" 1 The invalidation response for address %x should not be in this section with cache index %d, core %d and memory %d and is atomic %d and is an owned eviction %d\n", mf->get_addr(), cache_index, mf->get_sid(), get_id(), mf->isatomic(), mf->isanownedeviction());
@@ -544,10 +547,11 @@ void memory_sub_partition:: cache_cycle( unsigned cycle )
                 }
                 else if (status == REMOTE_RESERVED)
                 {
-                   
+                   /*
                     if( (mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200 ){
                         printf(" Reserved Request from core %d for address %x going to cache_index %d and memory partition %d and is atomic %d and type is %d\n", mf->get_sid() ,mf->get_addr(), cache_index, get_id(), mf->isatomic(), mf->get_type());
                        }
+                       */
                 
                     if (mf->get_type() == INVALIDATION_RESPONSE || mf->isanownedeviction())
                     {

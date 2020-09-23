@@ -536,17 +536,20 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
                 wb = true;
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line()
                 );
-
+                /*
                  if (idx == 94 && mf->get_sid() == 73)
                 {
                   printf("EVICTION for address %x at cache_index %d\n", mf->get_addr(), idx);
                 }
+                */
             }
              m_lines[idx]->allocate( m_config.tag(addr), m_config.block_addr(addr), time, mf->get_access_sector_mask());
+             /*
              if (idx == 94 && mf->get_sid() == 73)
                 {
                   printf("Allocate for address %x at cache_index %d wtf the index should be 94\n", addr, idx);
                 }
+                */
         }
         break;
     case SECTOR_MISS:
@@ -2102,15 +2105,19 @@ unsigned tag_array::get_ownership_pending_index( mem_fetch *mf) const
    i = requests_in_ownership_queue.find(addr);
    if(i == requests_in_ownership_queue.end()){
        requests_in_ownership_queue.emplace(addr, std::make_pair(cache_index, 1));
+          /*
           if((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200){	
        printf("Adding cache_index for address %x as %d  location is  %x\n", addr, cache_index, &requests_in_ownership_queue);                 
    }
-   }
+   */
+}
     else{
         i->second.second ++;  
+        /*
         if((mf->get_addr() & (new_addr_type)(~127)) ==0xc015a200){	
        printf(" Incrementing Adding cache_index for address %x where value is %d\n", addr, i->second.second);       	
-        }	
+        }
+        */	
 
     }
    }
@@ -2125,13 +2132,17 @@ void tag_array::remove_ownership_pending_index( mem_fetch *mf)
         }
     assert(requests_in_ownership_queue.count(addr)>0);
     requests_in_ownership_queue[addr].second--;  
+    /*
     if((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200){	
        printf("Decrementing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       	
-        }    
+        } 
+        */   
     if(requests_in_ownership_queue[addr].second == 0){
+        /*
         if((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200){	
        printf("Removing cache_index for address %x with request from core %d\n", addr, mf->get_sid());       	
-        }  
+        } 
+        */ 
         requests_in_ownership_queue.erase(addr);
     }
 
