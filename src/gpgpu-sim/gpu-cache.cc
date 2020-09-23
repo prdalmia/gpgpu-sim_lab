@@ -537,7 +537,7 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
                 evicted.set_info(m_lines[idx]->m_block_addr, m_lines[idx]->get_modified_size(), (unsigned)-1, m_lines[idx]->is_owned_line()
                 );
 
-                 if (((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200) && mf->get_sid() == 73)
+                 if (idx == 94 && mf->get_sid() == 73)
                 {
                   printf("EVICTION for address %x at cache_index %d\n", mf->get_addr(), idx);
                 }
@@ -1970,7 +1970,7 @@ data_cache::access( new_addr_type addr,
     unsigned cache_index = (unsigned)-1;
     enum cache_request_status probe_status
         = m_tag_array->probe( block_addr, cache_index, mf, true);
-         if (((mf->get_addr() & (new_addr_type)(~127)) == 0xc015a200) && mf->get_sid() == 73)
+         if (cache_index == 94 && mf->get_sid() == 73)
                 {
                   printf("address %x at cache_index accessed %d and probe_status ios %d\n", mf->get_addr(), cache_index, probe_status);
                 }  
