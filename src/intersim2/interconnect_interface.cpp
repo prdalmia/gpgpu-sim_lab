@@ -127,7 +127,7 @@ void InterconnectInterface::CreateInterconnect(unsigned n_shader, unsigned n_mem
   _boundary_buffer_capacity = _icnt_config->GetInt( "boundary_buffer_size" ) ;
   assert(_boundary_buffer_capacity);
   if (_icnt_config->GetInt("input_buffer_size")) {
-    _input_buffer_capacity =  16384;   //_icnt_config->GetInt("input_buffer_size");
+    _input_buffer_capacity =  _icnt_config->GetInt("input_buffer_size");
   } else {
     _input_buffer_capacity = 18;
   }
