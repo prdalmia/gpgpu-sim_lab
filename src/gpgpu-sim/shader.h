@@ -1593,6 +1593,7 @@ struct shader_core_stats_pod {
     unsigned *last_shader_cycle_distro;
     unsigned *num_warps_issuable;
     unsigned gpgpu_n_stall_shd_mem;
+    unsigned gpgpu_n_stall_lab_icnt;
     unsigned* single_issue_nums;
     unsigned* dual_issue_nums;
 

@@ -1572,6 +1572,17 @@ public:
     {
         return m_lab_array->access(addr, time, mf, events);
     }
+
+    enum cache_request_status probe( new_addr_type addr, unsigned &idx,  mem_fetch *mf ) 
+    {
+        return m_lab_array->probe(addr, idx, mf);
+    }
+
+
+     lab_block_t * get_block( unsigned idx ) 
+    {
+        return m_lab_array->get_block(idx); 
+    }
     /// Sends next request to lower level of memory
     // accessors for cache bandwidth availability 
     virtual bool data_port_free() const {}; 

@@ -1818,13 +1818,25 @@ void ldst_unit::Lab_latency_queue_cycle()
     {
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
-                                  
-
+            
+		   bool write_sent = was_write_sent(events);
+		   bool read_sent = was_read_sent(events);
+          unsigned idx;
+          unsigned size_evicted = 0;
+          enum cache_request_status status_probe = m_lab->probe(mf_next->get_addr(), idx, mf_next);
+        if( (status_probe == MISS || status_probe == HIT_RESERVED)){
+          lab_block_t* block_lab =  m_lab->get_block(idx);
+          size_evicted = block_lab->get_modified_size();
+        }                           
+     if( (status_probe == MISS || status_probe == HIT_RESERVED) && m_icnt->full(size_evicted, true)) {
+            //probe if its a miss or HIT Reserved then do this
+            assert( !read_sent );
+			   assert( !write_sent );
+     }
+     else{
 			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
                // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
-		   bool write_sent = was_write_sent(events);
-		   bool read_sent = was_read_sent(events);
 
 		   if ( status == HIT) {
 			   assert( !read_sent );
@@ -1855,8 +1867,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    events.pop_back();
                    lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
                     m_icnt->push(lab_event.m_evicted_block.mf);
-                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
-                
+                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;        
                    } 
                }
 
@@ -1892,20 +1903,22 @@ void ldst_unit::Lab_latency_queue_cycle()
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
                 
-              if(m_core->get_sid() == 0){ 
-                   lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
+              //if(m_core->get_sid() == 0){ 
+                //   lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
                  //  lab_block_map[ mf_next->get_addr() & ~(new_addr_type)(127)] = m_core->get_n_active_cta();
-                  printf("Time %lld Atomic access to address[%llx] with actual address [%llx] and repetition was  = %d\n", gpu_sim_cycle+gpu_tot_sim_cycle,  (mf_next->get_addr() & ~(new_addr_type)(127)), mf_next->get_addr(), lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]);
-                  }
+               //   printf("Time %lld Atomic access to address[%llx] with actual address [%llx] and repetition was  = %d\n", gpu_sim_cycle+gpu_tot_sim_cycle,  (mf_next->get_addr() & ~(new_addr_type)(127)), mf_next->get_addr(), lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]);
+                 // }
                   
                     //delete data;
                     //mf_next->set_atomicdone();
-               }
+              // }
           
           m_response_fifo.push_back(mf_next);  
           
     
     
+    }
+    }
     }
 
 	 for( unsigned stage = 0; stage< m_config->m_lab_config.lab_latency-1; ++stage)

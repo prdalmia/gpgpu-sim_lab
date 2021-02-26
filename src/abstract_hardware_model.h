@@ -786,6 +786,7 @@ public:
    const active_mask_t &get_warp_mask() const { return m_warp_mask; }
    bool is_write() const { return m_write; }
    enum mem_access_type get_type() const { return m_type; }
+   void set_sector_mask(mem_access_sector_mask_t sector_mask) {m_sector_mask = sector_mask;}
    mem_access_byte_mask_t get_byte_mask() const { return m_byte_mask; }
    mem_access_sector_mask_t get_sector_mask() const { return m_sector_mask; }
 
