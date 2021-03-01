@@ -1251,7 +1251,7 @@ public:
     virtual bool stallable() const { return true; }
     bool response_buffer_full() const;
     void print(FILE *fout) const;
-    void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses );
+    void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses, unsigned dl1_icnt_fail );
     void get_cache_stats(unsigned &read_accesses, unsigned &write_accesses, unsigned &read_misses, unsigned &write_misses, unsigned cache_type);
     void get_cache_stats(cache_stats &cs);
 
@@ -1333,6 +1333,7 @@ protected:
    std::deque<mem_fetch* > m_next_global_queue;
    std::deque<mem_fetch* > lab_latency_queue;
   std::map < new_addr_type , unsigned long> lab_data_map;
+  unsigned lab_icnt_fail;
    //std::map < new_addr_type , unsigned long> lab_block_map;
    //std::map < new_addr_type , unsigned long> lab_replace_data_map;
    void L1_latency_queue_cycle();
@@ -1836,7 +1837,7 @@ public:
     // accessors
     std::list<unsigned> get_regs_written( const inst_t &fvt ) const;
     const shader_core_config *get_config() const { return m_config; }
-    void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses );
+    void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses, unsigned& dl1_icnt_fail );
 
     void get_cache_stats(cache_stats &cs);
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;
@@ -2109,7 +2110,7 @@ public:
     gpgpu_sim *get_gpu() { return m_gpu; }
 
     void display_pipeline( unsigned sid, FILE *fout, int print_mem, int mask );
-    void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) const;
+    void print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses, unsigned& dl1_icnt_fail ) const;
 
     void get_cache_stats(cache_stats &cs) const;
     void get_L1I_sub_stats(struct cache_sub_stats &css) const;

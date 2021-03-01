@@ -217,7 +217,7 @@ struct lab_block_t {
 
     	 void set_ignore_on_fill(bool m_ignore) {};
     	 void set_modified_on_fill(bool m_modified) {};
-    	 unsigned get_modified_size() {};
+    	 unsigned get_modified_size() {return sector_use_count * SECTOR_SIZE;}
 
     	 void set_m_readable(bool readable) {};
     	 bool is_readable() {};
@@ -1572,6 +1572,17 @@ public:
     {
         return m_lab_array->access(addr, time, mf, events);
     }
+    
+    enum cache_request_status probe( new_addr_type addr, unsigned &idx,  mem_fetch *mf ) 
+    {
+        return m_lab_array->probe(addr, idx, mf);
+    }
+
+
+     lab_block_t * get_block( unsigned idx ) 
+    {
+        return m_lab_array->get_block(idx); 
+    }
     /// Sends next request to lower level of memory
     // accessors for cache bandwidth availability 
     virtual bool data_port_free() const {}; 
@@ -1625,7 +1636,6 @@ protected:
     lab_array*  m_lab_array;
     cache_stats m_stats;
 };
-
 /// Data cache - Implements common functions for L1 and L2 data cache
 class data_cache : public baseline_cache {
 public:

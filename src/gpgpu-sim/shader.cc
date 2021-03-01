@@ -1462,7 +1462,7 @@ void shader_core_ctx::execute()
     }
 }
 
-void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) {
+void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses, unsigned dl1_icnt_fail ) {
   /*
    if( m_L1D ) {
        m_L1D->print( fp, dl1_accesses, dl1_misses );
@@ -1482,7 +1482,9 @@ void ldst_unit::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& d
 */
 
    if( m_lab ) {
-       m_lab->print( fp, dl1_accesses, dl1_misses );
+       m_lab->print( fp, dl1_accesses, dl1_misses);
+       dl1_icnt_fail += lab_icnt_fail;
+       
    }
 
 }
@@ -1819,12 +1821,25 @@ void ldst_unit::Lab_latency_queue_cycle()
 		    mem_fetch* mf_next = lab_latency_queue[0];
 			std::list<cache_event> events;
                                   
-
+     	   bool write_sent = was_write_sent(events);
+		   bool read_sent = was_read_sent(events);
+          unsigned idx;
+          unsigned size_evicted = 0;
+          enum cache_request_status status_probe = m_lab->probe(mf_next->get_addr(), idx, mf_next);
+        if( (status_probe == MISS || status_probe == HIT_RESERVED)){
+          lab_block_t* block_lab =  m_lab->get_block(idx);
+          size_evicted = block_lab->get_modified_size();
+        }                           
+     if( (status_probe == MISS || status_probe == HIT_RESERVED) && m_icnt->full(size_evicted, true)) {
+            //probe if its a miss or HIT Reserved then do this
+            lab_icnt_fail++;
+            assert( !read_sent );
+			   assert( !write_sent );
+     }
+     else{
 			enum cache_request_status status = m_lab->access(mf_next->get_addr(),mf_next,gpu_sim_cycle+gpu_tot_sim_cycle,events);
                // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
-		   bool write_sent = was_write_sent(events);
-		   bool read_sent = was_read_sent(events);
 
 		   if ( status == HIT) {
 			   assert( !read_sent );
@@ -1855,8 +1870,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                    events.pop_back();
                    lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
                     m_icnt->push(lab_event.m_evicted_block.mf);
-                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;
-                
+                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;           
                    } 
                }
 
@@ -1891,7 +1905,7 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
-                
+           /*    
               if(m_core->get_sid() == 0){ 
                    lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
                  //  lab_block_map[ mf_next->get_addr() & ~(new_addr_type)(127)] = m_core->get_n_active_cta();
@@ -1901,11 +1915,13 @@ void ldst_unit::Lab_latency_queue_cycle()
                     //delete data;
                     //mf_next->set_atomicdone();
                }
-          
+          */
           m_response_fifo.push_back(mf_next);  
           
     
     
+    }
+     }
     }
 
 	 for( unsigned stage = 0; stage< m_config->m_lab_config.lab_latency-1; ++stage)
@@ -2839,16 +2855,18 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
 // LAB
 
     fprintf(fout, "LAB_cache:\n");
-    unsigned total_lab_misses = 0, total_lab_accesses = 0;
+    unsigned total_lab_misses = 0, total_lab_accesses = 0; unsigned total_lab_icnt_fail = 0;
     for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
-         unsigned cluster_lab_misses = 0, cluster_lab_accesses = 0;
-         m_cluster[ i ]->print_cache_stats( fout, cluster_lab_accesses, cluster_lab_misses );
+         unsigned cluster_lab_misses = 0, cluster_lab_accesses = 0, cluster_lab_icnt_fail = 0;
+         m_cluster[ i ]->print_cache_stats( fout, cluster_lab_accesses, cluster_lab_misses, cluster_lab_icnt_fail );
          total_lab_misses += cluster_lab_misses;
          total_lab_accesses += cluster_lab_accesses;
+         total_lab_icnt_fail += cluster_lab_icnt_fail;
    }
    fprintf( fout, "\tLAB_total_cache_accesses = %llu\n", total_lab_accesses );
    fprintf( fout, "\tLAB_total_cache_misses = %llu\n", total_lab_misses );
    fprintf( fout, "\tLAB_total_cache_miss_rate = %.4lf\n", (float)total_lab_misses / (float)total_lab_accesses );
+   fprintf( fout, "\tLAB_icnt_fail = %llu\n", total_lab_icnt_fail );
 
 
     // L1C
@@ -2890,10 +2908,11 @@ void gpgpu_sim::shader_print_cache_stats( FILE *fout ) const{
 
 void gpgpu_sim::shader_print_l1_miss_stat( FILE *fout ) const
 {
-   unsigned total_d1_misses = 0, total_d1_accesses = 0;
+   unsigned total_d1_misses = 0, total_d1_accesses = 0; 
    for ( unsigned i = 0; i < m_shader_config->n_simt_clusters; ++i ) {
-         unsigned custer_d1_misses = 0, cluster_d1_accesses = 0;
-         m_cluster[ i ]->print_cache_stats( fout, cluster_d1_accesses, custer_d1_misses );
+         unsigned custer_d1_misses = 0, cluster_d1_accesses = 0; 
+         unsigned cluster_dl1_fail = 0;
+         m_cluster[ i ]->print_cache_stats( fout, cluster_d1_accesses, custer_d1_misses, cluster_dl1_fail );
          total_d1_misses += custer_d1_misses;
          total_d1_accesses += cluster_d1_accesses;
    }
@@ -3268,16 +3287,19 @@ unsigned int shader_core_config::max_cta( const kernel_info_t &k ) const
              
              if(m_L1D_config.additional_cache != 0)
             {
-              if(m_L1D_config.additional_cache == 1){ 
-              m_L1D_config.set_assoc(m_L1D_config.get_assoc() + 16);
-              }
-              else 
-              m_L1D_config.set_assoc(m_L1D_config.get_assoc()*2);
-            }            
+            switch(m_L1D_config.additional_cache){
+             case  8:  m_L1D_config.set_assoc(m_L1D_config.get_assoc() - 2);
+             case  16: m_L1D_config.set_assoc(m_L1D_config.get_assoc() - 4); 
+             case 32: m_L1D_config.set_assoc(m_L1D_config.get_assoc() - 8); 
+             case 64: m_L1D_config.set_assoc(m_L1D_config.get_assoc() - 16); 
+             case 128: m_L1D_config.set_assoc(m_L1D_config.get_assoc() - 32);  
+             case  256: m_L1D_config.set_assoc(m_L1D_config.get_assoc() - 64);
+            }
+            }
     		 printf ("GPGPU-Sim: Reconfigure L1 cache in Volta Archi to %uKB\n", m_L1D_config.get_total_size_inKB());
-    	}
 
     	k.volta_cache_config_set = true;
+    }
     }
 
     return result;
@@ -3704,8 +3726,8 @@ void shader_core_ctx::store_ack( class mem_fetch *mf )
     m_warp[warp_id].dec_store_req();
 }
 
-void shader_core_ctx::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) {
-   m_ldst_unit->print_cache_stats( fp, dl1_accesses, dl1_misses );
+void shader_core_ctx::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses, unsigned& dl1_icnt_fail ) {
+   m_ldst_unit->print_cache_stats( fp, dl1_accesses, dl1_misses, dl1_icnt_fail );
 }
 
 void shader_core_ctx::get_cache_stats(cache_stats &cs){
@@ -4326,9 +4348,9 @@ void simt_core_cluster::display_pipeline( unsigned sid, FILE *fout, int print_me
     }
 }
 
-void simt_core_cluster::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses ) const {
+void simt_core_cluster::print_cache_stats( FILE *fp, unsigned& dl1_accesses, unsigned& dl1_misses, unsigned& dl1_icnt_fail ) const {
    for ( unsigned i = 0; i < m_config->n_simt_cores_per_cluster; ++i ) {
-      m_core[ i ]->print_cache_stats( fp, dl1_accesses, dl1_misses );
+      m_core[ i ]->print_cache_stats( fp, dl1_accesses, dl1_misses, dl1_icnt_fail );
    }
 }
 
