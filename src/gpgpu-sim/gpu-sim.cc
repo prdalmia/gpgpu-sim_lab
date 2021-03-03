@@ -878,6 +878,9 @@ bool gpgpu_sim::active()
     for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) 
        if( m_cluster[i]->get_not_completed()>0 ) 
            return true;;
+    for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) 
+       if( m_cluster[i]->get_pending_flush() == true  ) 
+           return true;;       
     for (unsigned i=0;i<m_memory_config->m_n_mem;i++) 
        if( m_memory_partition_unit[i]->busy()>0 )
            return true;;
@@ -1693,7 +1696,7 @@ void gpgpu_sim::cycle()
       int all_threads_complete = 1;
       if (m_config.gpgpu_flush_l1_cache) {
          for (unsigned i=0;i<m_shader_config->n_simt_clusters;i++) {
-            if (m_cluster[i]->get_not_completed() == 0){
+            if (m_cluster[i]->get_not_completed() == 0 || m_cluster[i]->get_pending_flush() == true ){
                 m_cluster[i]->cache_invalidate();
                 m_cluster[i]->cache_flush();
             }

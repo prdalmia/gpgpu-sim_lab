@@ -1259,6 +1259,7 @@ public:
     void get_LAB_sub_stats(struct cache_sub_stats &css) const;
     void get_L1C_sub_stats(struct cache_sub_stats &css) const;
     void get_L1T_sub_stats(struct cache_sub_stats &css) const;
+    bool m_flush_pending;
 
 protected:
     ldst_unit( mem_fetch_interface *icnt,
@@ -1809,6 +1810,7 @@ public:
     bool fetch_unit_response_buffer_full() const;
     bool ldst_unit_response_buffer_full() const;
     unsigned get_not_completed() const { return m_not_completed; }
+    unsigned get_pending_flush() const { return m_ldst_unit->m_flush_pending; }
     unsigned get_n_active_cta() const { return m_n_active_cta; }
     unsigned isactive() const {if(m_n_active_cta>0) return 1; else return 0;}
     kernel_info_t *get_kernel() { return m_kernel; }
@@ -2008,7 +2010,8 @@ public:
     // CTA scheduling / hardware thread allocation
     unsigned m_n_active_cta; // number of Cooperative Thread Arrays (blocks) currently running on this shader.
     unsigned m_cta_status[MAX_CTA_PER_SHADER]; // CTAs status 
-    unsigned m_not_completed; // number of threads to be completed (==0 when all thread on this core completed) 
+    unsigned m_not_completed; // number of threads to be completed (==0 when all thread on this core completed)
+    unsigned flush_pending; //Are there are flushes pending 
     std::bitset<MAX_THREAD_PER_SM> m_active_threads;
     
     // thread contexts 
@@ -2104,6 +2107,7 @@ public:
     void get_pdom_stack_top_info( unsigned sid, unsigned tid, addr_t *pc, addr_t *rpc ) const;
     unsigned max_cta( const kernel_info_t &kernel );
     unsigned get_not_completed() const;
+    bool get_pending_flush() const;
     void print_not_completed( FILE *fp ) const;
     unsigned get_n_active_cta() const;
     unsigned get_n_active_sms() const;

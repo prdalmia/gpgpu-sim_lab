@@ -2053,20 +2053,26 @@ void ldst_unit::flush(){
     //m_L1D->flush();
 
     if(m_flush_lab == false){
-    std::deque<mem_fetch*> flush_queue = m_lab->flush();
-    
-    for (unsigned i=0; i < flush_queue.size(); i++){
-           m_icnt->push(flush_queue[i]);
-          /*
-           if(m_sid ==0){
-           printf("The flush queue has MF for addresses %llu\n ", flush_queue[i]->get_addr());
+    if(!m_flush_pending){    
+     m_lab->flush();
+    }
+    else{
+    while(!m_lab->flush_queue.empty()){
+        auto i = m_lab->flush_queue.front();
+           if( !m_icnt->full(i.second, true)){
+             m_icnt->push(i.first);
+             m_lab->flush_queue.pop_front();
            }
-          */    	
+           else{
+               m_flush_pending = true;
+               return;
+           }    	
         }
+    m_flush_pending = false; 
     m_flush_lab = true;
-    //lab_data_map.clear();
     }
     
+}
 }
 
 void ldst_unit::invalidate(){
@@ -2296,6 +2302,7 @@ void ldst_unit::init( mem_fetch_interface *icnt,
     m_L1C = new read_only_cache(L1C_name,m_config->m_L1C_config,m_sid,get_shader_constant_cache_id(),icnt,IN_L1C_MISS_QUEUE);
     m_L1D = NULL;
     m_lab = NULL;
+    m_flush_pending = false;
     m_flush_lab = false;
     m_mem_rc = NO_RC_FAIL;
     m_num_writeback_clients=5; // = shared memory, global/local (uncached), L1D, L1T, L1C
@@ -3366,10 +3373,11 @@ void shader_core_ctx::cycle()
 
 void shader_core_ctx::cache_flush()
 {
-    if(m_not_completed == 0 )
+    if(m_not_completed == 0 || m_ldst_unit->m_flush_pending) {
     {
         m_ldst_unit->flush();
     }
+}
 }
 
 void shader_core_ctx::cache_invalidate()
@@ -4144,6 +4152,19 @@ unsigned simt_core_cluster::get_not_completed() const
     for( unsigned i=0; i < m_config->n_simt_cores_per_cluster; i++ ) 
         not_completed += m_core[i]->get_not_completed();
     return not_completed;
+}
+
+bool simt_core_cluster::get_pending_flush() const
+{
+    for( unsigned i=0; i < m_config->n_simt_cores_per_cluster; i++ ) 
+         {
+         if( m_core[i]->get_pending_flush())
+         {
+             return true;
+         }
+         }
+         return false;
+    
 }
 
 void simt_core_cluster::print_not_completed( FILE *fp ) const

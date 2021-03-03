@@ -420,17 +420,18 @@ void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch *mf)
 
 
 //TODO: we need write back the flushed data to the upper level
-std::deque<mem_fetch*> lab_array::flush() 
+std::deque<std::pair<mem_fetch*, unsigned>> lab_array::flush() 
 {
     
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
     	if(m_lines[i]->is_valid_line()) {             
            mem_fetch *mf =  m_lines[i]->get_mf();
+           unsigned size_evicted = m_lines[i]->sector_use_count * SECTOR_SIZE;
            mf->set_num_sectors(m_lines[i]->sector_use_count);
            m_lines[i]->reset_sectors_used_count();
            m_lines[i]->reset_sectors();
            m_lines[i]->set_status(INVALID); 
-           flush_queue.push_back(mf);           
+           flush_queue.push_back(std::make_pair(mf, size_evicted));           
     	}
 
     return flush_queue;

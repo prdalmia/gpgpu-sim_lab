@@ -1071,7 +1071,7 @@ public:
     unsigned size() const { return m_config.get_num_lines();}
     lab_block_t* get_block(unsigned idx) { return m_lines[idx];}
 
-    std::deque<mem_fetch*> flush() ; // flush all written entries
+    void  flush(std::deque<std::pair<mem_fetch*, unsigned>>& flush_queue) ; // flush all written entries
     void invalidate(); // invalidate all entries
     void new_window();
     void init(int core_id);
@@ -1090,7 +1090,7 @@ protected:
     lab_cache_config &m_config;
 
     lab_block_t **m_lines; /* nbanks  x nset x assoc lines in total */
-    std::deque<mem_fetch*> flush_queue;
+    std::deque<std::pair<mem_fetch*, unsigned>> flush_queue;
 
     unsigned m_access;
     unsigned m_miss;
@@ -1611,7 +1611,7 @@ public:
     /// Pop next ready access (does not include accesses that "HIT")
    // mem_fetch *next_access(){return my_queue.next_access();}
     // flash invalidate all entries in cache
-    std::deque<mem_fetch*> flush(){ return m_lab_array->flush();}
+    void  flush(){ m_lab_array->flush(flush_queue);}
     void invalidate(){m_lab_array->invalidate();}
 
     // Stat collection
@@ -1629,6 +1629,8 @@ public:
     //fprintf( fp, "Cache %s:\t", m_name.c_str() );
     m_lab_array->print(fp,accesses,misses);
     }
+
+    std::deque<std::pair<mem_fetch*, unsigned>> flush_queue;
 
 protected:
     const char* m_name;
