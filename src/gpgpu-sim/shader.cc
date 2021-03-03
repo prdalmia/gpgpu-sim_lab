@@ -2056,7 +2056,6 @@ void ldst_unit::flush(){
     if(!m_flush_pending){    
      m_lab->flush();
     }
-    else{
     while(!m_lab->flush_queue.empty()){
         auto i = m_lab->flush_queue.front();
            if( !m_icnt->full(i.second, true)){
@@ -2070,8 +2069,6 @@ void ldst_unit::flush(){
         }
     m_flush_pending = false; 
     m_flush_lab = true;
-    }
-    
 }
 }
 

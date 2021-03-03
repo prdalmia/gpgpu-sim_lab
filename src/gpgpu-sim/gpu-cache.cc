@@ -420,7 +420,7 @@ void lab_array::fill( new_addr_type addr, unsigned time, mem_fetch *mf)
 
 
 //TODO: we need write back the flushed data to the upper level
-std::deque<std::pair<mem_fetch*, unsigned>> lab_array::flush() 
+void lab_array::flush(std::deque<std::pair<mem_fetch*, unsigned>>& flush_queue ) 
 {
     
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
@@ -433,8 +433,6 @@ std::deque<std::pair<mem_fetch*, unsigned>> lab_array::flush()
            m_lines[i]->set_status(INVALID); 
            flush_queue.push_back(std::make_pair(mf, size_evicted));           
     	}
-
-    return flush_queue;
 }
 
 float lab_array::windowed_miss_rate( ) const
