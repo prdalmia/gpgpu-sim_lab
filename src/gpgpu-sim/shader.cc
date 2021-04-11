@@ -1841,7 +1841,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 
-		   if ( status == HIT ) {
+		   if ( status == HIT || status == MISS || status == HIT_RESERVED ) {
 			   assert( !read_sent );
 			   lab_latency_queue[0] = NULL;
 
@@ -1857,27 +1857,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 				      m_core->store_ack(mf_next);
 			   }
                 
-		   } else if ( status == RESERVATION_FAIL ) {
-			   assert( !read_sent );
-			   assert( !write_sent );
-		   }
-           
-             else {
-               
-			   assert( status == MISS || status == HIT_RESERVED );
-			   lab_latency_queue[0] = NULL;
-               if(!events.empty()){
-                   cache_event lab_event = events.front();
-                   if(lab_event.m_cache_event_type == WRITE_BACK_REQUEST_SENT)
-                   {
-                   events.pop_back();
-                   lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
-                    m_icnt->push(lab_event.m_evicted_block.mf);
-                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;           
-                   } 
-               }
-
-               const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
+                const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
 									mf_next->get_addr(),
 									mf_next->get_data_size(),
 									mf_next->is_write(),
@@ -1899,9 +1879,30 @@ void ldst_unit::Lab_latency_queue_cycle()
 
                 mf_copy->set_atomicdone();
                 m_icnt->push(mf_copy);
+		   } else if ( status == RESERVATION_FAIL ) {
+			   assert( !read_sent );
+			   assert( !write_sent );
+		   }
+           /*
+             else {
+               
+			   assert( status == MISS || status == HIT_RESERVED );
+			   lab_latency_queue[0] = NULL;
+               if(!events.empty()){
+                   cache_event lab_event = events.front();
+                   if(lab_event.m_cache_event_type == WRITE_BACK_REQUEST_SENT)
+                   {
+                   events.pop_back();
+                   lab_event.m_evicted_block.mf->set_num_sectors(lab_event.m_evicted_block.sectors_used);
+                    m_icnt->push(lab_event.m_evicted_block.mf);
+                 //   lab_replace_data_map[lab_event.m_evicted_block.mf->get_addr() & ~(new_addr_type)(127)]++;           
+                   } 
+               }
+
+               
                 
 	   }
-
+*/
 
     
      if ( mf_next && mf_next->isatomic() ){
