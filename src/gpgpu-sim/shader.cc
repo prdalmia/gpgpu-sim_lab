@@ -1910,7 +1910,24 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
-                     m_icnt->push(mf_next);
+            const mem_access_t *ma = new  mem_access_t( mf_next->get_access_type(),
+									mf_next->get_addr(),
+									mf_next->get_data_size(),
+									mf_next->is_write(),
+									mf_next->get_access_warp_mask(),
+									mf_next->get_access_byte_mask(),
+									mf_next->get_access_sector_mask());
+
+               //printf("the request size is %d\n", mf_next->get_data_size());                      
+
+               mem_fetch *mf_copy = new mem_fetch(*ma,
+                                      &mf_next->get_inst(),
+                                      mf_next->get_ctrl_size(),
+                                      mf_next->get_wid(),
+                                      mf_next->get_sid(), 
+                                      mf_next->get_tpc(), 
+                                     mf_next->get_mem_config());
+                     m_icnt->push(mf_copy);
            /*
            
               
