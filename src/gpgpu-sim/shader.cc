@@ -1824,13 +1824,13 @@ void ldst_unit::Lab_latency_queue_cycle()
      	   bool write_sent = was_write_sent(events);
 		   bool read_sent = was_read_sent(events);
           unsigned idx;
-          unsigned size_evicted = 0;
+          unsigned size_evicted = mf_next->get_access_size();
           enum cache_request_status status_probe = m_lab->probe(mf_next->get_addr(), idx, mf_next);
         if( (status_probe == MISS || status_probe == HIT_RESERVED)){
           lab_block_t* block_lab =  m_lab->get_block(idx);
           size_evicted = block_lab->get_modified_size();
         }                           
-     if( (status_probe == MISS || status_probe == HIT_RESERVED) && m_icnt->full(size_evicted, true)) {
+     if(( status_probe == HIT || status_probe == MISS || status_probe == HIT_RESERVED) && m_icnt->full(mf_next->get_access_size(), true)){
             //probe if its a miss or HIT Reserved then do this
             lab_icnt_fail++;
             assert( !read_sent );
@@ -1841,7 +1841,7 @@ void ldst_unit::Lab_latency_queue_cycle()
                // printf(" Request recieved for block %x\n", mf_next->get_addr() );
 
 
-		   if ( status == HIT) {
+		   if ( status == HIT || status == MISS || status == HIT_RESERVED) {
 			   assert( !read_sent );
 			   lab_latency_queue[0] = NULL;
 
@@ -1856,11 +1856,14 @@ void ldst_unit::Lab_latency_queue_cycle()
 				   for(unsigned i=0; i< dec_ack; ++i)
 				      m_core->store_ack(mf_next);
 			   }
-        
+                m_icnt->push(mf_next);
 		   } else if ( status == RESERVATION_FAIL ) {
 			   assert( !read_sent );
 			   assert( !write_sent );
-		   } else {
+		   }
+           
+            /* else {
+               
 			   assert( status == MISS || status == HIT_RESERVED );
 			   lab_latency_queue[0] = NULL;
                if(!events.empty()){
@@ -1892,11 +1895,13 @@ void ldst_unit::Lab_latency_queue_cycle()
                                       mf_next->get_tpc(), 
                                      mf_next->get_mem_config());
                //printf("the request copy size is %d\n", mf_copy->get_data_size());
-                m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
+                //m_lab->fill(mf_copy,gpu_sim_cycle+gpu_tot_sim_cycle);
 
                 mf_copy->set_atomicdone();
+                m_icnt->push(mf_copy);
+                
 	   }
-
+*/
 
     
      if ( mf_next && mf_next->isatomic() ){
