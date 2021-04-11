@@ -1856,7 +1856,7 @@ void ldst_unit::Lab_latency_queue_cycle()
 				   for(unsigned i=0; i< dec_ack; ++i)
 				      m_core->store_ack(mf_next);
 			   }
-                m_icnt->push(mf_next);
+                
 		   } else if ( status == RESERVATION_FAIL ) {
 			   assert( !read_sent );
 			   assert( !write_sent );
@@ -1910,7 +1910,10 @@ void ldst_unit::Lab_latency_queue_cycle()
          //this will be a new branch
                     //long long* data = mf_next->do_atomic_lab();
                      mf_next->do_atomic();
-           /*    
+           /*
+           
+              m_icnt->push(mf_next);
+           
               if(m_core->get_sid() == 0){ 
                    lab_data_map[ mf_next->get_addr() & ~(new_addr_type)(127)]++;
                  //  lab_block_map[ mf_next->get_addr() & ~(new_addr_type)(127)] = m_core->get_n_active_cta();
