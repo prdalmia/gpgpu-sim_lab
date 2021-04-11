@@ -2060,7 +2060,7 @@ void ldst_unit::fill( mem_fetch *mf )
 void ldst_unit::flush(){
 	// Flush L1D cache
     //m_L1D->flush();
-
+/*
     if(m_flush_lab == false){
     if(!m_flush_pending){    
      m_lab->flush();
@@ -2078,7 +2078,9 @@ void ldst_unit::flush(){
         }
     m_flush_pending = false; 
     m_flush_lab = true;
+
 }
+*/
 }
 
 void ldst_unit::invalidate(){
